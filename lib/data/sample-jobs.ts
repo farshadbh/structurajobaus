@@ -573,6 +573,25 @@ const seeds: Seed[] = [
       'Grow and lead the Victorian structures practice, with accountability for technical excellence and client relationships.',
     tags: ['Practice Lead', 'Business Development', 'CPEng'],
   },
+ {
+  title: 'Structural Engineer',
+  roleSlug: 'structural-engineer',
+  sector: 'industry',
+  organisation: 'GHD',
+  city: 'newcastle',
+  salaryMin: 110000,
+  salaryMax: 140000,
+  salaryPeriod: 'year',
+  employmentType: 'full-time',
+  workArrangement: 'hybrid',
+  visaSponsorship: false,
+  featured: true,
+  postedAt: '2026-10-27',
+  closingDate: '2026-11-30',
+  summary:
+    'Structural engineer for buildings and infrastructure projects in Newcastle NSW.',
+  tags: ['Structures', 'Design', 'Consulting'],
+}
 ]
 
 function slugify(value: string) {
