@@ -37,5 +37,5 @@ export const EMPLOYMENT_TYPE_LABEL = {
 } as const
 
 export const SITE_NAME = 'Structural Engineering Academic & Industry Jobs Australia'
-export const SITE_SHORT_NAME = 'StructJobs AU'
+export const SITE_SHORT_NAME = 'SE Jobs Australia'
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://structjobs.com.au'

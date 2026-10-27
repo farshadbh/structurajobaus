@@ -3,23 +3,24 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
-import { SITE_NAME, SITE_URL } from '@/lib/format'
+import { SITE_NAME, SITE_SHORT_NAME, SITE_URL } from '@/lib/format'
 import './globals.css'
 
 const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
 const description =
-  'Find the latest structural engineering and academic opportunities across Australia — lecturer, professor, postdoc and PhD roles alongside structural, bridge and civil engineering jobs in Sydney, Melbourne, Brisbane, Perth, Adelaide and Newcastle.'
+  'Structural Engineering Academic & Industry Jobs Australia — find the latest structural engineering and academic opportunities across Australia, from lecturer, professor, postdoc and PhD roles to structural, bridge and civil engineering jobs in Sydney, Melbourne, Brisbane, Perth, Adelaide and Newcastle.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: SITE_NAME,
-    template: `%s | ${SITE_NAME}`,
+    template: `%s | ${SITE_SHORT_NAME}`,
   },
   description,
   applicationName: SITE_NAME,
+  appleWebApp: { title: SITE_SHORT_NAME },
   keywords: [
     'structural engineering jobs Australia',
     'structural engineer jobs',
