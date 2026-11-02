@@ -224,29 +224,32 @@ const ROLE_RULES = [
   [/\bcivil\b/i, 'civil-engineer'],
 ]
 
-const RELEVANT_TITLE = /\b(structural|structures|bridge|bridges|civil)\b/i
-// Universities advertise under faculty titles ("Lecturer in Engineering",
-// "Head of School", "Postdoctoral Research Fellow") that never carry the word
-// "structural", so for an academic employer any engineering discipline counts.
-const ENGINEERING_DISCIPLINE =
-  /\b(engineer|engineering|structures?|structural|civil|construction|infrastructure|geotechnical|mechanics|materials|built environment)\b/i
+// The board is for civil/structural work only: "geotechnical", "construction"
+// and "bridge" count, generic "engineering" does not.
+const CIVIL_DISCIPLINE =
+  /\b(structural|structures?|bridge|bridges|civil|geotechnical|construction|infrastructure|seismic|earthquake|concrete|steel|built environment|environmental engineering)\b/i
+// Sibling disciplines a university advertises next to civil engineering. Their
+// titles mention "engineering", which is not enough to belong here.
+const OTHER_DISCIPLINE =
+  /\b(mechanical|mechatronic|robotics?|electrical|electronic|chemical|aerospace|aeronautical|combustion|process systems|software|computer science|data science|biomedical|mining|petroleum|nursing|medical|psychology|law|business|accounting|finance|marketing|natural sciences|biology|chemistry|physics)\b/i
 const NOISE_TITLE =
   /\b(draft|drafter|draught|bim|detailer|estimator|sales|recruit|talent|technician|labourer|laborer|welder|boilermaker|foreman|supervisor)\b/i
 const VISA_PATTERN = /\b(visa sponsorship|sponsorship|sponsor(?:s|ed|ing)?|sponsored|482|tss|work visa)\b/i
 
 /**
- * A job is relevant when the title names the discipline, or when an academic
- * employer is hiring for engineering at all — the discipline keyword then sits
- * in the ad body instead of the title.
+ * A job belongs on the board when its title names civil/structural work, or —
+ * for an academic employer, whose titles are "Lecturer in Engineering" or
+ * "Head of School" — when the discipline appears in the ad body instead.
+ * Sibling disciplines (mechanical, robotics, chemical…) must stay out.
  */
 function isRelevantTitle(title, company, text) {
   if (NOISE_TITLE.test(title)) return false
-  if (RELEVANT_TITLE.test(title)) return true
+  if (CIVIL_DISCIPLINE.test(title)) return true
+  // "Civil and Mechanical Engineering" stays; "Lecturer in Mechanical
+  // Engineering" does not.
+  if (OTHER_DISCIPLINE.test(title)) return false
   if (!ACADEMIC_EMPLOYERS.test(company)) return false
-  return (
-    ENGINEERING_DISCIPLINE.test(title) ||
-    ENGINEERING_DISCIPLINE.test(String(text ?? '').slice(0, 600))
-  )
+  return CIVIL_DISCIPLINE.test(String(text ?? '').slice(0, 600))
 }
 
 function classifyRole(title) {
