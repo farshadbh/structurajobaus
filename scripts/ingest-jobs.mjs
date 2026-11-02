@@ -228,6 +228,11 @@ const ROLE_RULES = [
 // and "bridge" count, generic "engineering" does not.
 const CIVIL_DISCIPLINE =
   /\b(structural|structures?|bridge|bridges|civil|geotechnical|construction|infrastructure|seismic|earthquake|concrete|steel|built environment|environmental engineering)\b/i
+// Ad bodies are matched on the discipline *phrase*, not the bare words: a
+// violence-prevention PhD talks about "civil society" and social "structures",
+// and a single-keyword test filed it under structural engineering.
+const CIVIL_PHRASE =
+  /\b(civil|structural|bridge|geotechnical|construction|infrastructure|earthquake|environmental|materials|steel|concrete)[ -]engineering\b/i
 // Sibling disciplines a university advertises next to civil engineering. Their
 // titles mention "engineering", which is not enough to belong here.
 const OTHER_DISCIPLINE =
@@ -239,7 +244,7 @@ const VISA_PATTERN = /\b(visa sponsorship|sponsorship|sponsor(?:s|ed|ing)?|spons
 /**
  * A job belongs on the board when its title names civil/structural work, or —
  * for an academic employer, whose titles are "Lecturer in Engineering" or
- * "Head of School" — when the discipline appears in the ad body instead.
+ * "Head of School" — when the discipline phrase appears in the ad body instead.
  * Sibling disciplines (mechanical, robotics, chemical…) must stay out.
  */
 function isRelevantTitle(title, company, text) {
@@ -249,7 +254,7 @@ function isRelevantTitle(title, company, text) {
   // Engineering" does not.
   if (OTHER_DISCIPLINE.test(title)) return false
   if (!ACADEMIC_EMPLOYERS.test(company)) return false
-  return CIVIL_DISCIPLINE.test(String(text ?? '').slice(0, 600))
+  return CIVIL_PHRASE.test(String(text ?? '').slice(0, 600))
 }
 
 function classifyRole(title) {
