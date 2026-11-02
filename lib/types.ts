@@ -1,8 +1,14 @@
 import type { EmploymentType, Sector, StateCode, WorkArrangement } from './taxonomy'
 
+/** Where a listing came from. Only `direct` and `adzuna` are real vacancies. */
+export type JobSource = 'adzuna' | 'direct' | 'demo'
+
 /**
  * Mirrors the `jobs` table in scripts/001_create_jobs.sql (snake_case columns
  * map to the camelCase fields below).
+ *
+ * Salary is optional because live listings frequently omit it. `undefined`
+ * means "not advertised" and is never rendered as zero.
  */
 export interface Job {
   id: string
@@ -15,8 +21,8 @@ export interface Job {
   city: string
   state: StateCode
   location: string
-  salaryMin: number
-  salaryMax: number
+  salaryMin?: number
+  salaryMax?: number
   salaryPeriod: 'year' | 'scholarship'
   employmentType: EmploymentType
   workArrangement: WorkArrangement
@@ -30,6 +36,9 @@ export interface Job {
   requirements: string[]
   tags: string[]
   applyUrl: string
+  /** Absent on legacy demo seeds; treat anything other than `adzuna` as third-party. */
+  source?: JobSource
+  externalId?: string
 }
 
 export interface JobFilters {

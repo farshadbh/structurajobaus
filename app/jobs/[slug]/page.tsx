@@ -1,21 +1,20 @@
-import {
-  Building2,
-  CalendarClock,
-  CalendarDays,
-  Clock,
-  ExternalLink,
-  MapPin,
-  Plane,
-  Wallet,
-  Laptop,
-} from 'lucide-react'
+import { Building2, CalendarClock, CalendarDays, Clock, Laptop, MapPin, Plane, Wallet } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { ApplyButton } from '@/components/jobs/apply-button'
+import { JsonLd } from '@/components/json-ld'
 import { JobCard, SectorBadge } from '@/components/jobs/job-card'
 import { PageHeader } from '@/components/page-header'
-import { EMPLOYMENT_TYPE_LABEL, formatDate, formatSalary, SITE_URL, WORK_ARRANGEMENT_LABEL } from '@/lib/format'
-import { getAllJobSlugs, getJobBySlug, getRelatedJobs } from '@/lib/jobs'
-import { getRole } from '@/lib/taxonomy'
+import {
+  ADZUNA_ATTRIBUTION_URL,
+  EMPLOYMENT_TYPE_LABEL,
+  formatDate,
+  formatSalary,
+  SITE_URL,
+  WORK_ARRANGEMENT_LABEL,
+} from '@/lib/format'
+import { getAllJobSlugs, getJobBySlug, getRelatedJobs, IS_DEMO_DATA } from '@/lib/jobs'
+import { getCity, getRole } from '@/lib/taxonomy'
 import type { Job } from '@/lib/types'
 
 type Params = Promise<{ slug: string }>
@@ -36,14 +35,24 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   }
 }
 
+/**
+ * Only real vacancies are marked up. Demo listings carry invented details, and
+ * publishing JobPosting markup for them is what search engines treat as spam.
+ */
 function jobPostingJsonLd(job: Job) {
+  if (job.source === 'demo') return null
+
+  const city = getCity(job.city)?.name ?? job.location.split(',')[0].trim()
+  const hasSalary = Boolean(job.salaryMin || job.salaryMax)
+
   return {
     '@context': 'https://schema.org',
     '@type': 'JobPosting',
     title: job.title,
-    description: `<p>${job.description}</p>`,
+    description: `<p>${job.description.replace(/\n+/g, ' ')}</p>`,
+    identifier: { '@type': 'PropertyValue', name: job.organisation, value: job.id },
     datePosted: job.postedAt,
-    validThrough: job.closingDate,
+    validThrough: `${job.closingDate}T23:59:59+11:00`,
     employmentType:
       job.employmentType === 'full-time'
         ? 'FULL_TIME'
@@ -57,7 +66,7 @@ function jobPostingJsonLd(job: Job) {
       '@type': 'Place',
       address: {
         '@type': 'PostalAddress',
-        addressLocality: job.location,
+        addressLocality: city,
         addressRegion: job.state,
         addressCountry: 'AU',
       },
@@ -66,11 +75,18 @@ function jobPostingJsonLd(job: Job) {
       jobLocationType: 'TELECOMMUTE',
       applicantLocationRequirements: { '@type': 'Country', name: 'Australia' },
     }),
-    baseSalary: {
-      '@type': 'MonetaryAmount',
-      currency: 'AUD',
-      value: { '@type': 'QuantitativeValue', minValue: job.salaryMin, maxValue: job.salaryMax, unitText: 'YEAR' },
-    },
+    ...(hasSalary && {
+      baseSalary: {
+        '@type': 'MonetaryAmount',
+        currency: 'AUD',
+        value: {
+          '@type': 'QuantitativeValue',
+          ...(job.salaryMin ? { minValue: job.salaryMin } : {}),
+          ...(job.salaryMax ? { maxValue: job.salaryMax } : {}),
+          unitText: 'YEAR',
+        },
+      },
+    }),
     directApply: false,
     url: `${SITE_URL}/jobs/${job.slug}`,
   }
@@ -82,6 +98,7 @@ export default async function JobPage({ params }: { params: Params }) {
   const related = await getRelatedJobs(job)
   const role = getRole(job.roleSlug)
   const sectorLabel = job.sector === 'academic' ? 'Academic jobs' : 'Industry jobs'
+  const jsonLd = IS_DEMO_DATA ? null : jobPostingJsonLd(job)
 
   const facts = [
     { icon: Wallet, label: 'Salary', value: formatSalary(job) },
@@ -95,7 +112,7 @@ export default async function JobPage({ params }: { params: Params }) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingJsonLd(job)) }} />
+      {jsonLd && <JsonLd data={jsonLd} />}
       <PageHeader
         eyebrow={role?.name ?? sectorLabel}
         title={job.title}
@@ -105,10 +122,10 @@ export default async function JobPage({ params }: { params: Params }) {
           { label: job.title, href: `/jobs/${job.slug}` },
         ]}
       >
-        <p className="mt-5 flex items-center gap-2 text-white/85">
+        <p className="mt-5 flex items-center gap-2 text-white/90">
           <Building2 className="size-4" aria-hidden="true" />
           {job.organisation}
-          {job.department && <span className="text-white/60">· {job.department}</span>}
+          {job.department && <span className="text-white/75">· {job.department}</span>}
         </p>
       </PageHeader>
 
@@ -118,36 +135,42 @@ export default async function JobPage({ params }: { params: Params }) {
             <h2 id="about-role" className="text-xl font-semibold">
               About the role
             </h2>
-            <p className="mt-3 leading-relaxed text-muted-foreground">{job.description}</p>
+            <p className="mt-3 leading-relaxed whitespace-pre-line text-muted-foreground">
+              {job.description}
+            </p>
           </section>
 
-          <section aria-labelledby="responsibilities" className="mt-10">
-            <h2 id="responsibilities" className="text-xl font-semibold">
-              Key responsibilities
-            </h2>
-            <ul className="mt-4 flex flex-col gap-2.5">
-              {job.responsibilities.map((item) => (
-                <li key={item} className="flex gap-3 leading-relaxed">
-                  <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </section>
+          {job.responsibilities.length > 0 && (
+            <section aria-labelledby="responsibilities" className="mt-10">
+              <h2 id="responsibilities" className="text-xl font-semibold">
+                Key responsibilities
+              </h2>
+              <ul className="mt-4 flex flex-col gap-2.5">
+                {job.responsibilities.map((item) => (
+                  <li key={item} className="flex gap-3 leading-relaxed">
+                    <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-          <section aria-labelledby="requirements" className="mt-10">
-            <h2 id="requirements" className="text-xl font-semibold">
-              Selection criteria
-            </h2>
-            <ul className="mt-4 flex flex-col gap-2.5">
-              {job.requirements.map((item) => (
-                <li key={item} className="flex gap-3 leading-relaxed">
-                  <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </section>
+          {job.requirements.length > 0 && (
+            <section aria-labelledby="requirements" className="mt-10">
+              <h2 id="requirements" className="text-xl font-semibold">
+                Selection criteria
+              </h2>
+              <ul className="mt-4 flex flex-col gap-2.5">
+                {job.requirements.map((item) => (
+                  <li key={item} className="flex gap-3 leading-relaxed">
+                    <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {job.tags.length > 0 && (
             <ul className="mt-10 flex flex-wrap gap-2" aria-label="Skills and keywords">
@@ -176,16 +199,26 @@ export default async function JobPage({ params }: { params: Params }) {
                 </div>
               ))}
             </dl>
-            <a
-              href={job.applyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-accent text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
-            >
-              Apply now
-              <ExternalLink className="size-4" aria-hidden="true" />
-              <span className="sr-only">(opens in a new tab)</span>
-            </a>
+            {IS_DEMO_DATA ? (
+              <p className="mt-4 rounded-md border border-dashed px-3 py-2.5 text-center text-xs text-muted-foreground">
+                Demo listing — no application link.
+              </p>
+            ) : (
+              <ApplyButton slug={job.slug} href={job.applyUrl} />
+            )}
+            {job.source === 'adzuna' && (
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                Listing sourced from{' '}
+                <a
+                  href={ADZUNA_ATTRIBUTION_URL}
+                  target="_blank"
+                  rel="nofollow noopener noreferrer"
+                  className="underline hover:text-foreground"
+                >
+                  Adzuna
+                </a>
+              </p>
+            )}
           </div>
         </aside>
       </div>

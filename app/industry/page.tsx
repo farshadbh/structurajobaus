@@ -1,21 +1,37 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { SectorPage } from '@/components/jobs/sector-page'
-import { parseFilters } from '@/lib/jobs'
+import { isKnownRole, parseFilters } from '@/lib/jobs'
 import { getRole } from '@/lib/taxonomy'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
-export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
-  const { role } = parseFilters(await searchParams)
-  const roleName = role ? getRole(role)?.name : undefined
-  const title = roleName ? `${roleName} Jobs in Australia` : 'Industry Structural Engineering Jobs Australia'
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: SearchParams
+}): Promise<Metadata> {
+  const filters = parseFilters(await searchParams)
+  const roleName = filters.role ? getRole(filters.role)?.name : undefined
+
+  const title = roleName
+    ? `${roleName} Jobs in Australia`
+    : 'Industry Structural Engineering Jobs Australia'
+
+  const otherFilters =
+    filters.q || filters.city || filters.state || filters.salaryMin || filters.visa || filters.remote || filters.hybrid || filters.fullTime
+
   return {
     title,
-    description: `Browse ${roleName ?? 'structural, senior, principal, civil, bridge, design and project engineer'} jobs with leading Australian engineering firms.`,
-    alternates: { canonical: roleName ? `/industry?role=${role}` : '/industry' },
+    description: `Browse ${roleName ?? 'structural, civil, bridge, design and project engineer'} roles with Australian consultancies, contractors and asset owners.`,
+    alternates: { canonical: roleName ? `/industry?role=${filters.role}` : '/industry' },
+    robots: otherFilters ? { index: false, follow: true } : { index: true, follow: true },
   }
 }
 
 export default async function IndustryPage({ searchParams }: { searchParams: SearchParams }) {
-  return <SectorPage sector="industry" filters={parseFilters(await searchParams)} />
+  const filters = parseFilters(await searchParams)
+  if (!isKnownRole(filters.role)) notFound()
+
+  return <SectorPage sector="industry" filters={filters} />
 }
