@@ -20,8 +20,9 @@
  *   - Jooble's free plan is 500 requests for the *lifetime* of the key, so it
  *     gets 4 industry keywords x 2 pages plus 2 academic keywords x 1 page =
  *     10 calls per run (~50 days of daily runs).
- *   - Adzuna's unapproved/trial account has 25 lifetime calls, so it stays at
- *     6 keywords x 2 pages = 12 calls — enough for a single validation run.
+ *   - Adzuna's approved account is still on the trial plan: 25 calls for the
+ *     lifetime of the key (full access is £8/month). It therefore gets 4
+ *     keywords x 1 page = 4 calls per run, covering industry *and* academic.
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import path from 'node:path'
@@ -56,6 +57,14 @@ const JOOBLE_INDUSTRY_QUERIES = QUERIES.slice(0, 4)
 const ACADEMIC_QUERIES = [
   'structural engineering lecturer',
   'structural engineer university',
+]
+// Adzuna is metered per call on the free plan, so it gets a deliberately small
+// set that covers both sectors instead of the full industry list.
+const ADZUNA_QUERIES = [
+  'structural engineer',
+  'bridge engineer',
+  'structural engineering lecturer',
+  'structural engineering university',
 ]
 const PAGES_PER_QUERY = 2
 const RESULTS_PER_PAGE = 50
@@ -552,7 +561,7 @@ async function main() {
 
   if (ADZUNA_APP_ID && ADZUNA_APP_KEY) {
     try {
-      add(await collect(QUERIES, fetchAdzunaPage, fromAdzuna, 'Adzuna', calls), 'adzuna')
+      add(await collect(ADZUNA_QUERIES, fetchAdzunaPage, fromAdzuna, 'Adzuna', calls, 1), 'adzuna')
     } catch (error) {
       console.warn(`[ingest] Adzuna failed: ${error instanceof Error ? error.message : error}`)
     }
