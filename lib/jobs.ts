@@ -44,7 +44,20 @@ function isOpen(job: Job) {
   return job.closingDate >= today()
 }
 
-const LIVE_JOBS: Job[] = FILE.jobs.filter(isOpen).sort(byNewest)
+/**
+ * Jooble returns an empty company for some aggregated ads, and older snapshots
+ * stored those as "Unnamed employer". A placeholder is not information, so it is
+ * treated as "employer not named" and the organisation line is left out.
+ */
+const PLACEHOLDER_EMPLOYER =
+  /^(unnamed employer|unknown( employer)?|n\/?a|none|not specified|not disclosed|employer confidential)$/i
+
+function withRealEmployer(job: Job): Job {
+  const organisation = String(job.organisation ?? '').trim()
+  return PLACEHOLDER_EMPLOYER.test(organisation) ? { ...job, organisation: '' } : job
+}
+
+const LIVE_JOBS: Job[] = FILE.jobs.filter(isOpen).map(withRealEmployer).sort(byNewest)
 
 export const IS_DEMO_DATA = LIVE_JOBS.length === 0 && DEMO_ENABLED
 export const DATA_UPDATED_AT = FILE.generatedAt
