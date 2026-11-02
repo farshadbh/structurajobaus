@@ -25,6 +25,9 @@ export function SectorBadge({ sector }: { sector: Job['sector'] }) {
 
 export function JobCard({ job }: { job: Job }) {
   const attribution = job.source ? SOURCE_ATTRIBUTION[job.source] : undefined
+  // Facts the ad simply does not state are left out rather than filled with a
+  // placeholder, so every line on the card is real information.
+  const salary = formatSalary(job)
 
   return (
     <article className="group relative flex h-full flex-col rounded-lg border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-md">
@@ -43,10 +46,12 @@ export function JobCard({ job }: { job: Job }) {
         </Link>
       </h3>
 
-      <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-        <Building2 className="size-3.5 shrink-0" aria-hidden="true" />
-        <span className="truncate">{job.organisation}</span>
-      </p>
+      {job.organisation && (
+        <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Building2 className="size-3.5 shrink-0" aria-hidden="true" />
+          <span className="truncate">{job.organisation}</span>
+        </p>
+      )}
 
       <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{job.summary}</p>
 
@@ -56,11 +61,13 @@ export function JobCard({ job }: { job: Job }) {
           <MapPin className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
           <dd>{job.location}</dd>
         </div>
-        <div className="flex items-center gap-1.5">
-          <dt className="sr-only">Salary</dt>
-          <Wallet className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-          <dd className="font-medium">{formatSalary(job)}</dd>
-        </div>
+        {salary && (
+          <div className="flex items-center gap-1.5">
+            <dt className="sr-only">Salary</dt>
+            <Wallet className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <dd className="font-medium">{salary}</dd>
+          </div>
+        )}
       </dl>
 
       <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="Job attributes">

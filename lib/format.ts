@@ -14,10 +14,15 @@ const dateFormatter = new Intl.DateTimeFormat('en-AU', {
   timeZone: 'Australia/Sydney',
 })
 
+/**
+ * Returns null when the ad states no salary, so callers can leave the line out
+ * completely. A placeholder such as "Not advertised" reads like a gap on the
+ * board rather than a fact about the ad, and most live listings omit pay.
+ */
 export function formatSalary(job: Pick<Job, 'salaryMin' | 'salaryMax' | 'salaryPeriod'>) {
   const { salaryMin, salaryMax } = job
 
-  if (!salaryMin && !salaryMax) return 'Not advertised'
+  if (!salaryMin && !salaryMax) return null
 
   const min = salaryMin ?? salaryMax!
   const max = salaryMax ?? salaryMin!
