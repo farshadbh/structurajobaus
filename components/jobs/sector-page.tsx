@@ -17,7 +17,7 @@ const SECTOR_COPY = {
     eyebrow: 'Industry jobs',
     title: 'Industry structural engineering jobs',
     description:
-      'Structural, civil, bridge, design and project engineering roles with Australian consultancies, contractors and asset owners.',
+      'Structural, civil, geotechnical, bridge, design and project engineering roles with Australian consultancies, contractors and asset owners.',
     roles: INDUSTRY_ROLES,
   },
 }

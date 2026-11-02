@@ -18,8 +18,8 @@
  *   - Careerjet publisher keys have no published call cap; we use 6 keywords
  *     x 2 pages = 12 calls per run.
  *   - Jooble's free plan is 500 requests for the *lifetime* of the key, so it
- *     gets 3 industry keywords x 2 pages plus 6 academic keywords x 1 page =
- *     12 calls per run (~41 days of daily runs).
+ *     gets 3 industry keywords x 2 pages plus 7 academic keywords x 1 page =
+ *     13 calls per run (~38 days of daily runs).
  *   - Adzuna's approved account is still on the trial plan: 25 calls for the
  *     lifetime of the key (full access is £8/month). It therefore gets 4
  *     keywords x 1 page = 4 calls per run, covering industry *and* academic.
@@ -51,9 +51,10 @@ const QUERIES = [
   'civil structural engineer',
   'structural engineer university',
 ]
-// Three keywords instead of four: "senior structural engineer" duplicates
-// "structural engineer", and the freed calls go to the academic range below.
-const JOOBLE_INDUSTRY_QUERIES = QUERIES.slice(0, 3)
+// "senior structural engineer" duplicates "structural engineer", so that call is
+// spent on geotechnical vacancies instead: the board covers civil/structural
+// work, and geotechnical sits in the same discipline.
+const JOOBLE_INDUSTRY_QUERIES = [...QUERIES.slice(0, 2), 'geotechnical engineer']
 // Jooble's free tier is metered per call for the *lifetime* of the key, so the
 // academic queries get one page each instead of two.
 //
@@ -74,6 +75,10 @@ const ACADEMIC_QUERIES = [
   'university lecturer civil engineering',
   'senior lecturer structural engineering',
   'professor civil engineering university',
+  // One extra query for geotechnical academia: lecturer, research fellow,
+  // postdoc and professor posts in that sub-discipline rarely mention
+  // "structural", so the queries above miss them.
+  'geotechnical engineering university',
 ]
 // Adzuna is metered per call on the free plan, so it gets a deliberately small
 // set that covers both sectors instead of the full industry list.
@@ -227,6 +232,9 @@ const ROLE_RULES = [
   [/postdoc|post-doc|post doctoral/i, 'postdoctoral-fellow'],
   [/research fellow|research associate|research assistant|research officer/i, 'research-fellow'],
   [/\blecturer\b|associate lecturer|teaching fellow|\btutor\b|academic/i, 'lecturer'],
+  // Geotechnical titles become their own filter: "Geotechnical Engineer" must
+  // not be filed under plain civil engineering.
+  [/geotech/i, 'geotechnical-engineer'],
   [/principal structural|principal engineer/i, 'principal-structural-engineer'],
   [/senior structural|lead structural/i, 'senior-structural-engineer'],
   [/\bbridge/i, 'bridge-engineer'],

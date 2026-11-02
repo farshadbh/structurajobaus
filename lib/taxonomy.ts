@@ -24,6 +24,7 @@ export const INDUSTRY_ROLES: Role[] = [
   { slug: 'senior-structural-engineer', name: 'Senior Structural Engineer', sector: 'industry' },
   { slug: 'principal-structural-engineer', name: 'Principal Structural Engineer', sector: 'industry' },
   { slug: 'civil-engineer', name: 'Civil Engineer', sector: 'industry' },
+  { slug: 'geotechnical-engineer', name: 'Geotechnical Engineer', sector: 'industry' },
   { slug: 'bridge-engineer', name: 'Bridge Engineer', sector: 'industry' },
   { slug: 'design-engineer', name: 'Design Engineer', sector: 'industry' },
   { slug: 'project-engineer', name: 'Project Engineer', sector: 'industry' },

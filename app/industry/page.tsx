@@ -23,7 +23,7 @@ export async function generateMetadata({
 
   return {
     title,
-    description: `Browse ${roleName ?? 'structural, civil, bridge, design and project engineer'} roles with Australian consultancies, contractors and asset owners.`,
+    description: `Browse ${roleName ?? 'structural, civil, geotechnical, bridge, design and project engineer'} roles with Australian consultancies, contractors and asset owners.`,
     alternates: { canonical: roleName ? `/industry?role=${filters.role}` : '/industry' },
     robots: otherFilters ? { index: false, follow: true } : { index: true, follow: true },
   }
