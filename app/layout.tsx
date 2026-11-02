@@ -3,19 +3,26 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
-import { SITE_NAME, SITE_SHORT_NAME, SITE_URL } from '@/lib/format'
+import { SITE_NAME, SITE_SHORT_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/format'
 import './globals.css'
 
 const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
 const description =
-  'Structural Engineering Academic & Industry Jobs Australia — find the latest structural engineering and academic opportunities across Australia, from lecturer, professor, postdoc and PhD roles to structural, bridge and civil engineering jobs in Sydney, Melbourne, Brisbane, Perth, Adelaide and Newcastle.'
+  'Structural engineering jobs in Australia: lecturer, professor, postdoc and PhD roles at universities, plus structural, bridge and civil engineering jobs in Sydney, Melbourne, Brisbane, Perth and Adelaide. Updated every morning.'
+
+const ogImage = {
+  url: '/images/hero-bridge.png',
+  width: 1376,
+  height: 768,
+  alt: 'Steel arch bridge under construction',
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: SITE_NAME,
+    default: `${SITE_NAME} | ${SITE_TAGLINE}`,
     template: `%s | ${SITE_SHORT_NAME}`,
   },
   description,
@@ -39,11 +46,10 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: SITE_NAME,
     description,
-    images: [{ url: '/images/hero-bridge.png', width: 1536, height: 1024, alt: 'Steel arch bridge under construction' }],
+    images: [ogImage],
   },
-  twitter: { card: 'summary_large_image', title: SITE_NAME, description, images: ['/images/hero-bridge.png'] },
+  twitter: { card: 'summary_large_image', title: SITE_NAME, description, images: [ogImage.url] },
   robots: { index: true, follow: true },
-  generator: 'v0.app',
   icons: {
     icon: [
       { url: '/icon-light-32x32.png', media: '(prefers-color-scheme: light)' },

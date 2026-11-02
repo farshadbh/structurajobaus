@@ -2,6 +2,7 @@ import { CityGrid } from '@/components/home/city-grid'
 import { Hero } from '@/components/home/hero'
 import { JobSection } from '@/components/home/job-section'
 import { RoleCategories } from '@/components/home/role-categories'
+import { JsonLd } from '@/components/json-ld'
 import { SITE_NAME, SITE_URL } from '@/lib/format'
 import { getFeaturedJobs, getJobCounts, getLatestJobs, getVisaSponsoredJobs } from '@/lib/jobs'
 
@@ -28,13 +29,13 @@ export default async function HomePage() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
+      <JsonLd data={websiteJsonLd} />
       <Hero stats={counts} />
       <JobSection
         id="featured-jobs"
         eyebrow="Featured"
         title="Featured structural engineering jobs"
-        description="Hand-picked roles from leading Australian universities and engineering firms."
+        description="The newest roles from Australian universities and engineering firms."
         jobs={featured}
         href="/jobs"
         linkLabel="View all jobs"
@@ -58,7 +59,7 @@ export default async function HomePage() {
         jobs={industry}
         href="/industry"
         linkLabel="All industry jobs"
-        className="bg-muted/50 border-y"
+        className="border-y bg-muted/50"
       />
       <JobSection
         id="visa-jobs"
