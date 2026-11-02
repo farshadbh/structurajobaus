@@ -114,8 +114,11 @@ export default async function JobPage({ params }: { params: Params }) {
     { icon: MapPin, label: 'Location', value: job.location },
     { icon: Clock, label: 'Employment', value: EMPLOYMENT_TYPE_LABEL[job.employmentType] },
     { icon: Laptop, label: 'Work arrangement', value: WORK_ARRANGEMENT_LABEL[job.workArrangement] },
-    // "Not mentioned" is accurate: the ad may still sponsor, it just does not say so.
-    { icon: Plane, label: 'Visa sponsorship', value: job.visaSponsorship ? 'Available' : 'Not mentioned' },
+    // Only stated sponsorship is listed. Most employers say nothing either way,
+    // and a "not mentioned" row reads as doubt the ad never expressed.
+    ...(job.visaSponsorship
+      ? [{ icon: Plane, label: 'Visa sponsorship', value: 'Available' }]
+      : []),
     { icon: CalendarDays, label: 'Posted', value: formatDate(job.postedAt) },
     { icon: CalendarClock, label: 'Closing date', value: formatDate(job.closingDate) },
   ]
