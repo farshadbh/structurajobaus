@@ -1,8 +1,8 @@
 import { Building2, CalendarDays, MapPin, Plane, Wallet } from 'lucide-react'
 import Link from 'next/link'
 import {
-  ADZUNA_ATTRIBUTION_URL,
   EMPLOYMENT_TYPE_LABEL,
+  SOURCE_ATTRIBUTION,
   formatDate,
   formatSalary,
   WORK_ARRANGEMENT_LABEL,
@@ -24,6 +24,8 @@ export function SectorBadge({ sector }: { sector: Job['sector'] }) {
 }
 
 export function JobCard({ job }: { job: Job }) {
+  const attribution = job.source ? SOURCE_ATTRIBUTION[job.source] : undefined
+
   return (
     <article className="group relative flex h-full flex-col rounded-lg border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
@@ -81,15 +83,15 @@ export function JobCard({ job }: { job: Job }) {
           <CalendarDays className="size-3.5" aria-hidden="true" />
           Posted <time dateTime={job.postedAt}>{formatDate(job.postedAt)}</time>
         </p>
-        {job.source === 'adzuna' && (
+        {attribution && (
           <a
-            href={ADZUNA_ATTRIBUTION_URL}
+            href={attribution.url}
             target="_blank"
             rel="nofollow noopener noreferrer"
             // Sits above the card-wide link overlay so attribution stays clickable.
             className="relative z-10 mt-2 inline-block text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
           >
-            via Adzuna
+            via {attribution.label}
           </a>
         )}
       </div>

@@ -1,7 +1,11 @@
 import type { EmploymentType, Sector, StateCode, WorkArrangement } from './taxonomy'
 
-/** Where a listing came from. Only `direct` and `adzuna` are real vacancies. */
-export type JobSource = 'adzuna' | 'direct' | 'demo'
+/**
+ * Where a listing came from. `direct` (employer submissions), `careerjet` and
+ * `jooble` are the free feeds; `adzuna` is optional and paid. Only `demo` is
+ * fabricated.
+ */
+export type JobSource = 'adzuna' | 'careerjet' | 'jooble' | 'direct' | 'demo'
 
 /**
  * Mirrors the `jobs` table in scripts/001_create_jobs.sql (snake_case columns

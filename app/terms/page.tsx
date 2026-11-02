@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { PageHeader } from '@/components/page-header'
-import { ADZUNA_ATTRIBUTION_URL, SITE_NAME } from '@/lib/format'
+import { SITE_NAME } from '@/lib/format'
 
 export const metadata: Metadata = {
   title: 'Terms of Use',
@@ -36,16 +36,9 @@ export default function TermsPage() {
 
         <h2 className="mt-8 text-lg font-semibold">Attribution</h2>
         <p className="mt-2 text-muted-foreground">
-          Some listings are supplied by{' '}
-          <a
-            className="underline hover:text-foreground"
-            href={ADZUNA_ATTRIBUTION_URL}
-            target="_blank"
-            rel="nofollow noopener noreferrer"
-          >
-            Adzuna
-          </a>{' '}
-          and remain subject to their terms. Listings are labelled with their source.
+          Some listings are supplied by third-party job aggregators and remain subject to their
+          terms. Every listing is labelled with its source, and role details may be summarised from
+          the original advertisement.
         </p>
 
         <h2 className="mt-8 text-lg font-semibold">Acceptable use</h2>

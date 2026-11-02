@@ -24,8 +24,12 @@ jobs:
         with:
           node-version: 22
 
+      # Each source is optional: the script skips any key that is not set, so the
+      # workflow succeeds (with a warning) before the first credential exists.
       - name: Fetch latest listings
         env:
+          CAREERJET_API_KEY: ${{ secrets.CAREERJET_API_KEY }}
+          JOOBLE_API_KEY: ${{ secrets.JOOBLE_API_KEY }}
           ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
           ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
         run: node scripts/ingest-jobs.mjs

@@ -6,11 +6,11 @@ import { JsonLd } from '@/components/json-ld'
 import { JobCard, SectorBadge } from '@/components/jobs/job-card'
 import { PageHeader } from '@/components/page-header'
 import {
-  ADZUNA_ATTRIBUTION_URL,
   EMPLOYMENT_TYPE_LABEL,
   formatDate,
   formatSalary,
   SITE_URL,
+  SOURCE_ATTRIBUTION,
   WORK_ARRANGEMENT_LABEL,
 } from '@/lib/format'
 import { getAllJobSlugs, getJobBySlug, getRelatedJobs, IS_DEMO_DATA } from '@/lib/jobs'
@@ -99,6 +99,7 @@ export default async function JobPage({ params }: { params: Params }) {
   const role = getRole(job.roleSlug)
   const sectorLabel = job.sector === 'academic' ? 'Academic jobs' : 'Industry jobs'
   const jsonLd = IS_DEMO_DATA ? null : jobPostingJsonLd(job)
+  const attribution = job.source ? SOURCE_ATTRIBUTION[job.source] : undefined
 
   const facts = [
     { icon: Wallet, label: 'Salary', value: formatSalary(job) },
@@ -206,16 +207,16 @@ export default async function JobPage({ params }: { params: Params }) {
             ) : (
               <ApplyButton slug={job.slug} href={job.applyUrl} />
             )}
-            {job.source === 'adzuna' && (
+            {attribution && (
               <p className="mt-3 text-center text-xs text-muted-foreground">
                 Listing sourced from{' '}
                 <a
-                  href={ADZUNA_ATTRIBUTION_URL}
+                  href={attribution.url}
                   target="_blank"
                   rel="nofollow noopener noreferrer"
                   className="underline hover:text-foreground"
                 >
-                  Adzuna
+                  {attribution.label}
                 </a>
               </p>
             )}

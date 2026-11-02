@@ -68,5 +68,15 @@ export const SITE_URL = (() => {
   return 'http://localhost:3000'
 })()
 
+/**
+ * Aggregators require a visible attribution link wherever their listings appear.
+ * Listings with no entry here (employer submissions) render no attribution.
+ */
+export const SOURCE_ATTRIBUTION: Record<string, { label: string; url: string }> = {
+  adzuna: { label: 'Adzuna', url: 'https://www.adzuna.com.au' },
+  careerjet: { label: 'Careerjet', url: 'https://www.careerjet.com.au' },
+  jooble: { label: 'Jooble', url: 'https://au.jooble.org' },
+}
+
 /** Adzuna's terms require an attribution link wherever their listings appear. */
 export const ADZUNA_ATTRIBUTION_URL = 'https://www.adzuna.com.au'

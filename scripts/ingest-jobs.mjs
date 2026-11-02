@@ -1,15 +1,26 @@
 #!/usr/bin/env node
 /**
- * Refreshes data/jobs.json from the Adzuna AU job search API.
+ * Refreshes data/jobs.json from job APIs.
  *
- * Run manually with `pnpm ingest`, or automatically every morning at 06:00
- * Australia/Sydney via .github/workflows/refresh-jobs.yml.
+ * Every source is optional and skipped when its key is absent, so the pipeline
+ * runs today with whatever you have registered:
  *
- * Required environment variables:
- *   ADZUNA_APP_ID, ADZUNA_APP_KEY   — free keys from https://developer.adzuna.com
+ *   Careerjet  CAREERJET_API_KEY            free publisher key (no card)
+ *              https://www.careerjet.com/partners/api
+ *   Jooble     JOOBLE_API_KEY               free key, 500 lifetime requests per key
+ *              https://au.jooble.org/api/about   (AU keys only exist on the AU domain)
+ *   Adzuna     ADZUNA_APP_ID + ADZUNA_APP_KEY   trial/paid — https://developer.adzuna.com
  *
- * Adzuna's terms require the "Adzuna" attribution link on every published
- * listing, which the job card and detail page render for source="adzuna".
+ * Run with `pnpm ingest`, or automatically at 06:00 Australia/Sydney via
+ * .github/workflows/refresh-jobs.yml.
+ *
+ * Quota notes, because they shape the query counts below:
+ *   - Careerjet publisher keys have no published call cap; we use 6 keywords
+ *     x 2 pages = 12 calls per run.
+ *   - Jooble's free plan is 500 requests for the *lifetime* of the key, so it
+ *     only gets 4 keywords x 1 page = 4 calls per run (~125 days of daily runs).
+ *   - Adzuna's unapproved/trial account has 25 lifetime calls, so it stays at
+ *     6 keywords x 2 pages = 12 calls — enough for a single validation run.
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import path from 'node:path'
@@ -18,8 +29,10 @@ import { fileURLToPath } from 'node:url'
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DATA_FILE = path.join(ROOT, 'data', 'jobs.json')
 
-const APP_ID = process.env.ADZUNA_APP_ID?.trim()
-const APP_KEY = process.env.ADZUNA_APP_KEY?.trim()
+const ADZUNA_APP_ID = process.env.ADZUNA_APP_ID?.trim()
+const ADZUNA_APP_KEY = process.env.ADZUNA_APP_KEY?.trim()
+const CAREERJET_API_KEY = process.env.CAREERJET_API_KEY?.trim()
+const JOOBLE_API_KEY = process.env.JOOBLE_API_KEY?.trim()
 
 const QUERIES = [
   'structural engineer',
@@ -29,6 +42,7 @@ const QUERIES = [
   'civil structural engineer',
   'structural engineer university',
 ]
+const JOOBLE_QUERIES = QUERIES.slice(0, 4)
 const PAGES_PER_QUERY = 2
 const RESULTS_PER_PAGE = 50
 const MAX_JOBS = 120
@@ -37,7 +51,7 @@ const LISTING_DAYS = 30
 /* ------------------------------------------------------------------ helpers */
 
 const slugify = (value) =>
-  value
+  String(value)
     .toLowerCase()
     .replace(/&/g, ' and ')
     .replace(/[^a-z0-9]+/g, '-')
@@ -48,6 +62,13 @@ const addDays = (iso, days) => {
   const date = new Date(`${iso}T00:00:00Z`)
   date.setUTCDate(date.getUTCDate() + days)
   return date.toISOString().slice(0, 10)
+}
+
+/** Stable short id for providers (Careerjet) that expose no job identifier. */
+function shortHash(value) {
+  let hash = 5381
+  for (let i = 0; i < value.length; i++) hash = ((hash << 5) + hash + value.charCodeAt(i)) | 0
+  return Math.abs(hash).toString(36)
 }
 
 function stripHtml(html = '') {
@@ -66,10 +87,30 @@ function stripHtml(html = '') {
 }
 
 function truncate(text, max) {
-  if (text.length <= max) return text
-  const cut = text.slice(0, max)
+  const value = String(text ?? '')
+  if (value.length <= max) return value
+  const cut = value.slice(0, max)
   const lastSpace = cut.lastIndexOf(' ')
   return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trim()}…`
+}
+
+const MONTHS = {
+  jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
+  jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12,
+}
+
+/** Careerjet dates look like "Wed,15 Nov 2025 19:13:43 GMT". */
+function parseCareerjetDate(value) {
+  const match = String(value ?? '').match(/(\d{1,2})[ ,-]+([A-Za-z]{3})[ ,-]+(\d{4})/)
+  if (!match) return null
+  const month = MONTHS[match[2].toLowerCase()]
+  if (!month) return null
+  return `${match[3]}-${String(month).padStart(2, '0')}-${String(match[1]).padStart(2, '0')}`
+}
+
+function isoDate(value) {
+  const candidate = String(value ?? '').slice(0, 10)
+  return /^\d{4}-\d{2}-\d{2}$/.test(candidate) ? candidate : null
 }
 
 /* ------------------------------------------------------------- taxonomy maps */
@@ -131,6 +172,7 @@ const ROLE_RULES = [
 const RELEVANT_TITLE = /\b(structural|structures|bridge|bridges|civil)\b/i
 const NOISE_TITLE =
   /\b(draft|drafter|draught|bim|detailer|estimator|sales|recruit|talent|technician|labourer|laborer|welder|boilermaker|foreman|supervisor)\b/i
+const VISA_PATTERN = /\b(sponsorship|sponsored|482|tss visa)\b/i
 
 function classifyRole(title) {
   for (const [pattern, slug] of ROLE_RULES) {
@@ -143,122 +185,193 @@ function classifySector(title, company) {
   return ACADEMIC_EMPLOYERS.test(company) || ACADEMIC_TITLES.test(title) ? 'academic' : 'industry'
 }
 
-function classifyLocation(raw) {
-  const area = (raw?.location?.area ?? []).map((part) => String(part).toLowerCase())
+/** Providers give a free-text location, so infer city + state from that text. */
+function classifyLocation(text) {
+  const source = String(text ?? '').replace(/\s+/g, ' ').trim()
+  const lower = source.toLowerCase()
 
   let state = null
-  let citySlug = null
-
-  for (const part of area) {
-    const normalised = part.replace(/\s+/g, '-')
-    if (CITY_STATE[normalised]) {
-      citySlug = normalised
-      state = CITY_STATE[normalised]
+  for (const [name, code] of Object.entries(STATE_NAMES)) {
+    if (lower.includes(name)) {
+      state = code
       break
     }
-    if (STATE_NAMES[part]) state = STATE_NAMES[part]
+  }
+  state = state ?? source.match(/\b(NSW|VIC|QLD|WA|SA|TAS|ACT|NT)\b/)?.[1] ?? null
+
+  let citySlug = null
+  let cityName = null
+
+  for (const [slug, code] of Object.entries(CITY_STATE)) {
+    const label = slug.replace(/-/g, ' ')
+    if (new RegExp(`\\b${label}\\b`, 'i').test(source)) {
+      citySlug = slug
+      cityName = label.replace(/\b\w/g, (char) => char.toUpperCase())
+      state = state ?? code
+      break
+    }
   }
 
-  if (!state) {
-    // Fall back to the region name in the display string, e.g. "Perth, WA".
-    const guess = String(raw?.location?.display_name ?? '').match(/\b(NSW|VIC|QLD|WA|SA|TAS|ACT|NT)\b/)
-    state = guess?.[1] ?? 'NSW'
+  if (!cityName) {
+    const first = source.split(',')[0].trim()
+    cityName = first || 'Australia'
+    citySlug = slugify(cityName) || 'australia'
   }
 
-  if (!citySlug) {
-    const candidates = area.filter(
-      (part) => part !== 'australia' && !STATE_NAMES[part] && part.length > 2,
-    )
-    citySlug = slugify(candidates[0] ?? state)
-  }
-
-  const cityName = citySlug.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
-
-  return { citySlug, state, location: `${cityName}, ${state}` }
+  return { citySlug, state: state ?? 'NSW', location: `${cityName}, ${state ?? 'NSW'}` }
 }
 
 /* ------------------------------------------------------------------ mapping */
 
-function toJob(raw) {
-  const title = String(raw.title ?? '').trim()
-  const company = String(raw.company?.display_name ?? '').trim() || 'Unnamed employer'
+function buildJob({
+  source,
+  externalId,
+  title,
+  company,
+  description,
+  postedAt,
+  applyUrl,
+  locationText,
+  salaryMin,
+  salaryMax,
+}) {
+  const cleanTitle = String(title ?? '').trim()
+  const cleanCompany = String(company ?? '').trim() || 'Unnamed employer'
 
-  if (!title || !raw.id) return null
-  if (!RELEVANT_TITLE.test(title) || NOISE_TITLE.test(title)) return null
+  if (!cleanTitle || !externalId || !postedAt) return null
+  if (!RELEVANT_TITLE.test(cleanTitle) || NOISE_TITLE.test(cleanTitle)) return null
 
-  const description = stripHtml(raw.description ?? '')
-  const postedAt = String(raw.created ?? '').slice(0, 10)
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(postedAt)) return null
+  const text = stripHtml(description)
+  const { citySlug, state, location } = classifyLocation(locationText)
 
-  const { citySlug, state, location } = classifyLocation(raw)
-
-  // Adzuna flags predicted salaries; publishing them as fact would be misleading.
   const hasRealSalary =
-    raw.salary_is_predicted === 0 &&
-    Number.isFinite(raw.salary_min) &&
-    Number.isFinite(raw.salary_max) &&
-    raw.salary_max >= raw.salary_min
-
-  const contractTime = String(raw.contract_time ?? '')
-  const contractType = String(raw.contract_type ?? '')
-  const employmentType =
-    contractTime === 'part_time'
-      ? 'part-time'
-      : contractType === 'contract'
-        ? 'contract'
-        : 'full-time'
-
-  const workArrangement = /\b(remote|work from home|wfh)\b/i.test(description)
-    ? 'remote'
-    : /\bhybrid\b/i.test(description)
-      ? 'hybrid'
-      : 'onsite'
+    Number.isFinite(salaryMin) && Number.isFinite(salaryMax) && salaryMax > 0 && salaryMax >= salaryMin
 
   const tags = [
-    raw.category?.label,
-    contractType ? contractType.replace(/_/g, ' ') : null,
-    contractTime ? contractTime.replace(/_/g, ' ') : null,
-    /\b(sponsorship|sponsored|482|tss visa)\b/i.test(description) ? 'Visa sponsorship' : null,
+    /contract|fixed term/i.test(text) ? 'Contract' : null,
+    /part time|part-time/i.test(text) ? 'Part time' : null,
+    VISA_PATTERN.test(text) ? 'Visa sponsorship' : null,
   ]
     .filter(Boolean)
-    .map((tag) => String(tag).replace(/\b\w/g, (char) => char.toUpperCase()))
     .slice(0, 4)
 
   return {
-    id: `adzuna-${raw.id}`,
-    externalId: String(raw.id),
-    slug: `${slugify(title)}-${slugify(company)}-${raw.id}`,
-    title,
-    roleSlug: classifyRole(title),
-    sector: classifySector(title, company),
-    organisation: company,
+    id: `${source}-${externalId}`,
+    externalId: String(externalId),
+    slug: `${slugify(cleanTitle)}-${slugify(cleanCompany)}-${externalId}`,
+    title: cleanTitle,
+    roleSlug: classifyRole(cleanTitle),
+    sector: classifySector(cleanTitle, cleanCompany),
+    organisation: cleanCompany,
     city: citySlug,
     state,
     location,
-    ...(hasRealSalary ? { salaryMin: raw.salary_min, salaryMax: raw.salary_max } : {}),
+    ...(hasRealSalary ? { salaryMin, salaryMax } : {}),
     salaryPeriod: 'year',
-    employmentType,
-    workArrangement,
-    visaSponsorship: /\b(sponsorship|sponsored|482|tss visa)\b/i.test(description),
+    employmentType: /part[- ]time/i.test(text) ? 'part-time' : /contract|fixed term/i.test(text) ? 'contract' : 'full-time',
+    workArrangement: /\b(remote|work from home|wfh)\b/i.test(text)
+      ? 'remote'
+      : /\bhybrid\b/i.test(text)
+        ? 'hybrid'
+        : 'onsite',
+    visaSponsorship: VISA_PATTERN.test(text),
     featured: false,
     postedAt,
     closingDate: addDays(postedAt, LISTING_DAYS),
-    summary: truncate(description.split('\n')[0] || title, 200),
-    description: truncate(description, 2500),
+    summary: truncate(text.split('\n')[0] || cleanTitle, 200),
+    description: truncate(text, 2500),
     responsibilities: [],
     requirements: [],
     tags,
-    applyUrl: String(raw.redirect_url ?? ''),
-    source: 'adzuna',
+    applyUrl: String(applyUrl ?? ''),
+    source,
   }
 }
 
-/* -------------------------------------------------------------------- fetch */
+/* ------------------------------------------------------- source: careerjet */
 
-async function fetchPage(what, page) {
+async function fetchCareerjetPage(keywords, page) {
   const params = new URLSearchParams({
-    app_id: APP_ID,
-    app_key: APP_KEY,
+    locale_code: 'en_AU',
+    keywords,
+    page: String(page),
+    page_size: String(RESULTS_PER_PAGE),
+    fragment_size: '1200',
+    sort: 'date',
+    // Careerjet requires the originating client; a scheduled job has no user,
+    // so identify it as our own unattended ingest.
+    user_ip: '127.0.0.1',
+    user_agent: 'structuraljobaus-ingest/1.0 (+https://structuraljobaus.vercel.app)',
+  })
+
+  const auth = Buffer.from(`${CAREERJET_API_KEY}:`).toString('base64')
+  const response = await fetch(`https://search.api.careerjet.net/v4/query?${params.toString()}`, {
+    headers: { Authorization: `Basic ${auth}`, Accept: 'application/json' },
+  })
+
+  if (!response.ok) {
+    throw new Error(`Careerjet "${keywords}" page ${page} returned HTTP ${response.status}`)
+  }
+
+  const body = await response.json()
+  return body?.type === 'JOBS' && Array.isArray(body.jobs) ? body.jobs : []
+}
+
+function fromCareerjet(raw) {
+  const salaryYearly = String(raw.salary_type ?? 'Y').toUpperCase() === 'Y'
+  const min = Number(raw.salary_min)
+  const max = Number(raw.salary_max)
+
+  return buildJob({
+    source: 'careerjet',
+    externalId: shortHash(String(raw.url ?? `${raw.title}-${raw.company}-${raw.date}`)),
+    title: raw.title,
+    company: raw.company,
+    description: raw.description,
+    postedAt: parseCareerjetDate(raw.date),
+    applyUrl: raw.url,
+    locationText: raw.locations,
+    salaryMin: salaryYearly && Number.isFinite(min) ? min : NaN,
+    salaryMax: salaryYearly && Number.isFinite(max) ? max : NaN,
+  })
+}
+
+/* ----------------------------------------------------------- source: jooble */
+
+async function fetchJooble(keywords) {
+  const response = await fetch(`https://jooble.org/api/${JOOBLE_API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ keywords, location: 'Australia', page: 1, ResultOnPage: RESULTS_PER_PAGE }),
+  })
+
+  if (!response.ok) throw new Error(`Jooble "${keywords}" returned HTTP ${response.status}`)
+
+  const body = await response.json()
+  return Array.isArray(body.jobs) ? body.jobs : []
+}
+
+function fromJooble(raw) {
+  return buildJob({
+    source: 'jooble',
+    externalId: raw.id ? String(raw.id) : shortHash(String(raw.link ?? raw.title)),
+    title: raw.title,
+    company: raw.company,
+    description: [raw.snippet, raw.type].filter(Boolean).join('\n'),
+    postedAt: isoDate(raw.updated),
+    applyUrl: raw.link,
+    locationText: raw.location,
+    salaryMin: NaN,
+    salaryMax: NaN,
+  })
+}
+
+/* ----------------------------------------------------------- source: adzuna */
+
+async function fetchAdzunaPage(what, page) {
+  const params = new URLSearchParams({
+    app_id: ADZUNA_APP_ID,
+    app_key: ADZUNA_APP_KEY,
     results_per_page: String(RESULTS_PER_PAGE),
     what,
     sort_by: 'date',
@@ -278,7 +391,37 @@ async function fetchPage(what, page) {
   return Array.isArray(body.results) ? body.results : []
 }
 
+function fromAdzuna(raw) {
+  const area = (raw?.location?.area ?? []).map((part) => String(part))
+  const locationText = [area[area.length - 1], raw?.location?.display_name].filter(Boolean).join(', ')
+
+  // Adzuna flags predicted salaries; publishing them as fact would mislead.
+  const hasRealSalary =
+    raw.salary_is_predicted === 0 &&
+    Number.isFinite(raw.salary_min) &&
+    Number.isFinite(raw.salary_max)
+
+  return buildJob({
+    source: 'adzuna',
+    externalId: raw.id ? String(raw.id) : null,
+    title: raw.title,
+    company: raw.company?.display_name,
+    description: raw.description,
+    postedAt: isoDate(raw.created),
+    applyUrl: raw.redirect_url,
+    locationText,
+    salaryMin: hasRealSalary ? raw.salary_min : NaN,
+    salaryMax: hasRealSalary ? raw.salary_max : NaN,
+  })
+}
+
 /* --------------------------------------------------------------------- main */
+
+const PRIORITY = { careerjet: 0, jooble: 1, adzuna: 2 }
+
+function dedupeKey(job) {
+  return `${slugify(job.title)}|${slugify(job.organisation)}|${job.city}`
+}
 
 async function readExisting() {
   try {
@@ -288,29 +431,69 @@ async function readExisting() {
   }
 }
 
-async function main() {
-  if (!APP_ID || !APP_KEY) {
-    console.warn('[ingest] ADZUNA_APP_ID / ADZUNA_APP_KEY are not set — no refresh performed.')
-    console.warn('[ingest] Add them as GitHub Actions secrets (and locally in .env) to enable it.')
-    return
-  }
-
-  const collected = new Map()
-
-  for (const what of QUERIES) {
+async function collect(queries, fetchPage, mapJob, label, calls) {
+  const found = []
+  for (const query of queries) {
     for (let page = 1; page <= PAGES_PER_QUERY; page++) {
-      const results = await fetchPage(what, page)
+      const results = await fetchPage(query, page)
+      calls.count++
       if (results.length === 0) break
-
       for (const raw of results) {
-        const job = toJob(raw)
-        if (!job) continue
-        if (!collected.has(job.externalId)) collected.set(job.externalId, job)
+        const job = mapJob(raw)
+        if (job) found.push(job)
       }
     }
   }
+  console.log(`[ingest] ${label}: ${found.length} matching listings from ${calls.count} calls`)
+  return found
+}
 
-  const jobs = [...collected.values()]
+async function main() {
+  const calls = { count: 0 }
+  const used = []
+  const merged = new Map()
+
+  const add = (jobs, source) => {
+    used.push(source)
+    for (const job of jobs) {
+      const key = dedupeKey(job)
+      const existing = merged.get(key)
+      if (!existing || PRIORITY[source] < PRIORITY[existing.source]) merged.set(key, job)
+    }
+  }
+
+  if (CAREERJET_API_KEY) {
+    add(await collect(QUERIES, fetchCareerjetPage, fromCareerjet, 'Careerjet', calls), 'careerjet')
+  } else {
+    console.warn('[ingest] CAREERJET_API_KEY not set — skipping Careerjet.')
+  }
+
+  if (JOOBLE_API_KEY) {
+    add(
+      await collect(
+        JOOBLE_QUERIES,
+        (keywords) => fetchJooble(keywords),
+        fromJooble,
+        'Jooble',
+        calls,
+      ),
+      'jooble',
+    )
+  } else {
+    console.warn('[ingest] JOOBLE_API_KEY not set — skipping Jooble.')
+  }
+
+  if (ADZUNA_APP_ID && ADZUNA_APP_KEY) {
+    add(await collect(QUERIES, fetchAdzunaPage, fromAdzuna, 'Adzuna', calls), 'adzuna')
+  }
+
+  if (used.length === 0) {
+    console.warn('[ingest] No source credentials are configured — no refresh performed.')
+    console.warn('[ingest] Set CAREERJET_API_KEY and/or JOOBLE_API_KEY (GitHub Actions secrets).')
+    return
+  }
+
+  const jobs = [...merged.values()]
     .sort((a, b) => b.postedAt.localeCompare(a.postedAt))
     .slice(0, MAX_JOBS)
 
@@ -332,7 +515,7 @@ async function main() {
   await writeFile(
     DATA_FILE,
     `${JSON.stringify(
-      { generatedAt: new Date().toISOString(), source: 'adzuna', jobs },
+      { generatedAt: new Date().toISOString(), source: used.join('+'), jobs },
       null,
       2,
     )}\n`,
@@ -341,7 +524,7 @@ async function main() {
 
   const academic = jobs.filter((job) => job.sector === 'academic').length
   console.log(
-    `[ingest] Wrote ${jobs.length} listings (${academic} academic, ${jobs.length - academic} industry) to data/jobs.json`,
+    `[ingest] Wrote ${jobs.length} listings (${academic} academic, ${jobs.length - academic} industry) from ${used.join(', ')} using ${calls.count} API calls.`,
   )
 }
 

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Logo } from '@/components/logo'
-import { ADZUNA_ATTRIBUTION_URL } from '@/lib/format'
+import { SOURCE_ATTRIBUTION } from '@/lib/format'
 import { DATA_UPDATED_AT, IS_DEMO_DATA } from '@/lib/jobs'
 import { ACADEMIC_ROLES, CITIES, INDUSTRY_ROLES } from '@/lib/taxonomy'
 
@@ -80,14 +80,22 @@ export function SiteFooter() {
             {IS_DEMO_DATA ? (
               <span>Preview listings are sample data.</span>
             ) : (
-              <a
-                href={ADZUNA_ATTRIBUTION_URL}
-                target="_blank"
-                rel="nofollow noopener noreferrer"
-                className="hover:text-primary-foreground"
-              >
-                Jobs by Adzuna
-              </a>
+              <span>
+                Listings aggregated from{' '}
+                {Object.values(SOURCE_ATTRIBUTION).map((source, index) => (
+                  <span key={source.label}>
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="nofollow noopener noreferrer"
+                      className="hover:text-primary-foreground"
+                    >
+                      {source.label}
+                    </a>
+                    {index < Object.values(SOURCE_ATTRIBUTION).length - 1 ? ', ' : '.'}
+                  </span>
+                ))}
+              </span>
             )}
           </p>
         </div>
