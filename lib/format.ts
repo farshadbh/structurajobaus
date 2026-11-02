@@ -15,12 +15,24 @@ const dateFormatter = new Intl.DateTimeFormat('en-AU', {
 })
 
 export function formatSalary(job: Pick<Job, 'salaryMin' | 'salaryMax' | 'salaryPeriod'>) {
-  const range = `${compactAud.format(job.salaryMin)} – ${compactAud.format(job.salaryMax)}`
+  const { salaryMin, salaryMax } = job
+
+  if (!salaryMin && !salaryMax) return 'Not advertised'
+
+  const min = salaryMin ?? salaryMax!
+  const max = salaryMax ?? salaryMin!
+  const range =
+    min === max ? compactAud.format(min) : `${compactAud.format(min)} – ${compactAud.format(max)}`
+
   return job.salaryPeriod === 'scholarship' ? `${range} stipend p.a.` : `${range} p.a.`
 }
 
+/**
+ * Parses a plain `YYYY-MM-DD` date as midnight UTC, then renders it in Sydney
+ * time so the calendar date never shifts by a day or an hour across DST.
+ */
 export function formatDate(iso: string) {
-  return dateFormatter.format(new Date(`${iso}T00:00:00+10:00`))
+  return dateFormatter.format(new Date(`${iso}T00:00:00Z`))
 }
 
 export const WORK_ARRANGEMENT_LABEL = {
@@ -36,6 +48,25 @@ export const EMPLOYMENT_TYPE_LABEL = {
   scholarship: 'Scholarship',
 } as const
 
-export const SITE_NAME = 'Structural Engineering Academic & Industry Jobs Australia'
+export const SITE_NAME = 'Structural Engineering Jobs Australia'
 export const SITE_SHORT_NAME = 'SE Jobs Australia'
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://structjobs.com.au'
+export const SITE_TAGLINE = 'Academic & industry structural engineering jobs'
+
+/**
+ * Canonical host. Set NEXT_PUBLIC_SITE_URL explicitly once a custom domain is
+ * live; until then fall back to the Vercel deployment URL so canonical tags and
+ * the sitemap can never point at a host that does not resolve.
+ */
+export const SITE_URL = (() => {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim()
+  if (explicit) return explicit.replace(/\/+$/, '')
+
+  const vercelHost =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() || process.env.VERCEL_URL?.trim()
+  if (vercelHost) return `https://${vercelHost.replace(/\/+$/, '')}`
+
+  return 'http://localhost:3000'
+})()
+
+/** Adzuna's terms require an attribution link wherever their listings appear. */
+export const ADZUNA_ATTRIBUTION_URL = 'https://www.adzuna.com.au'

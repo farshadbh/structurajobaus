@@ -1,25 +1,69 @@
+import dataset from '@/data/jobs.json'
 import { SAMPLE_JOBS } from './data/sample-jobs'
-import { STATES, type Sector, type StateCode } from './taxonomy'
+import { ALL_ROLES, CITIES, STATES, type Sector, type StateCode } from './taxonomy'
 import type { Job, JobFilters } from './types'
 
 /*
- * Data access layer. Every page reads jobs through these async functions, so
- * moving to Supabase only means replacing the bodies below with queries such as
- * `supabase.from('jobs').select('*').eq('sector', sector)` — no UI changes needed.
+ * Data access layer. Every page reads jobs through these async functions.
+ *
+ * Live listings live in data/jobs.json, which scripts/ingest-jobs.mjs refreshes
+ * from the Adzuna AU API on a 6am schedule (see .github/workflows/refresh-jobs.yml).
+ * The file is committed so the site stays statically rendered, and each deploy
+ * picks up the newest snapshot.
+ *
+ * The bundled sample listings are only used when NEXT_PUBLIC_DEMO_JOBS=1 and no
+ * live data exists yet, so the design can be reviewed before the first sync.
+ * Demo data is never served in production and never marked up as a JobPosting.
  */
+
+interface JobsFile {
+  generatedAt: string | null
+  source: string
+  jobs: Job[]
+}
+
+const FILE = dataset as unknown as JobsFile
+const DEMO_ENABLED = process.env.NEXT_PUBLIC_DEMO_JOBS === '1'
+
+const sydneyDate = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Australia/Sydney',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+})
+
+function today() {
+  return sydneyDate.format(new Date())
+}
 
 function byNewest(a: Job, b: Job) {
   return b.postedAt.localeCompare(a.postedAt)
 }
+
+function isOpen(job: Job) {
+  return job.closingDate >= today()
+}
+
+const LIVE_JOBS: Job[] = FILE.jobs.filter(isOpen).sort(byNewest)
+
+export const IS_DEMO_DATA = LIVE_JOBS.length === 0 && DEMO_ENABLED
+export const DATA_UPDATED_AT = FILE.generatedAt
+export const HAS_LIVE_DATA = LIVE_JOBS.length > 0
+
+const JOBS: Job[] = IS_DEMO_DATA ? [...SAMPLE_JOBS].sort(byNewest) : LIVE_JOBS
 
 function matchesFilters(job: Job, filters: JobFilters) {
   if (filters.sector && job.sector !== filters.sector) return false
   if (filters.role && job.roleSlug !== filters.role) return false
   if (filters.city && job.city !== filters.city) return false
   if (filters.state && job.state !== filters.state) return false
-  if (filters.salaryMin && job.salaryMax < filters.salaryMin) return false
   if (filters.visa && !job.visaSponsorship) return false
   if (filters.fullTime && job.employmentType !== 'full-time') return false
+
+  // Listings without an advertised salary cannot satisfy a salary filter.
+  if (filters.salaryMin) {
+    if (!job.salaryMax || job.salaryMax < filters.salaryMin) return false
+  }
 
   if (filters.remote || filters.hybrid) {
     const allowed = [filters.remote && 'remote', filters.hybrid && 'hybrid'].filter(Boolean)
@@ -28,7 +72,14 @@ function matchesFilters(job: Job, filters: JobFilters) {
 
   if (filters.q) {
     const terms = filters.q.toLowerCase().split(/\s+/).filter(Boolean)
-    const haystack = [job.title, job.organisation, job.department, job.location, job.summary, ...job.tags]
+    const haystack = [
+      job.title,
+      job.organisation,
+      job.department,
+      job.location,
+      job.summary,
+      ...job.tags,
+    ]
       .join(' ')
       .toLowerCase()
     if (!terms.every((term) => haystack.includes(term))) return false
@@ -38,44 +89,68 @@ function matchesFilters(job: Job, filters: JobFilters) {
 }
 
 export async function getJobs(filters: JobFilters = {}): Promise<Job[]> {
-  return SAMPLE_JOBS.filter((job) => matchesFilters(job, filters)).sort(byNewest)
+  return JOBS.filter((job) => matchesFilters(job, filters))
 }
 
 export async function getJobBySlug(slug: string): Promise<Job | undefined> {
-  return SAMPLE_JOBS.find((job) => job.slug === slug)
+  return JOBS.find((job) => job.slug === slug)
 }
 
 export async function getFeaturedJobs(limit = 6): Promise<Job[]> {
-  return SAMPLE_JOBS.filter((job) => job.featured).sort(byNewest).slice(0, limit)
+  const featured = JOBS.filter((job) => job.featured)
+  return (featured.length > 0 ? featured : JOBS).slice(0, limit)
 }
 
 export async function getLatestJobs(sector: Sector, limit = 4): Promise<Job[]> {
-  return SAMPLE_JOBS.filter((job) => job.sector === sector).sort(byNewest).slice(0, limit)
+  return JOBS.filter((job) => job.sector === sector).slice(0, limit)
 }
 
 export async function getVisaSponsoredJobs(limit = 4): Promise<Job[]> {
-  return SAMPLE_JOBS.filter((job) => job.visaSponsorship).sort(byNewest).slice(0, limit)
+  return JOBS.filter((job) => job.visaSponsorship).slice(0, limit)
 }
 
 export async function getRelatedJobs(job: Job, limit = 3): Promise<Job[]> {
-  return SAMPLE_JOBS.filter((other) => other.id !== job.id && other.sector === job.sector)
-    .sort((a, b) => Number(b.roleSlug === job.roleSlug) - Number(a.roleSlug === job.roleSlug) || byNewest(a, b))
+  return JOBS.filter((other) => other.id !== job.id && other.sector === job.sector)
+    .sort(
+      (a, b) =>
+        Number(b.roleSlug === job.roleSlug) - Number(a.roleSlug === job.roleSlug) || byNewest(a, b),
+    )
     .slice(0, limit)
 }
 
 export async function getJobCounts() {
-  const counts = { total: SAMPLE_JOBS.length, academic: 0, industry: 0, visa: 0, byCity: {} as Record<string, number>, byRole: {} as Record<string, number> }
-  for (const job of SAMPLE_JOBS) {
+  const counts = {
+    total: JOBS.length,
+    academic: 0,
+    industry: 0,
+    visa: 0,
+    byCity: {} as Record<string, number>,
+    byRole: {} as Record<string, number>,
+  }
+
+  for (const job of JOBS) {
     counts[job.sector]++
     if (job.visaSponsorship) counts.visa++
     counts.byCity[job.city] = (counts.byCity[job.city] ?? 0) + 1
     counts.byRole[job.roleSlug] = (counts.byRole[job.roleSlug] ?? 0) + 1
   }
+
   return counts
 }
 
-export async function getAllJobSlugs(): Promise<{ slug: string; postedAt: string }[]> {
-  return SAMPLE_JOBS.map(({ slug, postedAt }) => ({ slug, postedAt }))
+export async function getAllJobSlugs(): Promise<
+  { slug: string; postedAt: string; closingDate: string }[]
+> {
+  return JOBS.map(({ slug, postedAt, closingDate }) => ({ slug, postedAt, closingDate }))
+}
+
+/** Used to reject junk filter values instead of serving a soft-404. */
+export function isKnownRole(slug?: string) {
+  return !slug || ALL_ROLES.some((role) => role.slug === slug)
+}
+
+export function isKnownCity(slug?: string) {
+  return !slug || CITIES.some((city) => city.slug === slug)
 }
 
 type RawSearchParams = Record<string, string | string[] | undefined>
@@ -101,4 +176,9 @@ export function parseFilters(params: RawSearchParams): JobFilters {
     hybrid: get('hybrid') === '1',
     fullTime: get('fulltime') === '1',
   }
+}
+
+/** True when a search-params object narrows the result set in any way. */
+export function hasActiveFilters(filters: JobFilters) {
+  return Object.values(filters).some((value) => Boolean(value))
 }
