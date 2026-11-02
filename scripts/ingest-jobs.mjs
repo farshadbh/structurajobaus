@@ -33,6 +33,13 @@ const ADZUNA_APP_ID = process.env.ADZUNA_APP_ID?.trim()
 const ADZUNA_APP_KEY = process.env.ADZUNA_APP_KEY?.trim()
 const CAREERJET_API_KEY = process.env.CAREERJET_API_KEY?.trim()
 const JOOBLE_API_KEY = process.env.JOOBLE_API_KEY?.trim()
+// Jooble issues one key per country domain and the key only works against that
+// domain: an au.jooble.org key sent to jooble.org answers 403. Override with
+// JOOBLE_BASE_URL if the key came from a different country edition.
+const JOOBLE_BASE_URL = (process.env.JOOBLE_BASE_URL?.trim() || 'https://au.jooble.org').replace(
+  /\/+$/,
+  '',
+)
 
 const QUERIES = [
   'structural engineer',
@@ -344,7 +351,7 @@ function fromCareerjet(raw) {
 /* ----------------------------------------------------------- source: jooble */
 
 async function fetchJooble(keywords) {
-  const response = await fetch(`https://jooble.org/api/${JOOBLE_API_KEY}`, {
+  const response = await fetch(`${JOOBLE_BASE_URL}/api/${JOOBLE_API_KEY}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ keywords, location: 'Australia', page: 1, ResultOnPage: RESULTS_PER_PAGE }),
