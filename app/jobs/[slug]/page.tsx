@@ -1,6 +1,7 @@
-import { Building2, CalendarClock, CalendarDays, Clock, ExternalLink, Laptop, MapPin, Plane, Wallet } from 'lucide-react'
+import { Building2, CalendarClock, CalendarDays, Clock, Laptop, MapPin, Plane, Wallet } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { ApplyButton } from '@/components/jobs/apply-button'
 import { JsonLd } from '@/components/json-ld'
 import { JobCard, SectorBadge } from '@/components/jobs/job-card'
 import { PageHeader } from '@/components/page-header'
@@ -203,16 +204,7 @@ export default async function JobPage({ params }: { params: Params }) {
                 Demo listing — no application link.
               </p>
             ) : (
-              <a
-                href={job.applyUrl}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-accent text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
-              >
-                Apply now
-                <ExternalLink className="size-4" aria-hidden="true" />
-                <span className="sr-only">(opens in a new tab)</span>
-              </a>
+              <ApplyButton slug={job.slug} href={job.applyUrl} />
             )}
             {job.source === 'adzuna' && (
               <p className="mt-3 text-center text-xs text-muted-foreground">
