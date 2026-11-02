@@ -18,8 +18,8 @@
  *   - Careerjet publisher keys have no published call cap; we use 6 keywords
  *     x 2 pages = 12 calls per run.
  *   - Jooble's free plan is 500 requests for the *lifetime* of the key, so it
- *     gets 4 industry keywords x 2 pages plus 2 academic keywords x 1 page =
- *     10 calls per run (~50 days of daily runs).
+ *     gets 4 industry keywords x 2 pages plus 3 academic keywords x 1 page =
+ *     11 calls per run (~45 days of daily runs).
  *   - Adzuna's approved account is still on the trial plan: 25 calls for the
  *     lifetime of the key (full access is £8/month). It therefore gets 4
  *     keywords x 1 page = 4 calls per run, covering industry *and* academic.
@@ -54,9 +54,16 @@ const QUERIES = [
 const JOOBLE_INDUSTRY_QUERIES = QUERIES.slice(0, 4)
 // Jooble's free tier is metered per call for the *lifetime* of the key, so the
 // academic queries get one page each instead of two.
+//
+// These have to name the *employer type* as well as the discipline. Jooble
+// matches loosely, so "structural engineering lecturer" mostly returns industry
+// ads (99 matches, 2 real university vacancies); asking for a university
+// lecturer, a research fellow and a PhD scholarship instead surfaces the three
+// academic role types the /academic page advertises.
 const ACADEMIC_QUERIES = [
-  'structural engineering lecturer',
-  'structural engineer university',
+  'university lecturer civil engineering',
+  'postdoctoral research fellow civil engineering',
+  'phd scholarship structural engineering',
 ]
 // Adzuna is metered per call on the free plan, so it gets a deliberately small
 // set that covers both sectors instead of the full industry list.
@@ -69,6 +76,8 @@ const ADZUNA_QUERIES = [
 const PAGES_PER_QUERY = 2
 const RESULTS_PER_PAGE = 50
 const MAX_JOBS = 120
+// Slots kept for academic listings before industry ones fill the rest.
+const ACADEMIC_RESERVE = 30
 const LISTING_DAYS = 30
 
 /* ------------------------------------------------------------------ helpers */
@@ -193,7 +202,7 @@ const STATE_NAMES = {
 }
 
 const ACADEMIC_EMPLOYERS =
-  /(universit|unsw|monash|rmit|curtin|qut|deakin|swinburne|griffith|macquarie|latrobe|flinders|university of technology|australian national|western sydney|csu|acu|usc|james cook|murdoch|cdu)/i
+  /(universit|unsw|monash|rmit|curtin|qut|deakin|swinburne|griffith|macquarie|latrobe|flinders|australian national|western sydney|csu|acu|usc|james cook|murdoch|cdu|\buts\b|une\b|unisa|charles sturt|federation|victoria university|ecu\b|tafe|institute of technology|polytechnic|research institute|csiro)/i
 
 const ACADEMIC_TITLES =
   /\b(lecturer|professor|postdoc|post-doc|research fellow|research associate|phd|scholarship|academic|dean|head of school)\b/i
@@ -216,9 +225,29 @@ const ROLE_RULES = [
 ]
 
 const RELEVANT_TITLE = /\b(structural|structures|bridge|bridges|civil)\b/i
+// Universities advertise under faculty titles ("Lecturer in Engineering",
+// "Head of School", "Postdoctoral Research Fellow") that never carry the word
+// "structural", so for an academic employer any engineering discipline counts.
+const ENGINEERING_DISCIPLINE =
+  /\b(engineer|engineering|structures?|structural|civil|construction|infrastructure|geotechnical|mechanics|materials|built environment)\b/i
 const NOISE_TITLE =
   /\b(draft|drafter|draught|bim|detailer|estimator|sales|recruit|talent|technician|labourer|laborer|welder|boilermaker|foreman|supervisor)\b/i
 const VISA_PATTERN = /\b(visa sponsorship|sponsorship|sponsor(?:s|ed|ing)?|sponsored|482|tss|work visa)\b/i
+
+/**
+ * A job is relevant when the title names the discipline, or when an academic
+ * employer is hiring for engineering at all — the discipline keyword then sits
+ * in the ad body instead of the title.
+ */
+function isRelevantTitle(title, company, text) {
+  if (NOISE_TITLE.test(title)) return false
+  if (RELEVANT_TITLE.test(title)) return true
+  if (!ACADEMIC_EMPLOYERS.test(company)) return false
+  return (
+    ENGINEERING_DISCIPLINE.test(title) ||
+    ENGINEERING_DISCIPLINE.test(String(text ?? '').slice(0, 600))
+  )
+}
 
 function classifyRole(title) {
   for (const [pattern, slug] of ROLE_RULES) {
@@ -285,9 +314,10 @@ function buildJob({
   const cleanCompany = String(company ?? '').trim() || 'Unnamed employer'
 
   if (!cleanTitle || !externalId || !postedAt) return null
-  if (!RELEVANT_TITLE.test(cleanTitle) || NOISE_TITLE.test(cleanTitle)) return null
 
   const text = stripHtml(description)
+  if (!isRelevantTitle(cleanTitle, cleanCompany, text)) return null
+
   const { citySlug, state, location } = classifyLocation(locationText)
 
   const hasRealSalary =
@@ -504,7 +534,10 @@ async function collect(queries, fetchPage, mapJob, label, calls, pages = PAGES_P
       }
     }
   }
-  console.log(`[ingest] ${label}: ${found.length} matching listings from ${calls.count} calls`)
+  const academic = found.filter((job) => job.sector === 'academic').length
+  console.log(
+    `[ingest] ${label}: ${found.length} matching listings (${academic} academic) from ${calls.count} calls`,
+  )
   return found
 }
 
@@ -518,7 +551,10 @@ async function main() {
     for (const job of jobs) {
       const key = dedupeKey(job)
       const existing = merged.get(key)
-      if (!existing || PRIORITY[source] < PRIORITY[existing.source]) merged.set(key, job)
+      const winsTie = job.sector === 'academic' && existing?.sector !== 'academic'
+      if (!existing || PRIORITY[source] < PRIORITY[existing.source] || winsTie) {
+        merged.set(key, job)
+      }
     }
   }
 
@@ -573,9 +609,13 @@ async function main() {
     return
   }
 
-  const jobs = [...merged.values()]
-    .sort((a, b) => b.postedAt.localeCompare(a.postedAt))
-    .slice(0, MAX_JOBS)
+  // Academic roles are scarce, so a busy industry week must never push them out
+  // of the snapshot: reserve a share of MAX_JOBS for them.
+  const byNewest = (a, b) => b.postedAt.localeCompare(a.postedAt)
+  const all = [...merged.values()].sort(byNewest)
+  const academicFirst = all.filter((job) => job.sector === 'academic').slice(0, ACADEMIC_RESERVE)
+  const industryRest = all.filter((job) => job.sector !== 'academic')
+  const jobs = [...academicFirst, ...industryRest].slice(0, MAX_JOBS).sort(byNewest)
 
   const existing = await readExisting()
 
@@ -608,7 +648,15 @@ async function main() {
   )
 }
 
-main().catch((error) => {
-  console.error('[ingest] Failed:', error instanceof Error ? error.message : error)
-  process.exitCode = 1
-})
+/* Exported for the classification checks; running the file still ingests. */
+export { buildJob, classifySector, classifyLocation, isRelevantTitle, parseSalaryFromText, fromJooble }
+
+const invokedDirectly =
+  process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+
+if (invokedDirectly) {
+  main().catch((error) => {
+    console.error('[ingest] Failed:', error instanceof Error ? error.message : error)
+    process.exitCode = 1
+  })
+}
