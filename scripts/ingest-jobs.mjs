@@ -310,7 +310,12 @@ async function fetchCareerjetPage(keywords, page) {
   })
 
   if (!response.ok) {
-    throw new Error(`Careerjet "${keywords}" page ${page} returned HTTP ${response.status}`)
+    // Careerjet explains 403s in the body (invalid key, missing/blocked client
+    // params, or a site that has not been approved yet), so surface it.
+    const detail = await response.text().catch(() => '')
+    throw new Error(
+      `Careerjet "${keywords}" page ${page} returned HTTP ${response.status}${detail ? ` — ${detail.replace(/\s+/g, ' ').slice(0, 300)}` : ''}`,
+    )
   }
 
   const body = await response.json()
@@ -345,7 +350,12 @@ async function fetchJooble(keywords) {
     body: JSON.stringify({ keywords, location: 'Australia', page: 1, ResultOnPage: RESULTS_PER_PAGE }),
   })
 
-  if (!response.ok) throw new Error(`Jooble "${keywords}" returned HTTP ${response.status}`)
+  if (!response.ok) {
+    const detail = await response.text().catch(() => '')
+    throw new Error(
+      `Jooble "${keywords}" returned HTTP ${response.status}${detail ? ` — ${detail.replace(/\s+/g, ' ').slice(0, 300)}` : ''}`,
+    )
+  }
 
   const body = await response.json()
   return Array.isArray(body.jobs) ? body.jobs : []
@@ -384,7 +394,10 @@ async function fetchAdzunaPage(what, page) {
   )
 
   if (!response.ok) {
-    throw new Error(`Adzuna ${what} page ${page} returned HTTP ${response.status}`)
+    const detail = await response.text().catch(() => '')
+    throw new Error(
+      `Adzuna ${what} page ${page} returned HTTP ${response.status}${detail ? ` — ${detail.replace(/\s+/g, ' ').slice(0, 300)}` : ''}`,
+    )
   }
 
   const body = await response.json()
@@ -463,33 +476,45 @@ async function main() {
   }
 
   if (CAREERJET_API_KEY) {
-    add(await collect(QUERIES, fetchCareerjetPage, fromCareerjet, 'Careerjet', calls), 'careerjet')
+    try {
+      add(await collect(QUERIES, fetchCareerjetPage, fromCareerjet, 'Careerjet', calls), 'careerjet')
+    } catch (error) {
+      console.warn(`[ingest] Careerjet failed: ${error instanceof Error ? error.message : error}`)
+    }
   } else {
     console.warn('[ingest] CAREERJET_API_KEY not set — skipping Careerjet.')
   }
 
   if (JOOBLE_API_KEY) {
-    add(
-      await collect(
-        JOOBLE_QUERIES,
-        (keywords) => fetchJooble(keywords),
-        fromJooble,
-        'Jooble',
-        calls,
-      ),
-      'jooble',
-    )
+    try {
+      add(
+        await collect(
+          JOOBLE_QUERIES,
+          (keywords) => fetchJooble(keywords),
+          fromJooble,
+          'Jooble',
+          calls,
+        ),
+        'jooble',
+      )
+    } catch (error) {
+      console.warn(`[ingest] Jooble failed: ${error instanceof Error ? error.message : error}`)
+    }
   } else {
     console.warn('[ingest] JOOBLE_API_KEY not set — skipping Jooble.')
   }
 
   if (ADZUNA_APP_ID && ADZUNA_APP_KEY) {
-    add(await collect(QUERIES, fetchAdzunaPage, fromAdzuna, 'Adzuna', calls), 'adzuna')
+    try {
+      add(await collect(QUERIES, fetchAdzunaPage, fromAdzuna, 'Adzuna', calls), 'adzuna')
+    } catch (error) {
+      console.warn(`[ingest] Adzuna failed: ${error instanceof Error ? error.message : error}`)
+    }
   }
 
   if (used.length === 0) {
-    console.warn('[ingest] No source credentials are configured — no refresh performed.')
-    console.warn('[ingest] Set CAREERJET_API_KEY and/or JOOBLE_API_KEY (GitHub Actions secrets).')
+    console.warn('[ingest] No source produced listings — keeping the previous snapshot.')
+    console.warn('[ingest] Missing credentials are skipped; failures are reported above.')
     return
   }
 
