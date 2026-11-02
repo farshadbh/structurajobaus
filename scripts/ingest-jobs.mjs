@@ -351,7 +351,13 @@ function buildJob({
   salaryMax,
 }) {
   const cleanTitle = String(title ?? '').trim()
-  const cleanCompany = String(company ?? '').trim() || 'Unnamed employer'
+  // No stand-in company name: some Jooble ads name no employer, and "Unnamed
+  // employer" on a card reads like a gap in the board. The empty string is kept
+  // and the UI omits the line instead.
+  const rawCompany = String(company ?? '').trim()
+  const cleanCompany = /^(unnamed employer|unknown( employer)?|n\/?a|none)$/i.test(rawCompany)
+    ? ''
+    : rawCompany
 
   if (!cleanTitle || !externalId || !postedAt) return null
 
@@ -375,7 +381,7 @@ function buildJob({
   return {
     id: `${source}-${externalId}`,
     externalId: String(externalId),
-    slug: `${slugify(cleanTitle)}-${slugify(cleanCompany)}-${externalId}`,
+    slug: `${[slugify(cleanTitle), slugify(cleanCompany)].filter(Boolean).join('-')}-${externalId}`,
     title: cleanTitle,
     roleSlug: classifyRole(cleanTitle),
     sector: classifySector(cleanTitle, cleanCompany),
