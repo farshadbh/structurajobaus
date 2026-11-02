@@ -40,8 +40,12 @@ jobs:
             echo "No changes to data/jobs.json"
             exit 0
           fi
-          git config user.name "jobs-bot"
-          git config user.email "actions@users.noreply.github.com"
+          # Vercel Hobby refuses to deploy commits whose author is not a project
+          # collaborator on private repos (GitHub's actions@users.noreply.github.com
+          # bot identity is rejected as "Deployment Blocked"). Committing as the
+          # repo owner keeps every daily snapshot deployable.
+          git config user.name "orodzarrin"
+          git config user.email "orod.zarrin@gmail.com"
           git add data/jobs.json
           git commit -m "chore(data): refresh job listings"
           git push
