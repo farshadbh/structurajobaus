@@ -26,7 +26,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const job = await getJobBySlug((await params).slug)
   if (!job) return {}
-  const title = `${job.title} — ${job.organisation}, ${job.location}`
+  // Aggregated ads sometimes never name the employer; the title then leads with
+  // the location instead of a placeholder.
+  const title = `${job.title} — ${[job.organisation, job.location].filter(Boolean).join(', ')}`
   return {
     title,
     description: job.summary,
@@ -41,6 +43,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
  */
 function jobPostingJsonLd(job: Job) {
   if (job.source === 'demo') return null
+  // Google requires hiringOrganization on a JobPosting, so an ad that does not
+  // name its employer is better left unmarked than marked up with a stand-in.
+  if (!job.organisation) return null
 
   const city = getCity(job.city)?.name ?? job.location.split(',')[0].trim()
   const hasSalary = Boolean(job.salaryMin || job.salaryMax)
@@ -101,8 +106,11 @@ export default async function JobPage({ params }: { params: Params }) {
   const jsonLd = IS_DEMO_DATA ? null : jobPostingJsonLd(job)
   const attribution = job.source ? SOURCE_ATTRIBUTION[job.source] : undefined
 
+  const salary = formatSalary(job)
+
   const facts = [
-    { icon: Wallet, label: 'Salary', value: formatSalary(job) },
+    // Only facts the ad states are listed: no "Not advertised" filler.
+    ...(salary ? [{ icon: Wallet, label: 'Salary', value: salary }] : []),
     { icon: MapPin, label: 'Location', value: job.location },
     { icon: Clock, label: 'Employment', value: EMPLOYMENT_TYPE_LABEL[job.employmentType] },
     { icon: Laptop, label: 'Work arrangement', value: WORK_ARRANGEMENT_LABEL[job.workArrangement] },
@@ -124,11 +132,13 @@ export default async function JobPage({ params }: { params: Params }) {
           { label: job.title, href: `/jobs/${job.slug}` },
         ]}
       >
-        <p className="mt-5 flex items-center gap-2 text-white/90">
-          <Building2 className="size-4" aria-hidden="true" />
-          {job.organisation}
-          {job.department && <span className="text-white/75">· {job.department}</span>}
-        </p>
+        {job.organisation && (
+          <p className="mt-5 flex items-center gap-2 text-white/90">
+            <Building2 className="size-4" aria-hidden="true" />
+            {job.organisation}
+            {job.department && <span className="text-white/75">· {job.department}</span>}
+          </p>
+        )}
       </PageHeader>
 
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_340px] lg:px-8">

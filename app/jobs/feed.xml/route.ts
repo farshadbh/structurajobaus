@@ -19,7 +19,7 @@ export async function GET() {
   const items = jobs
     .map(
       (job) => `    <item>
-      <title>${escapeXml(`${job.title} — ${job.organisation}`)}</title>
+      <title>${escapeXml([job.title, job.organisation].filter(Boolean).join(' — '))}</title>
       <link>${SITE_URL}/jobs/${job.slug}</link>
       <guid isPermaLink="true">${SITE_URL}/jobs/${job.slug}</guid>
       <pubDate>${new Date(`${job.postedAt}T00:00:00Z`).toUTCString()}</pubDate>
