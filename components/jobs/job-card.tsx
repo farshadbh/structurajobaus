@@ -1,6 +1,12 @@
 import { Building2, CalendarDays, MapPin, Plane, Wallet } from 'lucide-react'
 import Link from 'next/link'
-import { EMPLOYMENT_TYPE_LABEL, formatDate, formatSalary, WORK_ARRANGEMENT_LABEL } from '@/lib/format'
+import {
+  ADZUNA_ATTRIBUTION_URL,
+  EMPLOYMENT_TYPE_LABEL,
+  formatDate,
+  formatSalary,
+  WORK_ARRANGEMENT_LABEL,
+} from '@/lib/format'
 import type { Job } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -56,8 +62,12 @@ export function JobCard({ job }: { job: Job }) {
       </dl>
 
       <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="Job attributes">
-        <li className="rounded-full border px-2.5 py-0.5 text-xs">{EMPLOYMENT_TYPE_LABEL[job.employmentType]}</li>
-        <li className="rounded-full border px-2.5 py-0.5 text-xs">{WORK_ARRANGEMENT_LABEL[job.workArrangement]}</li>
+        <li className="rounded-full border px-2.5 py-0.5 text-xs">
+          {EMPLOYMENT_TYPE_LABEL[job.employmentType]}
+        </li>
+        <li className="rounded-full border px-2.5 py-0.5 text-xs">
+          {WORK_ARRANGEMENT_LABEL[job.workArrangement]}
+        </li>
         {job.visaSponsorship && (
           <li className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2.5 py-0.5 text-xs font-medium text-success">
             <Plane className="size-3" aria-hidden="true" />
@@ -71,6 +81,17 @@ export function JobCard({ job }: { job: Job }) {
           <CalendarDays className="size-3.5" aria-hidden="true" />
           Posted <time dateTime={job.postedAt}>{formatDate(job.postedAt)}</time>
         </p>
+        {job.source === 'adzuna' && (
+          <a
+            href={ADZUNA_ATTRIBUTION_URL}
+            target="_blank"
+            rel="nofollow noopener noreferrer"
+            // Sits above the card-wide link overlay so attribution stays clickable.
+            className="relative z-10 mt-2 inline-block text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          >
+            via Adzuna
+          </a>
+        )}
       </div>
     </article>
   )

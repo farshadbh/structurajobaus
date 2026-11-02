@@ -22,10 +22,14 @@ export function Hero({ stats }: HeroProps) {
         alt=""
         fill
         priority
-        sizes="100vw"
+        fetchPriority="high"
+        sizes="(max-width: 768px) 100vw, 1440px"
         className="-z-20 object-cover opacity-35"
       />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary via-primary/90 to-primary/50" aria-hidden="true" />
+      <div
+        className="absolute inset-0 -z-10 bg-gradient-to-r from-primary via-primary/90 to-primary/50"
+        aria-hidden="true"
+      />
       <div className="blueprint-grid absolute inset-0 -z-10" aria-hidden="true" />
 
       <div className="mx-auto max-w-7xl px-4 pt-16 pb-14 sm:px-6 md:pt-24 md:pb-20 lg:px-8">
@@ -38,15 +42,16 @@ export function Hero({ stats }: HeroProps) {
           Structural Engineering Academic &amp; Industry Jobs{' '}
           <span className="text-accent">Australia</span>
         </h1>
-        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-pretty text-white/75">
-          Find the latest structural engineering and academic opportunities across Australia.
+        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-pretty text-white/80">
+          Find the latest structural engineering and academic opportunities across Australia —
+          refreshed every morning.
         </p>
 
         <div className="mt-10 max-w-5xl">
           <SearchBar />
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-white/70">
+        <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-white/80">
           <span>Popular:</span>
           {CITIES.slice(0, 4).map((city) => (
             <Link
@@ -68,7 +73,9 @@ export function Hero({ stats }: HeroProps) {
         <dl className="mt-14 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-white/15 bg-white/15 sm:grid-cols-4">
           {statItems.map((item) => (
             <div key={item.label} className="bg-primary/80 px-5 py-4 backdrop-blur">
-              <dt className="font-mono text-[11px] tracking-wider text-white/60 uppercase">{item.label}</dt>
+              <dt className="font-mono text-[11px] tracking-wider text-white/75 uppercase">
+                {item.label}
+              </dt>
               <dd className="mt-1 text-2xl font-semibold tabular-nums">{item.value}</dd>
             </div>
           ))}
