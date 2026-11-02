@@ -90,9 +90,6 @@ const ADZUNA_QUERIES = [
 ]
 const PAGES_PER_QUERY = 2
 const RESULTS_PER_PAGE = 50
-const MAX_JOBS = 120
-// Slots kept for academic listings before industry ones fill the rest.
-const ACADEMIC_RESERVE = 30
 const LISTING_DAYS = 30
 
 /* ------------------------------------------------------------------ helpers */
@@ -109,6 +106,16 @@ const addDays = (iso, days) => {
   const date = new Date(`${iso}T00:00:00Z`)
   date.setUTCDate(date.getUTCDate() + days)
   return date.toISOString().slice(0, 10)
+}
+
+/** Today in the site's timezone, so the 30-day window matches what it renders. */
+function sydneyToday() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Australia/Sydney',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date())
 }
 
 /** Stable short id for providers (Careerjet) that expose no job identifier. */
@@ -642,13 +649,14 @@ async function main() {
     return
   }
 
-  // Academic roles are scarce, so a busy industry week must never push them out
-  // of the snapshot: reserve a share of MAX_JOBS for them.
+  // No cap on how many listings are published: every vacancy inside its 30-day
+  // window is kept, so a busy geotechnical week can never push an older
+  // structural ad off the board.
   const byNewest = (a, b) => b.postedAt.localeCompare(a.postedAt)
-  const all = [...merged.values()].sort(byNewest)
-  const academicFirst = all.filter((job) => job.sector === 'academic').slice(0, ACADEMIC_RESERVE)
-  const industryRest = all.filter((job) => job.sector !== 'academic')
-  const jobs = [...academicFirst, ...industryRest].slice(0, MAX_JOBS).sort(byNewest)
+  const today = sydneyToday()
+  const jobs = [...merged.values()]
+    .filter((job) => job.closingDate >= today)
+    .sort(byNewest)
 
   const existing = await readExisting()
 
