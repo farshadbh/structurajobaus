@@ -18,8 +18,8 @@
  *   - Careerjet publisher keys have no published call cap; we use 6 keywords
  *     x 2 pages = 12 calls per run.
  *   - Jooble's free plan is 500 requests for the *lifetime* of the key, so it
- *     gets 4 industry keywords x 2 pages plus 3 academic keywords x 1 page =
- *     11 calls per run (~45 days of daily runs).
+ *     gets 3 industry keywords x 2 pages plus 6 academic keywords x 1 page =
+ *     12 calls per run (~41 days of daily runs).
  *   - Adzuna's approved account is still on the trial plan: 25 calls for the
  *     lifetime of the key (full access is £8/month). It therefore gets 4
  *     keywords x 1 page = 4 calls per run, covering industry *and* academic.
@@ -51,19 +51,29 @@ const QUERIES = [
   'civil structural engineer',
   'structural engineer university',
 ]
-const JOOBLE_INDUSTRY_QUERIES = QUERIES.slice(0, 4)
+// Three keywords instead of four: "senior structural engineer" duplicates
+// "structural engineer", and the freed calls go to the academic range below.
+const JOOBLE_INDUSTRY_QUERIES = QUERIES.slice(0, 3)
 // Jooble's free tier is metered per call for the *lifetime* of the key, so the
 // academic queries get one page each instead of two.
 //
 // These have to name the *employer type* as well as the discipline. Jooble
 // matches loosely, so "structural engineering lecturer" mostly returns industry
 // ads (99 matches, 2 real university vacancies); asking for a university
-// lecturer, a research fellow and a PhD scholarship instead surfaces the three
-// academic role types the /academic page advertises.
+// lecturer, a professor, a research fellow and a PhD scholarship instead
+// surfaces the role types the /academic page advertises.
+//
+// One query per academic role family, so the section carries the whole ladder
+// from PhD scholarship through postdoc and lecturer to professor and head of
+// school instead of only the two or three roles a single query happens to
+// return.
 const ACADEMIC_QUERIES = [
-  'university lecturer civil engineering',
-  'postdoctoral research fellow civil engineering',
   'phd scholarship structural engineering',
+  'postdoctoral research fellow civil engineering',
+  'research associate civil engineering university',
+  'university lecturer civil engineering',
+  'senior lecturer structural engineering',
+  'professor civil engineering university',
 ]
 // Adzuna is metered per call on the free plan, so it gets a deliberately small
 // set that covers both sectors instead of the full industry list.
@@ -205,17 +215,18 @@ const ACADEMIC_EMPLOYERS =
   /(universit|unsw|monash|rmit|curtin|qut|deakin|swinburne|griffith|macquarie|latrobe|flinders|australian national|western sydney|csu|acu|usc|james cook|murdoch|cdu|\buts\b|une\b|unisa|charles sturt|federation|victoria university|ecu\b|tafe|institute of technology|polytechnic|research institute|csiro)/i
 
 const ACADEMIC_TITLES =
-  /\b(lecturer|professor|postdoc|post-doc|research fellow|research associate|phd|scholarship|academic|dean|head of school)\b/i
+  /\b(lecturer|professor|postdoc|post-doc|research fellow|research associate|research assistant|teaching fellow|tutor|phd|scholarship|academic|dean|head of school)\b/i
 
 /* Ordered most-specific-first so "senior lecturer" never matches "lecturer". */
 const ROLE_RULES = [
   [/phd|scholarship/i, 'phd-scholarship'],
+  [/head of school|dean|director of school|school chair/i, 'professor'],
   [/senior lecturer/i, 'senior-lecturer'],
-  [/associate professor/i, 'associate-professor'],
+  [/associate professor|associate prof\b/i, 'associate-professor'],
   [/\bprofessor\b/i, 'professor'],
-  [/postdoc|post-doc/i, 'postdoctoral-fellow'],
-  [/research fellow|research associate/i, 'research-fellow'],
-  [/\blecturer\b/i, 'lecturer'],
+  [/postdoc|post-doc|post doctoral/i, 'postdoctoral-fellow'],
+  [/research fellow|research associate|research assistant|research officer/i, 'research-fellow'],
+  [/\blecturer\b|associate lecturer|teaching fellow|\btutor\b|academic/i, 'lecturer'],
   [/principal structural|principal engineer/i, 'principal-structural-engineer'],
   [/senior structural|lead structural/i, 'senior-structural-engineer'],
   [/\bbridge/i, 'bridge-engineer'],
