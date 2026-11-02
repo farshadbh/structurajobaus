@@ -239,6 +239,10 @@ const ROLE_RULES = [
 // and "bridge" count, generic "engineering" does not.
 const CIVIL_DISCIPLINE =
   /\b(structural|structures?|bridge|bridges|civil|geotechnical|construction|infrastructure|seismic|earthquake|concrete|steel|built environment|environmental engineering)\b/i
+// Words that can only mean our discipline when they appear in a title, so they
+// outrank a sibling discipline in the same title.
+const STRONG_CIVIL =
+  /\b(structural|structures?|civil|bridge|geotechnical|seismic|earthquake)\b/i
 // Ad bodies are matched on the discipline *phrase*, not the bare words: a
 // violence-prevention PhD talks about "civil society" and social "structures",
 // and a single-keyword test filed it under structural engineering.
@@ -260,10 +264,12 @@ const VISA_PATTERN = /\b(visa sponsorship|sponsorship|sponsor(?:s|ed|ing)?|spons
  */
 function isRelevantTitle(title, company, text) {
   if (NOISE_TITLE.test(title)) return false
-  if (CIVIL_DISCIPLINE.test(title)) return true
-  // "Civil and Mechanical Engineering" stays; "Lecturer in Mechanical
-  // Engineering" does not.
+  // "Civil and Mechanical Engineering" stays…
+  if (STRONG_CIVIL.test(title)) return true
+  // …but "School of Electrical, Mechanical and Infrastructure Engineering"
+  // does not: the sibling discipline outranks a shared school name.
   if (OTHER_DISCIPLINE.test(title)) return false
+  if (CIVIL_DISCIPLINE.test(title)) return true
   if (!ACADEMIC_EMPLOYERS.test(company)) return false
   return CIVIL_PHRASE.test(String(text ?? '').slice(0, 600))
 }
