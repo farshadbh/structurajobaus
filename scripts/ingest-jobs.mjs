@@ -18,7 +18,8 @@
  *   - Careerjet publisher keys have no published call cap; we use 6 keywords
  *     x 2 pages = 12 calls per run.
  *   - Jooble's free plan is 500 requests for the *lifetime* of the key, so it
- *     only gets 4 keywords x 1 page = 4 calls per run (~125 days of daily runs).
+ *     gets 4 industry keywords x 2 pages plus 2 academic keywords x 1 page =
+ *     10 calls per run (~50 days of daily runs).
  *   - Adzuna's unapproved/trial account has 25 lifetime calls, so it stays at
  *     6 keywords x 2 pages = 12 calls — enough for a single validation run.
  */
@@ -49,7 +50,13 @@ const QUERIES = [
   'civil structural engineer',
   'structural engineer university',
 ]
-const JOOBLE_QUERIES = QUERIES.slice(0, 4)
+const JOOBLE_INDUSTRY_QUERIES = QUERIES.slice(0, 4)
+// Jooble's free tier is metered per call for the *lifetime* of the key, so the
+// academic queries get one page each instead of two.
+const ACADEMIC_QUERIES = [
+  'structural engineering lecturer',
+  'structural engineer university',
+]
 const PAGES_PER_QUERY = 2
 const RESULTS_PER_PAGE = 50
 const MAX_JOBS = 120
@@ -99,6 +106,29 @@ function truncate(text, max) {
   const cut = value.slice(0, max)
   const lastSpace = cut.lastIndexOf(' ')
   return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trim()}…`
+}
+
+/**
+ * Jooble exposes no salary field, but plenty of ads state one in the text
+ * ("$120k-$150k + super"). Reading it beats showing "Not available" on every
+ * listing; anything that is not a plausible annual AUD figure is ignored.
+ */
+function parseSalaryFromText(text) {
+  const source = String(text ?? '')
+  // Hourly and daily rates cannot be reported as an annual salary.
+  if (/\$\s?\d+(?:\.\d+)?\s*(?:\/|per\s)\s*(?:h|hr|hour|day|d)\b/i.test(source)) return null
+
+  const values = []
+  const money = /\$\s?(\d{1,3}(?:,\d{3})+|\d{2,3})\s?(k\b)?/gi
+  let match
+  while ((match = money.exec(source))) {
+    const digits = match[1].replace(/,/g, '')
+    const value = match[2] ? Number(digits) * 1000 : Number(digits)
+    if (Number.isFinite(value) && value >= 40000 && value <= 500000) values.push(value)
+  }
+
+  if (values.length === 0) return null
+  return { min: Math.min(...values), max: Math.max(...values) }
 }
 
 const MONTHS = {
@@ -179,7 +209,7 @@ const ROLE_RULES = [
 const RELEVANT_TITLE = /\b(structural|structures|bridge|bridges|civil)\b/i
 const NOISE_TITLE =
   /\b(draft|drafter|draught|bim|detailer|estimator|sales|recruit|talent|technician|labourer|laborer|welder|boilermaker|foreman|supervisor)\b/i
-const VISA_PATTERN = /\b(sponsorship|sponsored|482|tss visa)\b/i
+const VISA_PATTERN = /\b(visa sponsorship|sponsorship|sponsor(?:s|ed|ing)?|sponsored|482|tss|work visa)\b/i
 
 function classifyRole(title) {
   for (const [pattern, slug] of ROLE_RULES) {
@@ -253,6 +283,7 @@ function buildJob({
 
   const hasRealSalary =
     Number.isFinite(salaryMin) && Number.isFinite(salaryMax) && salaryMax > 0 && salaryMax >= salaryMin
+  const salary = hasRealSalary ? { min: salaryMin, max: salaryMax } : parseSalaryFromText(text)
 
   const tags = [
     /contract|fixed term/i.test(text) ? 'Contract' : null,
@@ -273,7 +304,7 @@ function buildJob({
     city: citySlug,
     state,
     location,
-    ...(hasRealSalary ? { salaryMin, salaryMax } : {}),
+    ...(salary ? { salaryMin: salary.min, salaryMax: salary.max } : {}),
     salaryPeriod: 'year',
     employmentType: /part[- ]time/i.test(text) ? 'part-time' : /contract|fixed term/i.test(text) ? 'contract' : 'full-time',
     workArrangement: /\b(remote|work from home|wfh)\b/i.test(text)
@@ -451,10 +482,10 @@ async function readExisting() {
   }
 }
 
-async function collect(queries, fetchPage, mapJob, label, calls) {
+async function collect(queries, fetchPage, mapJob, label, calls, pages = PAGES_PER_QUERY) {
   const found = []
   for (const query of queries) {
-    for (let page = 1; page <= PAGES_PER_QUERY; page++) {
+    for (let page = 1; page <= pages; page++) {
       const results = await fetchPage(query, page)
       calls.count++
       if (results.length === 0) break
@@ -494,16 +525,24 @@ async function main() {
 
   if (JOOBLE_API_KEY) {
     try {
-      add(
-        await collect(
-          JOOBLE_QUERIES,
+      const joobleJobs = [
+        ...(await collect(
+          JOOBLE_INDUSTRY_QUERIES,
           (keywords) => fetchJooble(keywords),
           fromJooble,
           'Jooble',
           calls,
-        ),
-        'jooble',
-      )
+        )),
+        ...(await collect(
+          ACADEMIC_QUERIES,
+          (keywords) => fetchJooble(keywords),
+          fromJooble,
+          'Jooble academic',
+          calls,
+          1,
+        )),
+      ]
+      add(joobleJobs, 'jooble')
     } catch (error) {
       console.warn(`[ingest] Jooble failed: ${error instanceof Error ? error.message : error}`)
     }
