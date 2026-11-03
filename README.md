@@ -34,6 +34,35 @@ Run it manually any time:
 pnpm ingest
 ```
 
+## Accounts, saved lists and email alerts
+
+Visitors can create a free account (`/signup`) and build **lists** — saved searches with keywords,
+academic/industry, city, state, minimum salary and visa sponsorship. Each account chooses a daily,
+weekly or monthly email; `scripts/send-digests.mjs` sends one email per period, and only when
+something new matches.
+
+| Piece | Service | Free tier |
+| --- | --- | --- |
+| Accounts, lists, preferences | Upstash Redis (REST API) | 256 MB, 10k commands/day |
+| Email delivery | Brevo | 300 emails/day |
+| Scheduling | GitHub Actions `send-digests.yml` | free on public repos |
+
+Design notes worth knowing before changing any of it:
+
+- **No new npm dependencies.** Upstash and Brevo are plain HTTPS, so sign-in and the digest run on
+  `fetch` alone. That is also why the account layer does not use Auth.js: one email/password form
+  does not justify a framework, and a dependency means regenerating the lockfile.
+- **Passwords** are scrypt-hashed with a per-user salt. The session cookie is HttpOnly,
+  SameSite=Lax, Secure in production, and carries an HMAC-SHA256 signature over the user id and
+  expiry (`AUTH_SECRET`). Without `AUTH_SECRET`, sign-in is refused rather than falling back to a
+  guessable key.
+- **Failed sign-ins** are limited to 10 per network per 15 minutes, counted in the same Redis.
+- **The digest queue** is the Redis set `digest:users`, so the scheduled run never scans every
+  account ever created. It reads only the committed `data/jobs.json`, so an email can never
+  advertise a role the board does not show.
+- **Unsubscribe** uses a random per-account token (not a hash of the email), works without signing
+  in, and Brevo also receives a `List-Unsubscribe` header.
+
 ## Setup
 
 ```bash
@@ -51,6 +80,12 @@ pnpm dev
 | `JOOBLE_API_KEY` | GitHub Actions secret + local `.env` | Jooble AU key. Free, but 500 requests for the lifetime of the key, so only 4 calls per run. |
 | `ADZUNA_APP_ID` | optional | Adzuna app id (trial is 25 lifetime calls; paid is £8/month). |
 | `ADZUNA_APP_KEY` | optional | Adzuna app key. |
+| `UPSTASH_REDIS_REST_URL` | Vercel + Actions secret | Upstash Redis REST endpoint. Accounts are off until this and the token are set. |
+| `UPSTASH_REDIS_REST_TOKEN` | Vercel + Actions secret | Upstash REST token. |
+| `AUTH_SECRET` | Vercel | Signs the session cookie. `openssl rand -hex 32`. Changing it signs everyone out. |
+| `BREVO_API_KEY` | Actions secret | Brevo transactional email key. Absent means the digest run logs a skip and exits 0. |
+| `EMAIL_FROM` | Actions variable | Verified Brevo sender, e.g. `SE Jobs Australia <you@example.com>`. |
+| `SITE_URL` | Actions variable | Public URL used in email links. Defaults to the Vercel deployment. |
 | `NEXT_PUBLIC_DEMO_JOBS` | local only | `1` renders the bundled sample listings before the first sync. Never enable in production. |
 
 Free keys: Careerjet at <https://www.careerjet.com/partners/api> (publisher account) and Jooble at
@@ -78,12 +113,17 @@ Once you have a custom domain, set `NEXT_PUBLIC_SITE_URL` in Vercel and redeploy
 ## Project layout
 
 ```
-app/                 routes: /, /jobs, /jobs/[slug], /academic, /industry, /cities/[city], /privacy, /terms
+app/                 routes: /, /jobs, /jobs/[slug], /academic, /industry, /cities/[city], /account, /login, /signup, /privacy, /terms
 components/          header, footer, hero, job cards, filters, listing
 lib/jobs.ts          data access: live snapshot, expiry filtering, search/filtering
 lib/taxonomy.ts      roles, cities, states, salary bands
+lib/auth.ts          accounts: scrypt passwords, signed session cookie
+lib/accounts.ts      saved-list validation, criteria → board filters, digest labels
+lib/store.ts         Upstash Redis over REST (no driver)
+components/account/  sign-in form, lists manager
 data/jobs.json       the current listing snapshot (generated)
 scripts/ingest-jobs.mjs   multi-source ingestion (Careerjet, Jooble, optional Adzuna)
+scripts/send-digests.mjs  daily/weekly/monthly job alert email
 scripts/001_create_jobs.sql   future Postgres/Supabase schema for direct employer posts
 ```
 

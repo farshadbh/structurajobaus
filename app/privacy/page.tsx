@@ -18,16 +18,30 @@ export default function PrivacyPage() {
         breadcrumbs={[{ label: 'Privacy', href: '/privacy' }]}
       />
       <article className="mx-auto max-w-3xl px-4 py-12 text-sm leading-relaxed sm:px-6 lg:px-8">
-        <p className="text-muted-foreground">Last updated: 2 November 2026</p>
+        <p className="text-muted-foreground">Last updated: 3 November 2026</p>
 
         <h2 className="mt-8 text-lg font-semibold">What we collect</h2>
         <p className="mt-2 text-muted-foreground">
-          {SITE_NAME} is a read-only job board. There are no accounts, no logins and no forms that
-          accept personal information. We do not ask for your name, email address or CV.
+          You can read every page of {SITE_NAME} without an account, and nothing is collected if you
+          do. Accounts are optional and exist only to save job lists and email new matches.
         </p>
         <p className="mt-2 text-muted-foreground">
           Aggregate, privacy-friendly analytics are used to understand which pages are used. These
           measurements do not use advertising cookies and are not used to build a profile of you.
+        </p>
+
+        <h2 className="mt-8 text-lg font-semibold">Accounts and email alerts</h2>
+        <p className="mt-2 text-muted-foreground">
+          If you create an account we store your email address, a password hash (never the password
+          itself), the lists you save, and whether you have switched alerts on. We do not store your
+          name, your CV or anything about which ads you apply to.
+        </p>
+        <p className="mt-2 text-muted-foreground">
+          Email alerts are off until you switch them on. Every alert email carries a one-click
+          unsubscribe link that works without signing in; unsubscribing stops all alert email and
+          keeps your lists. Ask for your account to be deleted through the issue tracker below and it
+          is removed with everything in it. Email delivery is handled by Brevo, which processes the
+          address only to send the message.
         </p>
 
         <h2 className="mt-8 text-lg font-semibold">Job listings</h2>
