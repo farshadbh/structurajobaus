@@ -164,6 +164,8 @@ export function SupervisorExplorer({
 
   const active = country !== 'all' || university !== 'all' || field !== 'all'
   const selectedCountry = country === 'all' ? null : COUNTRY_BY_CODE.get(country)
+  // The site is Australian, so "all countries" still carries a home-country backdrop.
+  const backdrop = COUNTRY_PHOTOS[selectedCountry?.code ?? 'AU']
 
   function updateCountry(next: CountryFilter) {
     setCountry(next)
@@ -173,7 +175,7 @@ export function SupervisorExplorer({
 
   return (
     <section id={id} className="relative scroll-mt-24 overflow-hidden border-y bg-muted/40 py-14 md:py-16">
-      {selectedCountry && <CountryLandmark code={selectedCountry.code} />}
+      <CountryLandmark code={selectedCountry?.code ?? 'AU'} />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
@@ -345,20 +347,18 @@ export function SupervisorExplorer({
               </button>
             )}
 
-            {selectedCountry && (
-              <p className="mt-8 border-t pt-4 text-xs text-muted-foreground">
-                Background photograph:{' '}
-                <a
-                  href={COUNTRY_PHOTOS[selectedCountry.code].source}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:no-underline"
-                >
-                  {COUNTRY_PHOTOS[selectedCountry.code].credit}
-                </a>{' '}
-                / Wikimedia Commons, {COUNTRY_PHOTOS[selectedCountry.code].license}.
-              </p>
-            )}
+            <p className="mt-8 border-t pt-4 text-xs text-muted-foreground">
+              Background photograph:{' '}
+              <a
+                href={backdrop.source}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:no-underline"
+              >
+                {backdrop.credit}
+              </a>{' '}
+              / Wikimedia Commons, {backdrop.license}.
+            </p>
           </div>
 
           <aside className="self-start lg:sticky lg:top-24">
