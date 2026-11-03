@@ -1,6 +1,6 @@
 'use client'
 
-import { FileCheck2, FileText, Loader2, Upload, X } from 'lucide-react'
+import { FileCheck2, FileText, Loader2, Paperclip, Upload, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { CV_ACCEPT, parseCv, readCv, type CandidateProfile } from '@/lib/cv'
 
@@ -13,10 +13,14 @@ export function CvPanel({
   profile,
   onChange,
   onClear,
+  attachCv,
+  onAttachChange,
 }: {
   profile: CandidateProfile | null
   onChange: (profile: CandidateProfile) => void
   onClear: () => void
+  attachCv: boolean
+  onAttachChange: (attach: boolean) => void
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [reading, setReading] = useState(false)
@@ -51,6 +55,7 @@ export function CvPanel({
     onChange(parsed)
     setError('')
     setPasteOpen(false)
+    setPaste('')
   }
 
   const facts = profile
@@ -149,7 +154,8 @@ export function CvPanel({
             {reading ? 'Reading your CV…' : 'Upload your CV'}
           </label>
           <p className="mt-2 text-xs text-muted-foreground">
-            PDF, DOCX, TXT or MD — or drop the file here.
+            PDF, DOCX, TXT or MD — or drop the file here. A PDF of a scanned page has no text to
+            read, so paste the text instead.
           </p>
         </div>
       )}
@@ -201,6 +207,25 @@ export function CvPanel({
           </button>
         )
       )}
+
+      <label
+        htmlFor="attach-cv"
+        className="mt-4 flex cursor-pointer items-start gap-2 rounded-md border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground"
+      >
+        <input
+          id="attach-cv"
+          type="checkbox"
+          checked={attachCv}
+          onChange={(event) => onAttachChange(event.target.checked)}
+          className="mt-0.5 size-4 shrink-0 accent-[var(--primary)]"
+        />
+        <span>
+          <Paperclip className="mr-1 inline size-3.5 align-[-2px]" aria-hidden="true" />
+          <span className="font-medium text-foreground">Say my CV is attached.</span> The email will
+          mention your attached CV and transcript; you still attach the file yourself in your mail
+          app.
+        </span>
+      </label>
     </section>
   )
 }
