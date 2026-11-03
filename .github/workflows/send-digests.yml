@@ -1,0 +1,37 @@
+name: Send job alert emails
+
+# 20:00 UTC = 07:00 Sydney (AEDT), an hour after the listing refresh has committed
+# the new data/jobs.json. The job reads that committed snapshot, so the digest can
+# never advertise a role the board does not show.
+on:
+  schedule:
+    - cron: '0 20 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: send-digests
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Runs on a bare node: both services are plain HTTPS, so there is no install
+      # step and nothing to keep in the lockfile.
+      - name: Send due digests
+        env:
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          EMAIL_FROM: ${{ vars.EMAIL_FROM || 'SE Jobs Australia <alerts@example.com>' }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://structuraljobaus.vercel.app' }}
+        run: node scripts/send-digests.mjs

@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: '/industry', label: 'Industry Jobs' },
   { href: '/cities', label: 'Browse by City' },
   { href: '/jobs?visa=1', label: 'Visa Sponsorship' },
+  { href: '/account', label: 'Job alerts' },
   { href: '/post-a-job', label: 'Post a job' },
 ]
 
@@ -27,7 +28,6 @@ export function SiteHeader() {
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
           {NAV_ITEMS.map((item) => {
             const active = pathname.startsWith(item.href.split('?')[0]) && item.href !== '/jobs?visa=1'
-
             return (
               <Link
                 key={item.href}
