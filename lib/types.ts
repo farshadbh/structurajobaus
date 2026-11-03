@@ -1,11 +1,11 @@
 import type { EmploymentType, Sector, StateCode, WorkArrangement } from './taxonomy'
 
 /**
- * Where a listing came from. `direct` (employer submissions), `careerjet` and
- * `jooble` are the free feeds; `adzuna` is optional and paid. Only `demo` is
- * fabricated.
+ * Where a listing came from. `direct` (employer submissions), `careerjet`,
+ * `jooble` and `workday` (employer career sites) are the free feeds; `adzuna`
+ * is optional and paid. Only `demo` is fabricated.
  */
-export type JobSource = 'adzuna' | 'careerjet' | 'jooble' | 'direct' | 'demo'
+export type JobSource = 'adzuna' | 'careerjet' | 'jooble' | 'workday' | 'direct' | 'demo'
 
 /**
  * Mirrors the `jobs` table in scripts/001_create_jobs.sql (snake_case columns
