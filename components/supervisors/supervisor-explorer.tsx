@@ -4,6 +4,7 @@ import { Check, ExternalLink, Mail, X } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CountryLandmark } from '@/components/academics/country-landmark'
+import { CvPanel } from '@/components/supervisors/cv-panel'
 import { COUNTRY_PHOTOS } from '@/data/country-photos'
 import {
   ACADEMICS,
@@ -16,10 +17,12 @@ import {
   type AcademicField,
   type CountryCode,
 } from '@/lib/academics'
+import type { CandidateProfile } from '@/lib/cv'
 import { mailtoHref } from '@/lib/supervisor-email'
 import { cn } from '@/lib/utils'
 
 const STORAGE_KEY = 'sjs.supervisors.emailed.v1'
+const CV_KEY = 'sjs.supervisors.cv.v1'
 
 type EmailedMap = Record<string, string>
 type CountryFilter = 'all' | CountryCode
@@ -32,12 +35,14 @@ function SupervisorCard({
   person,
   emailed,
   onEmail,
+  profile,
 }: {
   person: Academic
   emailed: boolean
   onEmail: () => void
+  profile?: CandidateProfile | null
 }) {
-  const href = mailtoHref(person)
+  const href = mailtoHref(person, profile ?? undefined)
 
   return (
     <article
@@ -103,6 +108,7 @@ export function SupervisorExplorer({
   const [field, setField] = useState<FieldFilter>('all')
   const [shown, setShown] = useState(pageSize)
   const [emailed, setEmailed] = useState<EmailedMap>({})
+  const [cv, setCv] = useState<CandidateProfile | null>(null)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -111,6 +117,12 @@ export function SupervisorExplorer({
       if (raw) setEmailed(JSON.parse(raw) as EmailedMap)
     } catch {
       // Private mode or a blocked store: the list simply stays empty.
+    }
+    try {
+      const stored = window.localStorage.getItem(CV_KEY)
+      if (stored) setCv(JSON.parse(stored) as CandidateProfile)
+    } catch {
+      // A corrupt entry just means no CV is loaded.
     }
     setReady(true)
   }, [])
@@ -126,6 +138,16 @@ export function SupervisorExplorer({
 
   const markEmailed = (person: Academic) =>
     persist({ ...emailed, [person.id]: new Date().toISOString() })
+
+  function saveCv(next: CandidateProfile | null) {
+    setCv(next)
+    try {
+      if (next) window.localStorage.setItem(CV_KEY, JSON.stringify(next))
+      else window.localStorage.removeItem(CV_KEY)
+    } catch {
+      // The CV still applies for this visit.
+    }
+  }
 
   const removeEmailed = (personId: string) => {
     const next = { ...emailed }
@@ -190,8 +212,9 @@ export function SupervisorExplorer({
               {ACADEMICS.length} lecturers, associate professors and professors at{' '}
               {new Set(ACADEMICS.map((person) => person.university)).size} universities in{' '}
               {COUNTRIES_WITH_DATA.length} countries — their research focus, and an enquiry email
-              already written to each one. Filter by country, university or field, pick the people
-              whose work fits, and the ones you have written to turn green.
+              already written to each one. Add your CV and the email fills with your own details;
+              filter by country, university or field, pick the people whose work fits, and the ones
+              you have written to turn green.
             </p>
           </div>
 
@@ -280,6 +303,8 @@ export function SupervisorExplorer({
           </div>
         </div>
 
+        <CvPanel profile={cv} onChange={saveCv} onClear={() => saveCv(null)} />
+
         <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div>
             <p className="text-sm text-muted-foreground">
@@ -325,6 +350,7 @@ export function SupervisorExplorer({
                                   person={person}
                                   emailed={ready && Boolean(emailed[person.id])}
                                   onEmail={() => markEmailed(person)}
+                                  profile={cv}
                                 />
                               </li>
                             ))}
