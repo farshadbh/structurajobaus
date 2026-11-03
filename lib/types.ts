@@ -2,10 +2,17 @@ import type { EmploymentType, Sector, StateCode, WorkArrangement } from './taxon
 
 /**
  * Where a listing came from. `direct` (employer submissions), `careerjet`,
- * `jooble` and `workday` (employer career sites) are the free feeds; `adzuna`
- * is optional and paid. Only `demo` is fabricated.
+ * `jooble`, `workday` and `pageup` (employer career sites) are the free feeds;
+ * `adzuna` is optional and paid. Only `demo` is fabricated.
  */
-export type JobSource = 'adzuna' | 'careerjet' | 'jooble' | 'workday' | 'direct' | 'demo'
+export type JobSource =
+  | 'adzuna'
+  | 'careerjet'
+  | 'jooble'
+  | 'workday'
+  | 'pageup'
+  | 'direct'
+  | 'demo'
 
 /**
  * Mirrors the `jobs` table in scripts/001_create_jobs.sql (snake_case columns
