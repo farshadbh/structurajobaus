@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { SupervisorExplorer } from '@/components/supervisors/supervisor-explorer'
 import { PageHeader } from '@/components/page-header'
 import { ACADEMIC_VERIFIED_AT, ALL_ACADEMIC_STATS, COUNTRIES, PLANNED_COUNTRIES, countriesWithData } from '@/lib/academics'
-import { UNIVERSITY_COUNTRIES } from '@/lib/universities'
 
 export const metadata: Metadata = {
   title: 'Find a PhD supervisor — civil engineering academics worldwide',
@@ -34,11 +33,7 @@ export default function SupervisorsPage() {
         </p>
       </PageHeader>
 
-      <SupervisorExplorer
-        pageSize={36}
-        showDirectoryLink={false}
-        universityCountries={UNIVERSITY_COUNTRIES}
-      />
+      <SupervisorExplorer pageSize={36} showDirectoryLink={false} />
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <h2 className="text-lg font-semibold">Still to come</h2>
