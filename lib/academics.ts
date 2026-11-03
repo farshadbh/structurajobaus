@@ -44,18 +44,20 @@ export interface Country {
   /** Short form for chips and filter labels. */
   short: string
   region: string
+  /** Emoji flag, so the country reads at a glance in the filter and headings. */
+  flag: string
 }
 
 export const COUNTRIES: Country[] = [
-  { code: 'AU', slug: 'australia', name: 'Australia', short: 'Australia', region: 'Oceania' },
-  { code: 'US', slug: 'united-states', name: 'United States', short: 'USA', region: 'North America' },
-  { code: 'GB', slug: 'united-kingdom', name: 'United Kingdom', short: 'UK', region: 'Europe' },
-  { code: 'CA', slug: 'canada', name: 'Canada', short: 'Canada', region: 'North America' },
-  { code: 'DE', slug: 'germany', name: 'Germany', short: 'Germany', region: 'Europe' },
-  { code: 'IE', slug: 'ireland', name: 'Ireland', short: 'Ireland', region: 'Europe' },
-  { code: 'JP', slug: 'japan', name: 'Japan', short: 'Japan', region: 'Asia' },
-  { code: 'SG', slug: 'singapore', name: 'Singapore', short: 'Singapore', region: 'Asia' },
-  { code: 'HK', slug: 'hong-kong', name: 'Hong Kong', short: 'Hong Kong', region: 'Asia' },
+  { code: 'AU', slug: 'australia', name: 'Australia', short: 'Australia', region: 'Oceania', flag: '🇦🇺' },
+  { code: 'US', slug: 'united-states', name: 'United States', short: 'USA', region: 'North America', flag: '🇺🇸' },
+  { code: 'GB', slug: 'united-kingdom', name: 'United Kingdom', short: 'UK', region: 'Europe', flag: '🇬🇧' },
+  { code: 'CA', slug: 'canada', name: 'Canada', short: 'Canada', region: 'North America', flag: '🇨🇦' },
+  { code: 'DE', slug: 'germany', name: 'Germany', short: 'Germany', region: 'Europe', flag: '🇩🇪' },
+  { code: 'IE', slug: 'ireland', name: 'Ireland', short: 'Ireland', region: 'Europe', flag: '🇮🇪' },
+  { code: 'JP', slug: 'japan', name: 'Japan', short: 'Japan', region: 'Asia', flag: '🇯🇵' },
+  { code: 'SG', slug: 'singapore', name: 'Singapore', short: 'Singapore', region: 'Asia', flag: '🇸🇬' },
+  { code: 'HK', slug: 'hong-kong', name: 'Hong Kong', short: 'Hong Kong', region: 'Asia', flag: '🇭🇰' },
 ]
 
 /** Countries named as next additions but not yet compiled - shown as a roadmap, never faked. */
