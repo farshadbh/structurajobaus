@@ -1,0 +1,32 @@
+{
+  "country": "JP",
+  "verifiedAt": "2026-11-03",
+  "people": [
+    {
+      "id": "jp-ishida",
+      "name": "Tetsuya Ishida",
+      "title": "Professor, Department of Civil Engineering",
+      "university": "University of Tokyo",
+      "universitySlug": "utokyo",
+      "state": "Tokyo",
+      "field": "construction",
+      "researchFocus": "Multi-scale chemo-physics of structural concrete, carbon-neutral concrete and data-driven maintenance of concrete infrastructure.",
+      "email": "tetsuya.ishida@civil.t.u-tokyo.ac.jp",
+      "profileUrl": "https://www.civil.t.u-tokyo.ac.jp/en/laboratory/teacher_list/",
+      "sourceUrl": "https://concrete.t.u-tokyo.ac.jp/ja_2017/member/index.html"
+    },
+    {
+      "id": "jp-yagi",
+      "name": "Tomomi Yagi",
+      "title": "Professor, Department of Civil and Earth Resources Engineering",
+      "university": "Kyoto University",
+      "universitySlug": "kyoto",
+      "state": "Kyoto",
+      "field": "structural",
+      "researchFocus": "Wind engineering, bridge aerodynamics and wind-induced vibration of long-span structures.",
+      "email": "yagi.tomomi.7a@kyoto-u.ac.jp",
+      "profileUrl": "https://www.ce.t.kyoto-u.ac.jp/en/information/laboratory/bridge/index.html",
+      "sourceUrl": "https://www.ce.t.kyoto-u.ac.jp/en/information/laboratory/bridge/index.html"
+    }
+  ]
+}

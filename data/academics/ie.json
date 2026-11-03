@@ -1,0 +1,32 @@
+{
+  "country": "IE",
+  "verifiedAt": "2026-11-03",
+  "people": [
+    {
+      "id": "ie-basu",
+      "name": "Biswajit Basu",
+      "title": "Professor of Computational Dynamics",
+      "university": "Trinity College Dublin",
+      "universitySlug": "tcd",
+      "state": "Dublin",
+      "field": "structural",
+      "researchFocus": "Structural dynamics, vibration control, wavelet-based damage detection and wind-turbine dynamics.",
+      "email": "basub@tcd.ie",
+      "profileUrl": "https://www.tcd.ie/civileng/people/academic-staff-/basub/",
+      "sourceUrl": "https://www.tcd.ie/civileng/people/academic-staff-/basub/"
+    },
+    {
+      "id": "ie-pavia",
+      "name": "Sara Pavia",
+      "title": "Professor in Civil Engineering",
+      "university": "Trinity College Dublin",
+      "universitySlug": "tcd",
+      "state": "Dublin",
+      "field": "construction",
+      "researchFocus": "Heritage and bio-based construction materials, lime mortars, masonry and conservation of historic building fabric.",
+      "email": "pavias@tcd.ie",
+      "profileUrl": "https://www.tcd.ie/civileng/people/academic-staff-/pavias/",
+      "sourceUrl": "https://www.tcd.ie/civileng/people/academic-staff-/pavias/"
+    }
+  ]
+}
