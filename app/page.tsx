@@ -32,6 +32,8 @@ export default async function HomePage() {
     <>
       <JsonLd data={websiteJsonLd} />
       <Hero stats={counts} />
+      {/* Directly under the hero, so the supervisor finder is visible without scrolling past the job cards. */}
+      <SupervisorSection />
       <JobSection
         id="featured-jobs"
         eyebrow="Featured"
@@ -43,7 +45,6 @@ export default async function HomePage() {
         columns={3}
       />
       <RoleCategories counts={counts.byRole} />
-      <SupervisorSection />
       <JobSection
         id="latest-academic"
         eyebrow="Academic"

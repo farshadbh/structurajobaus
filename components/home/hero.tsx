@@ -68,6 +68,12 @@ export function Hero({ stats }: HeroProps) {
           >
             PhD Scholarships
           </Link>
+          <Link
+            href="/supervisors"
+            className="rounded-full border border-accent/60 bg-accent/10 px-3 py-1 font-medium text-white transition-colors hover:border-accent"
+          >
+            Find a supervisor
+          </Link>
         </div>
 
         <dl className="mt-14 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-white/15 bg-white/15 sm:grid-cols-4">
