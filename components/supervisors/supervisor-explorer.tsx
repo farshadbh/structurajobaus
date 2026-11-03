@@ -353,23 +353,16 @@ export function SupervisorExplorer({
                 className="h-10 rounded-md border bg-background px-3 text-sm"
               >
                 <option value="all">All countries ({ACADEMICS.length})</option>
-                <optgroup label="With supervisors">
-                  {COUNTRIES_WITH_DATA.map((entry) => (
-                    <option key={entry.code} value={entry.code}>
-                      {entry.name} (
-                      {ACADEMICS.filter((person) => person.country === entry.code).length})
-                    </option>
-                  ))}
-                </optgroup>
-                {listedCountries.length > 0 && (
-                  <optgroup label="Also on the universities page">
-                    {listedCountries.map((entry) => (
-                      <option key={entry.country} value={`${COUNTRY_NAME_PREFIX}${entry.country}`}>
-                        {entry.country} ({entry.universities})
-                      </option>
-                    ))}
-                  </optgroup>
-                )}
+                {COUNTRIES_WITH_DATA.map((entry) => (
+                  <option key={entry.code} value={entry.code}>
+                    {entry.name} ({ACADEMICS.filter((person) => person.country === entry.code).length})
+                  </option>
+                ))}
+                {listedCountries.map((entry) => (
+                  <option key={entry.country} value={`${COUNTRY_NAME_PREFIX}${entry.country}`}>
+                    {entry.country} ({entry.universities})
+                  </option>
+                ))}
               </select>
             </label>
 
