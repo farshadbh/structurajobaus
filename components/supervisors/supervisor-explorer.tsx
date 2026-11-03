@@ -3,7 +3,8 @@
 import { Check, ExternalLink, Mail, X } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { CountryLandmark, LandmarkBadge } from '@/components/academics/country-landmark'
+import { CountryLandmark } from '@/components/academics/country-landmark'
+import { COUNTRY_PHOTOS } from '@/data/country-photos'
 import {
   ACADEMICS,
   COUNTRIES,
@@ -177,17 +178,8 @@ export function SupervisorExplorer({
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-2xl">
-            <p className="flex items-center gap-2 font-mono text-xs font-medium tracking-wider text-accent uppercase">
-              {selectedCountry ? (
-                <>
-                  <span aria-hidden="true" className="text-base leading-none">
-                    {selectedCountry.flag}
-                  </span>
-                  {selectedCountry.name}
-                </>
-              ) : (
-                'Supervisors'
-              )}
+            <p className="font-mono text-xs font-medium tracking-wider text-accent uppercase">
+              {selectedCountry ? selectedCountry.name : 'Supervisors'}
             </p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
               Find your supervisor
@@ -220,10 +212,10 @@ export function SupervisorExplorer({
                 onChange={(event) => updateCountry(event.target.value as CountryFilter)}
                 className="h-10 rounded-md border bg-background px-3 text-sm"
               >
-                <option value="all">🌍 All countries ({ACADEMICS.length})</option>
+                <option value="all">All countries ({ACADEMICS.length})</option>
                 {COUNTRIES_WITH_DATA.map((entry) => (
                   <option key={entry.code} value={entry.code}>
-                    {entry.flag} {entry.name} (
+                    {entry.name} (
                     {ACADEMICS.filter((person) => person.country === entry.code).length})
                   </option>
                 ))}
@@ -301,13 +293,9 @@ export function SupervisorExplorer({
             ) : (
               groups.map((group) => (
                 <div key={group.country.code} className="mt-8 first:mt-6">
-                  <h3 className="flex items-center gap-2 text-sm font-semibold">
-                    <span aria-hidden="true" className="text-base leading-none">
-                      {group.country.flag}
-                    </span>
+                  <h3 className="flex items-center gap-3 text-sm font-semibold">
                     {group.country.name}
                     <span className="h-px flex-1 bg-border" aria-hidden="true" />
-                    <LandmarkBadge code={group.country.code} />
                     <span className="font-mono text-xs text-muted-foreground">
                       {group.universities.reduce((total, entry) => total + entry.people.length, 0)}
                     </span>
@@ -355,6 +343,21 @@ export function SupervisorExplorer({
               >
                 Show more ({people.length - shown} left)
               </button>
+            )}
+
+            {selectedCountry && (
+              <p className="mt-8 border-t pt-4 text-xs text-muted-foreground">
+                Background photograph:{' '}
+                <a
+                  href={COUNTRY_PHOTOS[selectedCountry.code].source}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:no-underline"
+                >
+                  {COUNTRY_PHOTOS[selectedCountry.code].credit}
+                </a>{' '}
+                / Wikimedia Commons, {COUNTRY_PHOTOS[selectedCountry.code].license}.
+              </p>
             )}
           </div>
 
