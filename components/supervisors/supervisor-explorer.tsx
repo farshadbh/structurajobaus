@@ -38,9 +38,7 @@ interface EmailedEntry {
 }
 
 type EmailedMap = Record<string, EmailedEntry>
-/** 'all', a country code, or `country:<Name>` for a listed country with no supervisors yet. */
-type CountryFilter = string
-const COUNTRY_NAME_PREFIX = 'country:'
+type CountryFilter = 'all' | CountryCode
 type FieldFilter = 'all' | AcademicField
 type DisciplineFilter = 'all' | Discipline
 
@@ -161,13 +159,10 @@ export function SupervisorExplorer({
   pageSize = 24,
   id = 'supervisors',
   showDirectoryLink = true,
-  universityCountries = [],
 }: {
   pageSize?: number
   id?: string
   showDirectoryLink?: boolean
-  /** Countries on the universities page, so the filter reaches them before staff are transcribed. */
-  universityCountries?: { country: string; universities: number }[]
 }) {
   const [country, setCountry] = useState<CountryFilter>('all')
   const [university, setUniversity] = useState('all')
@@ -245,10 +240,7 @@ export function SupervisorExplorer({
   }
 
   const universities = useMemo(
-    () =>
-      country.startsWith(COUNTRY_NAME_PREFIX)
-        ? []
-        : universitiesFor(country === 'all' ? undefined : (country as CountryCode)),
+    () => universitiesFor(country === 'all' ? undefined : country),
     [country],
   )
 
@@ -262,9 +254,7 @@ export function SupervisorExplorer({
     () =>
       ACADEMICS.filter(
         (person) =>
-          (country.startsWith(COUNTRY_NAME_PREFIX)
-            ? person.countryName === country.slice(COUNTRY_NAME_PREFIX.length)
-            : country === 'all' || person.country === country) &&
+          (country === 'all' || person.country === country) &&
           (university === 'all' || person.university === university) &&
           (discipline === 'all' || disciplineOf(person.field) === discipline) &&
           (field === 'all' || person.field === field),
@@ -287,20 +277,9 @@ export function SupervisorExplorer({
 
   const active =
     country !== 'all' || university !== 'all' || discipline !== 'all' || field !== 'all'
-  // A listed country with no transcribed staff is selected by name, not by code.
-  const selectedCountryName = country.startsWith(COUNTRY_NAME_PREFIX)
-    ? country.slice(COUNTRY_NAME_PREFIX.length)
-    : null
-  const selectedCountry =
-    country === 'all' || selectedCountryName
-      ? null
-      : COUNTRY_BY_CODE.get(country as CountryCode)
+  const selectedCountry = country === 'all' ? null : COUNTRY_BY_CODE.get(country)
   // The site is Australian, so "all countries" still carries a home-country backdrop.
   const backdrop = COUNTRY_PHOTOS[selectedCountry?.code ?? 'AU']
-  const listedCountries = useMemo(() => {
-    const covered = new Set(COUNTRIES_WITH_DATA.map((entry) => entry.name))
-    return universityCountries.filter((entry) => !covered.has(entry.country))
-  }, [universityCountries])
 
   function updateCountry(next: CountryFilter) {
     setCountry(next)
@@ -316,7 +295,7 @@ export function SupervisorExplorer({
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-2xl">
             <p className="font-mono text-xs font-medium tracking-wider text-accent uppercase">
-              {selectedCountry?.name ?? selectedCountryName ?? 'Supervisors'}
+              {selectedCountry ? selectedCountry.name : 'Supervisors'}
             </p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
               Find your supervisor
@@ -355,12 +334,8 @@ export function SupervisorExplorer({
                 <option value="all">All countries ({ACADEMICS.length})</option>
                 {COUNTRIES_WITH_DATA.map((entry) => (
                   <option key={entry.code} value={entry.code}>
-                    {entry.name} ({ACADEMICS.filter((person) => person.country === entry.code).length})
-                  </option>
-                ))}
-                {listedCountries.map((entry) => (
-                  <option key={entry.country} value={`${COUNTRY_NAME_PREFIX}${entry.country}`}>
-                    {entry.country} ({entry.universities})
+                    {entry.name} (
+                    {ACADEMICS.filter((person) => person.country === entry.code).length})
                   </option>
                 ))}
               </select>
@@ -467,12 +442,10 @@ export function SupervisorExplorer({
 
             {groups.length === 0 ? (
               <p className="mt-8 rounded-lg border bg-card p-6 text-sm text-muted-foreground">
-                {selectedCountryName
-                  ? `No supervisors in ${selectedCountryName} yet. The country list now covers every institution on the universities page, but a person only appears once that department's staff page has been transcribed — so it fills in one university at a time.`
-                  : discipline !== 'all' &&
-                      !ACADEMICS.some((person) => disciplineOf(person.field) === discipline)
-                    ? `No supervisors in ${disciplineName(discipline).toLowerCase()} yet. The filter covers the whole engineering faculty, but people are only added from staff pages that publish an address — so this section fills up a university at a time.`
-                    : 'Nobody matches those filters yet. Try a wider country, field of study or specialisation.'}
+                {discipline !== 'all' &&
+                !ACADEMICS.some((person) => disciplineOf(person.field) === discipline)
+                  ? `No supervisors in ${disciplineName(discipline).toLowerCase()} yet. The filter covers the whole engineering faculty, but people are only added from staff pages that publish an address — so this section fills up a university at a time.`
+                  : 'Nobody matches those filters yet. Try a wider country, field of study or specialisation.'}
               </p>
             ) : (
               groups.map((group) => (
