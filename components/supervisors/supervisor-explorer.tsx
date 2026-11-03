@@ -9,13 +9,18 @@ import { COUNTRY_PHOTOS } from '@/data/country-photos'
 import {
   ACADEMICS,
   COUNTRIES,
+  DISCIPLINES,
   FIELDS,
   countriesWithData,
+  disciplineName,
+  disciplineOf,
   groupByCountryAndUniversity,
+  subfieldsFor,
   universitiesFor,
   type Academic,
   type AcademicField,
   type CountryCode,
+  type Discipline,
 } from '@/lib/academics'
 import type { CandidateProfile } from '@/lib/cv'
 import { followUpMailtoHref, mailtoHref } from '@/lib/supervisor-email'
@@ -35,6 +40,7 @@ interface EmailedEntry {
 type EmailedMap = Record<string, EmailedEntry>
 type CountryFilter = 'all' | CountryCode
 type FieldFilter = 'all' | AcademicField
+type DisciplineFilter = 'all' | Discipline
 
 const COUNTRIES_WITH_DATA = countriesWithData()
 const COUNTRY_BY_CODE = new Map(COUNTRIES.map((country) => [country.code, country]))
@@ -160,6 +166,7 @@ export function SupervisorExplorer({
 }) {
   const [country, setCountry] = useState<CountryFilter>('all')
   const [university, setUniversity] = useState('all')
+  const [discipline, setDiscipline] = useState<DisciplineFilter>('all')
   const [field, setField] = useState<FieldFilter>('all')
   const [shown, setShown] = useState(pageSize)
   const [emailed, setEmailed] = useState<EmailedMap>({})
@@ -237,15 +244,22 @@ export function SupervisorExplorer({
     [country],
   )
 
+  // The second dropdown only offers what the first one allows.
+  const subfields = useMemo(
+    () => subfieldsFor(discipline === 'all' ? undefined : discipline),
+    [discipline],
+  )
+
   const people = useMemo(
     () =>
       ACADEMICS.filter(
         (person) =>
           (country === 'all' || person.country === country) &&
           (university === 'all' || person.university === university) &&
+          (discipline === 'all' || disciplineOf(person.field) === discipline) &&
           (field === 'all' || person.field === field),
       ),
-    [country, university, field],
+    [country, university, discipline, field],
   )
 
   const groups = useMemo(
@@ -261,7 +275,8 @@ export function SupervisorExplorer({
     [emailed],
   )
 
-  const active = country !== 'all' || university !== 'all' || field !== 'all'
+  const active =
+    country !== 'all' || university !== 'all' || discipline !== 'all' || field !== 'all'
   const selectedCountry = country === 'all' ? null : COUNTRY_BY_CODE.get(country)
   // The site is Australian, so "all countries" still carries a home-country backdrop.
   const backdrop = COUNTRY_PHOTOS[selectedCountry?.code ?? 'AU']
@@ -306,7 +321,7 @@ export function SupervisorExplorer({
         </div>
 
         <div className="mt-8 rounded-xl border bg-card p-3 sm:p-4">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]">
             <label className="flex flex-col gap-1.5">
               <span className="font-mono text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
                 Country
@@ -352,6 +367,28 @@ export function SupervisorExplorer({
                 Field of study
               </span>
               <select
+                value={discipline}
+                onChange={(event) => {
+                  setDiscipline(event.target.value as DisciplineFilter)
+                  setField('all')
+                  setShown(pageSize)
+                }}
+                className="h-10 rounded-md border bg-background px-3 text-sm"
+              >
+                <option value="all">All fields</option>
+                {DISCIPLINES.map((entry) => (
+                  <option key={entry.slug} value={entry.slug}>
+                    {entry.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="flex flex-col gap-1.5">
+              <span className="font-mono text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+                PhD specialisation
+              </span>
+              <select
                 value={field}
                 onChange={(event) => {
                   setField(event.target.value as FieldFilter)
@@ -359,8 +396,8 @@ export function SupervisorExplorer({
                 }}
                 className="h-10 rounded-md border bg-background px-3 text-sm"
               >
-                <option value="all">All fields</option>
-                {FIELDS.map((entry) => (
+                <option value="all">All specialisations</option>
+                {subfields.map((entry) => (
                   <option key={entry.slug} value={entry.slug}>
                     {entry.name}
                   </option>
@@ -372,7 +409,11 @@ export function SupervisorExplorer({
               {active && (
                 <button
                   type="button"
-                  onClick={() => updateCountry('all')}
+                  onClick={() => {
+                    updateCountry('all')
+                    setDiscipline('all')
+                    setField('all')
+                  }}
                   className="h-10 rounded-md border px-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Reset
@@ -395,12 +436,16 @@ export function SupervisorExplorer({
             <p className="text-sm text-muted-foreground">
               {people.length} {people.length === 1 ? 'supervisor' : 'supervisors'}
               {field !== 'all' && ` in ${FIELDS.find((entry) => entry.slug === field)?.name.toLowerCase()}`}
+              {field === 'all' && discipline !== 'all' && ` in ${disciplineName(discipline).toLowerCase()}`}
               {university !== 'all' && ` at ${university}`}
             </p>
 
             {groups.length === 0 ? (
               <p className="mt-8 rounded-lg border bg-card p-6 text-sm text-muted-foreground">
-                Nobody matches those three filters yet. Try a wider country or field.
+                {discipline !== 'all' &&
+                !ACADEMICS.some((person) => disciplineOf(person.field) === discipline)
+                  ? `No supervisors in ${disciplineName(discipline).toLowerCase()} yet. The filter covers the whole engineering faculty, but people are only added from staff pages that publish an address — so this section fills up a university at a time.`
+                  : 'Nobody matches those filters yet. Try a wider country, field of study or specialisation.'}
               </p>
             ) : (
               groups.map((group) => (
