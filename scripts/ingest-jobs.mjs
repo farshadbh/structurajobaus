@@ -10,8 +10,10 @@
  *   Jooble     JOOBLE_API_KEY               free key, 500 lifetime requests per key
  *              https://au.jooble.org/api/about   (AU keys only exist on the AU domain)
  *   Adzuna     ADZUNA_APP_ID + ADZUNA_APP_KEY   trial/paid — https://developer.adzuna.com
- *   Workday    no key needed                employer career sites, read directly
- *              Aurecon, SMEC, Fulton Hogan, UQ — see scripts/sources/workday.mjs
+ *
+ * Employer career sites (Workday, PageUp) need no key at all and are read
+ * directly, so their ads carry the employer's own name and an apply link that
+ * the employer maintains.
  *
  * Run with `pnpm ingest`, or automatically at 06:00 Australia/Sydney via
  * .github/workflows/refresh-jobs.yml.
@@ -20,18 +22,17 @@
  *   - Careerjet publisher keys have no published call cap; we use 6 keywords
  *     x 2 pages = 12 calls per run.
  *   - Jooble's free plan is 500 requests for the *lifetime* of the key, so it
- *     gets 3 industry keywords x 2 pages plus 7 academic keywords x 1 page =
- *     13 calls per run (~38 days of daily runs).
+ *     gets 3 industry keywords x 2 pages plus 6 academic keywords x 1 page =
+ *     12 calls per run (~41 days of daily runs).
  *   - Adzuna's approved account is still on the trial plan: 25 calls for the
  *     lifetime of the key (full access is £8/month). It therefore gets 4
  *     keywords x 1 page = 4 calls per run, covering industry *and* academic.
- *   - Workday boards are unmetered, but the run only asks for the seven terms
- *     the board advertises and reads at most 60 full ads per employer.
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fetchWorkdayJobs } from './sources/workday.mjs'
+import { fetchPageUpJobs } from './sources/pageup.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DATA_FILE = path.join(ROOT, 'data', 'jobs.json')
@@ -71,8 +72,7 @@ const JOOBLE_INDUSTRY_QUERIES = [...QUERIES.slice(0, 2), 'geotechnical engineer'
 //
 // One query per academic role family, so the section carries the whole ladder
 // from PhD scholarship through postdoc and lecturer to professor and head of
-// school instead of only the two or three roles a single query happens to
-// return.
+// school instead of only the two or three roles one query happens to return.
 const ACADEMIC_QUERIES = [
   'phd scholarship structural engineering',
   'postdoctoral research fellow civil engineering',
@@ -264,8 +264,8 @@ const CIVIL_DISCIPLINE =
 const STRONG_CIVIL =
   /\b(structural|structures?|civil|bridge|geotechnical|seismic|earthquake)\b/i
 // Ad bodies are matched on the discipline *phrase*, not the bare words: a
-// violence-prevention PhD talks about "civil society" and social "structures",
-// and a single-keyword test filed it under structural engineering.
+// violence-prevention PhD talks about "structural violence" and a careless
+// keyword test would file it under structural engineering.
 const CIVIL_PHRASE =
   /\b(civil|structural|bridge|geotechnical|construction|infrastructure|earthquake|environmental|materials|steel|concrete)[ -]engineering\b/i
 // Sibling disciplines a university advertises next to civil engineering. Their
@@ -279,15 +279,15 @@ const VISA_PATTERN = /\b(visa sponsorship|sponsorship|sponsor(?:s|ed|ing)?|spons
 /**
  * A job belongs on the board when its title names civil/structural work, or —
  * for an academic employer, whose titles are "Lecturer in Engineering" or
- * "Head of School" — when the discipline phrase appears in the ad body instead.
+ * "Head of School" — when the discipline appears in the ad body instead.
  * Sibling disciplines (mechanical, robotics, chemical…) must stay out.
  */
 function isRelevantTitle(title, company, text) {
   if (NOISE_TITLE.test(title)) return false
   // "Civil and Mechanical Engineering" stays…
   if (STRONG_CIVIL.test(title)) return true
-  // …but "School of Electrical, Mechanical and Infrastructure Engineering"
-  // does not: the sibling discipline outranks a shared school name.
+  // …but "School of Electrical, Mechanical and Infrastructure Engineering" does
+  // not: the sibling discipline outranks a shared school name.
   if (OTHER_DISCIPLINE.test(title)) return false
   if (CIVIL_DISCIPLINE.test(title)) return true
   if (!ACADEMIC_EMPLOYERS.test(company)) return false
@@ -305,17 +305,31 @@ function classifySector(title, company) {
   return ACADEMIC_EMPLOYERS.test(company) || ACADEMIC_TITLES.test(title) ? 'academic' : 'industry'
 }
 
+/** Providers give a free-text location, so infer city + state from that text. */
 /**
  * Campus and suburb names that belong to a listed city. Without this, a UQ ad
  * at "St Lucia Campus" matches no city and falls back to the default state,
  * which would put a Brisbane vacancy on the NSW page.
  */
 const CITY_ALIASES = {
+  // Campus names: employer boards publish the campus, not the city, so an ad
+  // at "Camperdown Campus" would otherwise land on the default state.
   'st lucia': 'brisbane',
+  'gardens point': 'brisbane',
+  'kelvin grove': 'brisbane',
   'sydney olympic park': 'sydney',
+  camperdown: 'sydney',
+  wallumattagal: 'sydney',
+  'macquarie park': 'sydney',
+  kensington: 'sydney',
   callaghan: 'newcastle',
   clayton: 'melbourne',
   parkville: 'melbourne',
+  caulfield: 'melbourne',
+  bundoora: 'melbourne',
+  acton: 'canberra',
+  'bedford park': 'adelaide',
+  'waurn ponds': 'geelong',
 }
 
 function classifyLocation(text) {
@@ -576,9 +590,9 @@ function fromAdzuna(raw) {
 
 /* --------------------------------------------------------------------- main */
 
-// Employer boards outrank aggregators: the same vacancy read directly carries
-// the real employer name and a link the employer controls.
-const PRIORITY = { workday: 0, careerjet: 1, jooble: 2, adzuna: 3 }
+// Employer-direct sources win every tie: their ad carries the real employer and
+// an apply link that stays live for as long as the vacancy does.
+const PRIORITY = { workday: 0, pageup: 1, careerjet: 2, jooble: 3, adzuna: 4 }
 
 /**
  * Text shown by an aggregator when the vacancy behind a listing has gone. A job
@@ -668,6 +682,10 @@ async function main() {
   const calls = { count: 0 }
   const used = []
   const merged = new Map()
+  // Read before any source so PageUp listings can keep the date they were first
+  // seen; PageUp publishes no posted date of its own.
+  const existing = await readExisting()
+  const seenBefore = new Map((existing.jobs ?? []).map((job) => [job.id, job]))
 
   const add = (jobs, source) => {
     used.push(source)
@@ -724,12 +742,34 @@ async function main() {
     } catch (error) {
       console.warn(`[ingest] Adzuna failed: ${error instanceof Error ? error.message : error}`)
     }
+  } else if (ADZUNA_APP_ID || ADZUNA_APP_KEY) {
+    // Adzuna needs the pair; one secret on its own is a half-finished setup, so
+    // say which is missing instead of skipping the source without explanation.
+    console.warn(
+      `[ingest] Adzuna skipped: ${ADZUNA_APP_ID ? 'ADZUNA_APP_KEY' : 'ADZUNA_APP_ID'} is not set (both are required).`,
+    )
   }
 
   // Employer career sites are read directly, so these ads need no aggregator:
   // they carry the employer's own name and a link that stays under their control.
   const employerJobs = (await fetchWorkdayJobs()).map(buildJob).filter(Boolean)
   if (employerJobs.length > 0) add(employerJobs, 'workday')
+
+  // Universities that run on PageUp publish no JSON feed, so their listing
+  // pages are read instead. They carry no posted date, hence the first-seen
+  // fallback: an ad keeps the date it first appeared on the board and still
+  // expires on the same 30-day window as every other listing.
+  const firstSeen = sydneyToday()
+  const pageUpJobs = (await fetchPageUpJobs())
+    .map((raw) =>
+      buildJob({
+        ...raw,
+        postedAt:
+          raw.postedAt ?? seenBefore.get(`pageup-${raw.externalId}`)?.postedAt ?? firstSeen,
+      }),
+    )
+    .filter(Boolean)
+  if (pageUpJobs.length > 0) add(pageUpJobs, 'pageup')
 
   if (used.length === 0) {
     console.warn('[ingest] No source produced listings — keeping the previous snapshot.')
@@ -746,12 +786,12 @@ async function main() {
     .filter((job) => job.closingDate >= today)
     .sort(byNewest)
 
-  // Employer-direct links are checked by their own board, so only the
-  // aggregator links need a liveness test before publication.
-  const checked = await dropDeadLinks(fresh.filter((job) => job.source !== 'workday'))
-  const jobs = [...checked, ...fresh.filter((job) => job.source === 'workday')].sort(byNewest)
-
-  const existing = await readExisting()
+  // Employer-direct links point at the employer's own board, which already
+  // removes a vacancy when it closes, so only aggregator links need a liveness
+  // test before publication.
+  const directFromEmployer = (job) => job.source === 'workday' || job.source === 'pageup'
+  const checked = await dropDeadLinks(fresh.filter((job) => !directFromEmployer(job)))
+  const jobs = [...checked, ...fresh.filter(directFromEmployer)].sort(byNewest)
 
   if (jobs.length === 0) {
     console.warn('[ingest] No matching structural engineering vacancies returned — keeping the previous snapshot.')
@@ -777,7 +817,7 @@ async function main() {
   )
 
   const academic = jobs.filter((job) => job.sector === 'academic').length
-  const fromBoards = jobs.filter((job) => job.source === 'workday').length
+  const fromBoards = jobs.filter((job) => directFromEmployer(job)).length
   console.log(
     `[ingest] Wrote ${jobs.length} listings (${academic} academic, ${jobs.length - academic} industry, ${fromBoards} direct from employer boards) from ${used.join(', ')} using ${calls.count} API calls.`,
   )
