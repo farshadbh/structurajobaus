@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { AcademicsTeaser } from '@/components/academics/academics-teaser'
 import { SectorPage } from '@/components/jobs/sector-page'
 import { isKnownRole, parseFilters } from '@/lib/jobs'
 import { getRole } from '@/lib/taxonomy'
@@ -33,5 +34,10 @@ export default async function AcademicPage({ searchParams }: { searchParams: Sea
   const filters = parseFilters(await searchParams)
   if (!isKnownRole(filters.role)) notFound()
 
-  return <SectorPage sector="academic" filters={filters} />
+  return (
+    <>
+      <SectorPage sector="academic" filters={filters} />
+      <AcademicsTeaser />
+    </>
+  )
 }
