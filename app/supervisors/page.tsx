@@ -28,7 +28,7 @@ export default function SupervisorsPage() {
       >
         <p className="mt-8 max-w-2xl text-sm text-white/70">
           {ALL_ACADEMIC_STATS.total} academics at {ALL_ACADEMIC_STATS.universities} universities in{' '}
-          {covered.length} countries. Compiled from public university pages and checked
+          {covered.length} countries. Compiled from public university pages and checked{' '}
           {ACADEMIC_VERIFIED_AT}; emails appear only where the university publishes one.
         </p>
       </PageHeader>
