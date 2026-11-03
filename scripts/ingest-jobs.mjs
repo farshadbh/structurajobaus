@@ -10,6 +10,8 @@
  *   Jooble     JOOBLE_API_KEY               free key, 500 lifetime requests per key
  *              https://au.jooble.org/api/about   (AU keys only exist on the AU domain)
  *   Adzuna     ADZUNA_APP_ID + ADZUNA_APP_KEY   trial/paid — https://developer.adzuna.com
+ *   Workday    no key needed                employer career sites, read directly
+ *              Aurecon, SMEC, Fulton Hogan, UQ — see scripts/sources/workday.mjs
  *
  * Run with `pnpm ingest`, or automatically at 06:00 Australia/Sydney via
  * .github/workflows/refresh-jobs.yml.
@@ -23,10 +25,13 @@
  *   - Adzuna's approved account is still on the trial plan: 25 calls for the
  *     lifetime of the key (full access is £8/month). It therefore gets 4
  *     keywords x 1 page = 4 calls per run, covering industry *and* academic.
+ *   - Workday boards are unmetered, but the run only asks for the seven terms
+ *     the board advertises and reads at most 60 full ads per employer.
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { fetchWorkdayJobs } from './sources/workday.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DATA_FILE = path.join(ROOT, 'data', 'jobs.json')
@@ -300,10 +305,28 @@ function classifySector(title, company) {
   return ACADEMIC_EMPLOYERS.test(company) || ACADEMIC_TITLES.test(title) ? 'academic' : 'industry'
 }
 
-/** Providers give a free-text location, so infer city + state from that text. */
+/**
+ * Campus and suburb names that belong to a listed city. Without this, a UQ ad
+ * at "St Lucia Campus" matches no city and falls back to the default state,
+ * which would put a Brisbane vacancy on the NSW page.
+ */
+const CITY_ALIASES = {
+  'st lucia': 'brisbane',
+  'sydney olympic park': 'sydney',
+  callaghan: 'newcastle',
+  clayton: 'melbourne',
+  parkville: 'melbourne',
+}
+
 function classifyLocation(text) {
   const source = String(text ?? '').replace(/\s+/g, ' ').trim()
   const lower = source.toLowerCase()
+  // Aliases only widen the city match; the displayed location keeps the ad's own text.
+  const haystack = Object.entries(CITY_ALIASES).reduce(
+    (value, [alias, city]) =>
+      new RegExp(`\\b${alias}\\b`, 'i').test(value) ? `${value} ${city}` : value,
+    source,
+  )
 
   let state = null
   for (const [name, code] of Object.entries(STATE_NAMES)) {
@@ -319,7 +342,7 @@ function classifyLocation(text) {
 
   for (const [slug, code] of Object.entries(CITY_STATE)) {
     const label = slug.replace(/-/g, ' ')
-    if (new RegExp(`\\b${label}\\b`, 'i').test(source)) {
+    if (new RegExp(`\\b${label}\\b`, 'i').test(haystack)) {
       citySlug = slug
       cityName = label.replace(/\b\w/g, (char) => char.toUpperCase())
       state = state ?? code
@@ -553,7 +576,61 @@ function fromAdzuna(raw) {
 
 /* --------------------------------------------------------------------- main */
 
-const PRIORITY = { careerjet: 0, jooble: 1, adzuna: 2 }
+// Employer boards outrank aggregators: the same vacancy read directly carries
+// the real employer name and a link the employer controls.
+const PRIORITY = { workday: 0, careerjet: 1, jooble: 2, adzuna: 3 }
+
+/**
+ * Text shown by an aggregator when the vacancy behind a listing has gone. A job
+ * like this sends the visitor to a dead end, so it is dropped instead.
+ */
+const DEAD_LINK_MARKERS =
+  /no longer (?:available|accepting|advertised|open)|has been filled|position (?:has been |is )?(?:closed|filled)|job (?:has )?expired|this (?:job|vacancy|advert) is no longer/i
+
+const LINK_CHECK_UA =
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
+
+/**
+ * True only when the link is provably dead: a gone status, or the aggregator's
+ * own "no longer available" notice. A 403, a timeout or a 5xx is treated as
+ * unknown and the listing is kept — a blocked bot is not evidence that a real
+ * vacancy has closed.
+ */
+async function isDeadApplyLink(url) {
+  if (!url) return false
+  try {
+    const response = await fetch(url, {
+      redirect: 'follow',
+      headers: { 'User-Agent': LINK_CHECK_UA, Accept: 'text/html,*/*' },
+      signal: AbortSignal.timeout(10000),
+    })
+    if (response.status === 404 || response.status === 410) return true
+    if (!response.ok) return false
+    const text = (await response.text()).slice(0, 20000)
+    return DEAD_LINK_MARKERS.test(text)
+  } catch {
+    return false
+  }
+}
+
+/** Checks third-party links concurrently and returns the still-live listings. */
+async function dropDeadLinks(jobs, concurrency = 8) {
+  const queue = [...jobs]
+  const dead = new Set()
+
+  async function worker() {
+    for (;;) {
+      const job = queue.shift()
+      if (!job) return
+      if (await isDeadApplyLink(job.applyUrl)) dead.add(job.id)
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, jobs.length) }, worker))
+  const kept = jobs.filter((job) => !dead.has(job.id))
+  console.log(`[ingest] Link check: ${dead.size} expired of ${jobs.length}, ${kept.length} kept.`)
+  return kept
+}
 
 function dedupeKey(job) {
   return `${slugify(job.title)}|${slugify(job.organisation)}|${job.city}`
@@ -649,6 +726,11 @@ async function main() {
     }
   }
 
+  // Employer career sites are read directly, so these ads need no aggregator:
+  // they carry the employer's own name and a link that stays under their control.
+  const employerJobs = (await fetchWorkdayJobs()).map(buildJob).filter(Boolean)
+  if (employerJobs.length > 0) add(employerJobs, 'workday')
+
   if (used.length === 0) {
     console.warn('[ingest] No source produced listings — keeping the previous snapshot.')
     console.warn('[ingest] Missing credentials are skipped; failures are reported above.')
@@ -660,9 +742,14 @@ async function main() {
   // structural ad off the board.
   const byNewest = (a, b) => b.postedAt.localeCompare(a.postedAt)
   const today = sydneyToday()
-  const jobs = [...merged.values()]
+  const fresh = [...merged.values()]
     .filter((job) => job.closingDate >= today)
     .sort(byNewest)
+
+  // Employer-direct links are checked by their own board, so only the
+  // aggregator links need a liveness test before publication.
+  const checked = await dropDeadLinks(fresh.filter((job) => job.source !== 'workday'))
+  const jobs = [...checked, ...fresh.filter((job) => job.source === 'workday')].sort(byNewest)
 
   const existing = await readExisting()
 
@@ -690,8 +777,9 @@ async function main() {
   )
 
   const academic = jobs.filter((job) => job.sector === 'academic').length
+  const fromBoards = jobs.filter((job) => job.source === 'workday').length
   console.log(
-    `[ingest] Wrote ${jobs.length} listings (${academic} academic, ${jobs.length - academic} industry) from ${used.join(', ')} using ${calls.count} API calls.`,
+    `[ingest] Wrote ${jobs.length} listings (${academic} academic, ${jobs.length - academic} industry, ${fromBoards} direct from employer boards) from ${used.join(', ')} using ${calls.count} API calls.`,
   )
 }
 
