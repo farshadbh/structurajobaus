@@ -3,7 +3,7 @@
 import { Check, ExternalLink, Mail, X } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { CountryLandmark } from '@/components/academics/country-landmark'
+import { CountryLandmark, LandmarkBadge } from '@/components/academics/country-landmark'
 import {
   ACADEMICS,
   COUNTRIES,
@@ -177,8 +177,17 @@ export function SupervisorExplorer({
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-2xl">
-            <p className="font-mono text-xs font-medium tracking-wider text-accent uppercase">
-              Supervisors
+            <p className="flex items-center gap-2 font-mono text-xs font-medium tracking-wider text-accent uppercase">
+              {selectedCountry ? (
+                <>
+                  <span aria-hidden="true" className="text-base leading-none">
+                    {selectedCountry.flag}
+                  </span>
+                  {selectedCountry.name}
+                </>
+              ) : (
+                'Supervisors'
+              )}
             </p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
               Find your supervisor
@@ -211,10 +220,10 @@ export function SupervisorExplorer({
                 onChange={(event) => updateCountry(event.target.value as CountryFilter)}
                 className="h-10 rounded-md border bg-background px-3 text-sm"
               >
-                <option value="all">All countries ({ACADEMICS.length})</option>
+                <option value="all">🌍 All countries ({ACADEMICS.length})</option>
                 {COUNTRIES_WITH_DATA.map((entry) => (
                   <option key={entry.code} value={entry.code}>
-                    {entry.name} (
+                    {entry.flag} {entry.name} (
                     {ACADEMICS.filter((person) => person.country === entry.code).length})
                   </option>
                 ))}
@@ -292,9 +301,13 @@ export function SupervisorExplorer({
             ) : (
               groups.map((group) => (
                 <div key={group.country.code} className="mt-8 first:mt-6">
-                  <h3 className="flex items-center gap-3 text-sm font-semibold">
+                  <h3 className="flex items-center gap-2 text-sm font-semibold">
+                    <span aria-hidden="true" className="text-base leading-none">
+                      {group.country.flag}
+                    </span>
                     {group.country.name}
                     <span className="h-px flex-1 bg-border" aria-hidden="true" />
+                    <LandmarkBadge code={group.country.code} />
                     <span className="font-mono text-xs text-muted-foreground">
                       {group.universities.reduce((total, entry) => total + entry.people.length, 0)}
                     </span>

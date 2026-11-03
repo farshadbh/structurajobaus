@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { CountryCode } from '@/lib/academics'
+import { cn } from '@/lib/utils'
 
 /*
  * One recognisable silhouette per country, drawn as inline SVG so it costs no
@@ -103,17 +104,36 @@ const ART: Record<CountryCode, ReactNode> = {
   ),
 }
 
+/**
+ * The large watermark behind the section. It sits in the header band at the top
+ * right, where no card covers it, because a silhouette behind opaque cards is a
+ * silhouette nobody sees.
+ */
 export function CountryLandmark({ code }: { code: CountryCode }) {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden text-primary">
       <svg
         viewBox="0 0 560 360"
         preserveAspectRatio="xMaxYMax meet"
-        className="absolute right-0 bottom-0 h-[85%] w-auto opacity-[0.07]"
+        className="absolute top-0 right-0 h-[260px] w-auto opacity-[0.16] sm:h-[320px]"
         fill="currentColor"
       >
         {ART[code]}
       </svg>
     </div>
+  )
+}
+
+/** The same silhouette at heading size, so every country section carries its symbol. */
+export function LandmarkBadge({ code, className }: { code: CountryCode; className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 560 360"
+      aria-hidden="true"
+      className={cn('h-5 w-8 shrink-0 text-accent/70', className)}
+      fill="currentColor"
+    >
+      {ART[code]}
+    </svg>
   )
 }
