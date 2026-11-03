@@ -7,7 +7,7 @@
  * Every host below was requested and its page title checked before this file was
  * committed: label matching alone pointed at branch campuses and shared names
  * (University of Chicago to a China office, Western University to a Thai
- * college), and those were corrected or dropped.
+ * college, La Trobe to a football club), and those were corrected or dropped.
  */
 
 export const QS_DOMAINS_RAW = `
@@ -132,4 +132,162 @@ University of Bern|unibe.ch
 University of Wollongong|uow.edu.au
 University of Otago|otago.ac.nz
 Complutense University of Madrid|ucm.es
+Al-Farabi Kazakh National University|farabi.university
+The Ohio State University|osu.edu
+Waseda University|waseda.jp
+Loughborough University|lboro.ac.uk
+Indian Institute of Technology Kharagpur (IIT-KGP)|iitkgp.ac.in
+Tel Aviv University|tau.ac.il
+Chulalongkorn University|chula.ac.th
+Hamad Bin Khalifa University (HBKU)|hbku.edu.qa
+Keio University|keio.ac.jp
+Massey University|massey.ac.nz
+Hong Kong Baptist University|hkbu.edu.hk
+University College Cork|ucc.ie
+Indian Institute of Technology Kanpur (IITK)|iitk.ac.in
+American University of Beirut (AUB)|aub.edu.lb
+Deakin University|deakin.edu.au
+University of Florida|ufl.edu
+University of Ottawa|uottawa.ca
+Griffith University|griffith.edu.au
+University of Strathclyde|strath.ac.uk
+University of Lausanne|unil.ch
+École Normale Supérieure de Lyon|ens-lyon.fr
+Beijing Normal University|bnu.edu.cn
+University of Lisbon|ulisboa.pt
+Central European University|ceu.edu
+Queensland University of Technology (QUT)|qut.edu.au
+La Trobe University|latrobe.edu.au
+Victoria University of Wellington|victoria.ac.nz
+University of Calgary|ucalgary.ca
+Technical University of Darmstadt|tu-darmstadt.de
+University of California, Irvine|uci.edu
+University of Minnesota (System)|twin-cities.umn.edu
+University of Porto|up.pt
+American University of Sharjah|aus.edu
+Sun Yat-sen University|sysu.edu.cn
+University of Göttingen|uni-goettingen.de
+Vanderbilt University|vanderbilt.edu
+Singapore University of Technology and Design|sutd.edu.sg
+University of Virginia|virginia.edu
+University of Cologne|uni-koeln.de
+Dartmouth College|home.dartmouth.edu
+University of Milan|unimi.it
+Taylor's University|taylors.edu.my
+University of Sussex|sussex.ac.uk
+University of Galway|universityofgalway.ie
+Istanbul Technical University|itu.edu.tr
+University of Pittsburgh|pitt.edu
+UCSI University|ucsiuniversity.edu.my
+University of Sharjah|sharjah.ac.ae
+University of Southern Denmark (SDU)|sdu.dk
+University of Aberdeen|abdn.ac.uk
+Georgetown University|georgetown.edu
+Swinburne University of Technology|swinburne.edu.au
+University of Waikato|waikato.ac.nz
+Dalhousie University|dal.ca
+Ulsan National Institute of Science and Technology (UNIST)|unist.ac.kr
+University of Notre Dame|nd.edu
+Xiamen University|xmu.edu.cn
+Huazhong University of Science and Technology|hust.edu.cn
+Kyung Hee University|khu.ac.kr
+University of Tasmania|utas.edu.au
+Simon Fraser University|sfu.ca
+The University of Arizona|arizona.edu
+Rutgers University–New Brunswick|rutgers.edu
+Southern University of Science and Technology (SUSTech)|sustech.edu.cn
+Bauman Moscow State Technical University|bmstu.ru
+North Carolina State University|ncsu.edu
+University of Colorado Boulder|colorado.edu
+Swansea University|swansea.ac.uk
+York University|yorku.ca
+Case Western Reserve University|case.edu
+University of Jordan|ju.edu.jo
+Koç University|kocuniversity.cn
+Nankai University|nankai.edu.cn
+Indian Institute of Technology Roorkee (IITR)|iitr.ac.in
+Southeast University|seu.edu.cn
+University of Pisa|unipi.it
+South China University of Technology|scut.edu.cn
+University of Coimbra|uc.pt
+Boğaziçi University|bogazici.edu.tr
+Abu Dhabi University|adu.ac.ae
+Indian Institute of Technology Guwahati (IITG)|iitg.ac.in
+University of Tsukuba|tsukuba.ac.jp
+Birkbeck, University of London|bbk.ac.uk
+Sunway University|sunway.edu.my
+Indiana University Bloomington|bloomington.iu.edu
+University of Chinese Academy of Sciences (UCAS)|ucas.ac.cn
+University of Oulu|oulu.fi
+University of Tehran|ut.ac.ir
+University of Illinois Chicago (UIC)|uic.edu
+University of Münster|uni-muenster.de
+University of Victoria (UVic)|uvic.ca
+Western Sydney University|westernsydney.edu.au
+Flinders University|flinders.edu.au
+University of Luxembourg|uni.lu
+Gwangju Institute of Science and Technology (GIST)|gist.ac.kr
+National Taiwan University of Science and Technology (Taiwan Tech)|ntust.edu.tw
+George Washington University|gwu.edu
+Quaid-i-Azam University|qau.edu.pk
+University of East Anglia (UEA)|uea.ac.uk
+Daegu Gyeongbuk Institute of Science and Technology (DGIST)|dgist.ac.kr
+Saint Petersburg State University|spbu.ru
+Sharif University of Technology|sharif.ir
+The American University in Cairo|aucegypt.edu
+East China Normal University|ecnu.edu.cn
+Ajman University|ajman.ac.ae
+Macau University of Science and Technology|must.edu.mo
+Sejong University|sejong.ac.kr
+University of California, Riverside|ucr.edu
+University of Turku|utu.fi
+University of the Philippines|up.edu.ph
+INTI International University|newinti.edu.my
+The Education University of Hong Kong|eduhk.hk
+Dublin City University|dcu.ie
+Graz University of Technology|tugraz.at
+University of Saskatchewan|usask.ca
+University of Southern Queensland|usq.edu.au
+University of Kent|kent.ac.uk
+Aston University|aston.ac.uk
+IPB University (aka Bogor Agricultural University)|ipb.ac.id
+Lincoln University|lincoln.ac.nz
+Murdoch University|murdoch.edu.au
+National Taiwan Normal University (NTNU)|ntnu.edu.tw
+Northwestern Polytechnical University|nwpu.edu.cn
+University of Aveiro|ua.pt
+Tilburg University|tilburguniversity.edu
+Chung-Ang University (CAU)|cau.ac.kr
+Czech Technical University in Prague|cvut.cz
+Central Queensland University (CQUniversity Australia)|cqu.edu.au
+Tampere University|tuni.fi
+James Cook University|jcu.edu.au
+National Sun Yat-sen University (NSYSU)|nsysu.edu.tw
+Aix-Marseille University|univ-amu.fr
+Shanghai University|shu.edu.cn
+University of Science and Technology Beijing|ustb.edu.cn
+IE University|ie.edu
+University of Granada|ugr.es
+Central South University|csu.edu.cn
+Bilkent University|bilkent.edu.tr
+Masaryk University|muni.cz
+Johannes Kepler University Linz|jku.at
+University of Connecticut|uconn.edu
+Dalian University of Technology|dlut.edu.cn
+Vilnius University|vu.lt
+Leibniz University Hannover|uni-hannover.de
+University of Bayreuth|uni-bayreuth.de
+Imam Abdulrahman Bin Faisal University (IAU)|uqu.edu.sa
+Hunan University|hnu.edu.cn
+Lebanese American University|lau.edu.lb
+Amirkabir University of Technology|aut.ac.ir
+Jinan University (China)|english.jnu.edu.cn
+University of Bordeaux|u-bordeaux.fr
+Ewha Womans University|ewha.ac.kr
+Novosibirsk State University|nsu.ru
+Prince Sultan University|psu.edu.sa
+University of Electronic Science and Technology of China|uestc.edu.cn
+National Taipei University of Technology|ntut.edu.tw
+Sogang University|sogang.ac.kr
+Concordia University|concordia.ca
 `

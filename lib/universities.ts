@@ -4,7 +4,7 @@ import { QS_DOMAINS_RAW } from '@/data/qs-domains'
 import { UNIVERSITIES_RAW } from '@/data/universities'
 
 /*
- * The coverage list behind /universities: the QS 2027 top 200 followed by the
+ * The coverage list behind /universities: the QS 2027 top 500 followed by the
  * rest of the directory, grouped by country, so a student can see where
  * engineering PhDs exist before narrowing to a supervisor.
  *
@@ -87,9 +87,14 @@ const COUNTRY_ALIASES: Record<string, string> = {
   'Republic of Korea': 'South Korea',
   'Russian Federation': 'Russia',
   'Macau SAR, China': 'Macau',
+  'Macao SAR, China': 'Macau',
+  'Türkiye': 'Turkey',
+  'Czechia': 'Czech Republic',
+  'Iran (Islamic Republic of)': 'Iran',
+  'Brunei Darussalam': 'Brunei',
 }
 
-/** Ranks 1-200 of the QS 2027 table, in the published order. */
+/** Ranks 1-500 of the QS 2027 table, in the published order. */
 export const QS_2027: QsRank[] = QS_2027_RAW.split('\n')
   .filter((line) => line.trim())
   .map((line) => {
