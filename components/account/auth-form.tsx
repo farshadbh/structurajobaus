@@ -24,8 +24,11 @@ export function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
     setBusy(true)
     setErrors([])
 
+    // The routes are /api/auth/register and /api/auth/login — not the mode name.
+    const endpoint = isSignup ? '/api/auth/register' : '/api/auth/login'
+
     try {
-      const response = await fetch(`/api/auth/${mode}`, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: payload.email, password: payload.password }),
@@ -36,7 +39,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
         setErrors(
           Array.isArray(data.errors) && data.errors.length > 0
             ? data.errors
-            : [data.error ?? 'Something went wrong. Please try again.'],
+            : [data.error ?? `Something went wrong (error ${response.status}). Please try again.`],
         )
         setBusy(false)
         return
