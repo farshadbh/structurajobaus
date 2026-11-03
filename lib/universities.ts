@@ -178,6 +178,13 @@ export const UNIVERSITIES_BY_COUNTRY: CountryUniversities[] = [...UNIVERSITIES]
   }, [])
   .sort((a, b) => a.country.localeCompare(b.country))
 
+/** Every country on the coverage list, with how many institutions it holds. */
+export const UNIVERSITY_COUNTRIES: { country: string; universities: number }[] =
+  UNIVERSITIES_BY_COUNTRY.map((entry) => ({
+    country: entry.country,
+    universities: entry.universities.length,
+  }))
+
 export function universitySlug(value: string) {
   return value
     .toLowerCase()

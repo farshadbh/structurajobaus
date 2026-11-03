@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { SearchBar } from '@/components/home/search-bar'
-import { CITIES } from '@/lib/taxonomy'
 
 interface HeroProps {
   stats: { total: number; academic: number; industry: number; visa: number }
@@ -53,20 +52,17 @@ export function Hero({ stats }: HeroProps) {
 
         <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-white/80">
           <span>Popular:</span>
-          {CITIES.slice(0, 4).map((city) => (
-            <Link
-              key={city.slug}
-              href={`/cities/${city.slug}`}
-              className="rounded-full border border-white/20 px-3 py-1 transition-colors hover:border-accent hover:text-white"
-            >
-              {city.name}
-            </Link>
-          ))}
           <Link
             href="/academic?role=phd-scholarship"
             className="rounded-full border border-white/20 px-3 py-1 transition-colors hover:border-accent hover:text-white"
           >
             PhD Scholarships
+          </Link>
+          <Link
+            href="/universities"
+            className="rounded-full border border-white/20 px-3 py-1 transition-colors hover:border-accent hover:text-white"
+          >
+            Universities worldwide
           </Link>
           <Link
             href="/supervisors"
