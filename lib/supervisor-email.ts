@@ -1,9 +1,10 @@
+import type { CandidateProfile } from './cv'
 import { fieldName, type Academic } from './academics'
 
 /*
  * A first email to a potential supervisor, pre-filled but still worth reading
- * before sending. Every square bracket is a decision only the student can make,
- * so the template stays short and the student fills in the substance.
+ * before sending. With a CV loaded the facts about the student fill themselves
+ * in; the research idea stays as a prompt, because only the student knows it.
  */
 
 const SUFFIXES = new Set(['jr', 'jr.', 'sr', 'sr.', 'ii', 'iii', 'iv', 'phd', 'pe', 'p.e.'])
@@ -33,8 +34,34 @@ function focusClause(person: Academic) {
   return lower.replace(/\.$/, '')
 }
 
-export function buildSupervisorEmail(person: Academic): { subject: string; body: string } {
-  const subject = `PhD enquiry: ${fieldName(person.field)} supervision`
+/** The degree line: "BEng Civil (Hons), University of Sydney" when both halves are known. */
+function degreeLine(profile?: CandidateProfile) {
+  const parts = [profile?.degree, profile?.university].filter(Boolean)
+  return parts.length ? parts.join(', ') : '[e.g. BEng Civil (Hons), University of X, 2025]'
+}
+
+export function buildSupervisorEmail(
+  person: Academic,
+  profile?: CandidateProfile,
+): { subject: string; body: string } {
+  const who = profile?.name
+  const subject = `PhD enquiry: ${fieldName(person.field)} supervision${who ? ` — ${who}` : ''}`
+
+  const about = [
+    `- Degree and university: ${degreeLine(profile)}`,
+    profile?.graduationYear
+      ? `- Graduated: ${profile.graduationYear}`
+      : '- Results: [WAM/GPA or class rank]',
+    ...(profile?.highlights.length
+      ? profile.highlights.map((fact) => `- ${fact}`)
+      : ['- Experience: [final-year thesis topic, internship, software or lab work in one line]']),
+  ]
+
+  const signature = [
+    profile?.name ?? '[Your full name]',
+    [profile?.email, profile?.phone].filter(Boolean).join(' · ') || '[Email] · [Phone]',
+    '[LinkedIn or Google Scholar, if you have one]',
+  ]
 
   const body = [
     `Dear ${salutation(person)},`,
@@ -42,9 +69,7 @@ export function buildSupervisorEmail(person: Academic): { subject: string; body:
     `I am writing to ask whether you are taking on new PhD students in the next intake. I am applying for a PhD in ${fieldName(person.field).toLowerCase()} engineering, and your work on ${focusClause(person)} is the closest match to what I want to study.`,
     '',
     'About me',
-    '- Degree and university: [e.g. BEng Civil (Hons), University of X, 2025]',
-    '- Results: [WAM/GPA or class rank]',
-    '- Experience: [final-year thesis topic, internship, software or lab work in one line]',
+    ...about,
     '',
     'What I would like to work on',
     '[Two or three sentences on the problem you want to solve, why it fits this group, and what you could contribute in the first year.]',
@@ -56,17 +81,15 @@ export function buildSupervisorEmail(person: Academic): { subject: string; body:
     'Thank you for your time.',
     '',
     'Kind regards,',
-    '[Your full name]',
-    '[Email] · [Phone]',
-    '[LinkedIn or Google Scholar, if you have one]',
+    ...signature,
   ].join('\n')
 
   return { subject, body }
 }
 
 /** A mailto: link with the template already written into it, or null without a published address. */
-export function mailtoHref(person: Academic): string | null {
+export function mailtoHref(person: Academic, profile?: CandidateProfile): string | null {
   if (!person.email) return null
-  const { subject, body } = buildSupervisorEmail(person)
+  const { subject, body } = buildSupervisorEmail(person, profile)
   return `mailto:${person.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
 }
