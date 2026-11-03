@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { PageHeader } from '@/components/page-header'
 import {
+  QS_2027,
   UNIVERSITIES,
   UNIVERSITIES_BY_COUNTRY,
   UNIVERSITIES_WITH_SITE,
@@ -11,9 +12,9 @@ import {
 } from '@/lib/universities'
 
 export const metadata: Metadata = {
-  title: '500 universities worldwide',
+  title: 'Universities worldwide, QS 2027 ranked',
   description:
-    'Five hundred universities grouped by country, with the official site for each. Supervisor records, research areas and published emails are added a university at a time.',
+    'The QS World University Rankings 2027 top 200 alongside the wider directory, grouped by country, each with its official site. Supervisor records, research areas and published emails are added a university at a time.',
   alternates: { canonical: '/universities' },
 }
 
@@ -22,8 +23,8 @@ export default function UniversitiesPage() {
     <>
       <PageHeader
         eyebrow="Universities"
-        title="500 universities worldwide"
-        description="Institutions grouped by country, with the official site for each — and the way into the staff pages that matter."
+        title="Universities worldwide"
+        description="The QS 2027 top 200 and the wider directory, grouped by country, each with the official site that leads to the staff pages that matter."
         breadcrumbs={[
           { label: 'Academic jobs', href: '/academic' },
           { label: 'Supervisors', href: '/supervisors' },
@@ -31,9 +32,9 @@ export default function UniversitiesPage() {
         ]}
       >
         <p className="mt-8 max-w-2xl text-sm text-white/70">
-          {UNIVERSITIES.length} institutions in {UNIVERSITIES_BY_COUNTRY.length} countries ·{' '}
-          {UNIVERSITIES_WITH_SITE} with an official website · {UNIVERSITIES_WITH_STAFF} with
-          transcribed supervisors.
+          QS 2027 rank for the first {QS_2027.length} · {UNIVERSITIES.length} institutions in{' '}
+          {UNIVERSITIES_BY_COUNTRY.length} countries · {UNIVERSITIES_WITH_SITE} with an official
+          website · {UNIVERSITIES_WITH_STAFF} with transcribed supervisors.
         </p>
       </PageHeader>
 
@@ -58,12 +59,13 @@ export default function UniversitiesPage() {
         </div>
 
         <p className="mt-6 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-          Built from Wikidata: the institution, its country and its official website. The order is how
-          many Wikipedia language editions carry each university — a public proxy for prominence, not
-          a commercial ranking, and not QS (topuniversities.com blocks automated reads). Names,
-          research areas and emails are only ever added from a university&rsquo;s own staff pages, so
-          most rows show no supervisors yet; that is the honest state of the directory rather than a
-          missing feature. Ready to write to someone?{' '}
+          Every <span className="font-mono text-xs text-foreground">#</span> is the institution&rsquo;s
+          rank in the QS World University Rankings 2027, taken from the table QS publishes; ties share
+          a rank. Institutions below the top {QS_2027.length} carry no number and come from Wikidata,
+          ordered by how many Wikipedia language editions cover them. What a ranking can never supply
+          is a person: names, research areas and emails are only ever added from a university&rsquo;s
+          own staff pages, so most rows show no supervisors yet — the honest state of the directory
+          rather than a missing feature. Ready to write to someone?{' '}
           <Link href="/supervisors" className="text-primary hover:underline">
             Find a supervisor
           </Link>
@@ -94,7 +96,12 @@ export default function UniversitiesPage() {
                   key={`${university.rank}-${university.name}`}
                   className="flex items-baseline gap-2 rounded-md border bg-card px-3 py-2 text-sm"
                 >
-                  <span className="font-mono text-[11px] text-muted-foreground">{university.rank}</span>
+                  <span
+                    className="min-w-[2.5rem] shrink-0 font-mono text-[11px] text-muted-foreground"
+                    title={university.qsRank ? `QS World University Rankings 2027: ${university.qsRank}` : 'Not ranked in the QS 2027 top 200'}
+                  >
+                    {university.qsRank ? `#${university.qsRank}` : '·'}
+                  </span>
                   <a
                     href={universityLink(university)}
                     target="_blank"
@@ -120,6 +127,7 @@ export default function UniversitiesPage() {
         ))}
 
         <p className="mt-12 border-t pt-6 text-xs leading-relaxed text-muted-foreground">
+          Ranks follow the QS World University Rankings 2027, published by QS on TopUniversities.com.
           Institution names, countries and websites come from Wikidata and are reused under CC0. The
           green number beside a university is the count of people transcribed from that
           institution&rsquo;s own pages; a dash means none yet. If you spot a wrong country or a dead
