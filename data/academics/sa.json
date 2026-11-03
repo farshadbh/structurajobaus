@@ -1,0 +1,126 @@
+{
+  "state": "SA",
+  "verifiedAt": "2026-11-03",
+  "people": [
+    {
+      "id": "alex-ng",
+      "name": "Alex (Ching-Tai) Ng",
+      "title": "Professor; Academic Lead (Research)",
+      "university": "Adelaide University",
+      "universitySlug": "adelaide",
+      "field": "structural",
+      "researchFocus": "Structural health monitoring and non-destructive evaluation, using guided waves, vibration testing and system identification to detect damage in infrastructure.",
+      "email": null,
+      "profileUrl": "https://researchers.adelaide.edu.au/profile/alex.ng",
+      "sourceUrl": "https://researchers.adelaide.edu.au/profile/alex.ng"
+    },
+    {
+      "id": "mizanur-rahman",
+      "name": "Mizanur Rahman",
+      "title": "Professor of Geotechnical Engineering",
+      "university": "Adelaide University",
+      "universitySlug": "adelaide",
+      "field": "geotechnical",
+      "researchFocus": "Critical-state soil mechanics and static liquefaction of sands, biocementation ground improvement, and pavement and permeable-pavement design.",
+      "email": null,
+      "profileUrl": "https://researchers.adelaide.edu.au/profile/mizanur.rahman-0",
+      "sourceUrl": "https://researchers.adelaide.edu.au/profile/mizanur.rahman-0"
+    },
+    {
+      "id": "seth-westra",
+      "name": "Seth Westra",
+      "title": "Professor",
+      "university": "Adelaide University",
+      "universitySlug": "adelaide",
+      "field": "water",
+      "researchFocus": "Hydrology and climate risk: climate change impacts on floods and droughts, flood estimation for complex catchments, and rainfall-runoff model uncertainty.",
+      "email": null,
+      "profileUrl": "https://researchers.adelaide.edu.au/profile/seth.westra",
+      "sourceUrl": "https://researchers.adelaide.edu.au/profile/seth.westra"
+    },
+    {
+      "id": "martin-lambert",
+      "name": "Martin Lambert",
+      "title": "Professor of Water Engineering and Hydraulics",
+      "university": "Adelaide University",
+      "universitySlug": "adelaide",
+      "field": "water",
+      "researchFocus": "Fluid transients (water-hammer waves) for condition assessment of pipe networks, plus stochastic hydrology and flood frequency analysis.",
+      "email": null,
+      "profileUrl": "https://researchers.adelaide.edu.au/profile/martin.lambert",
+      "sourceUrl": "https://researchers.adelaide.edu.au/profile/martin.lambert"
+    },
+    {
+      "id": "holger-maier",
+      "name": "Holger Maier",
+      "title": "Professor",
+      "university": "Adelaide University",
+      "universitySlug": "adelaide",
+      "field": "water",
+      "researchFocus": "Decision support, AI and optimisation for sustainable water and environmental systems, climate risk assessment and natural-hazard risk reduction.",
+      "email": null,
+      "profileUrl": "https://researchers.adelaide.edu.au/profile/holger.maier",
+      "sourceUrl": "https://researchers.adelaide.edu.au/profile/holger.maier"
+    },
+    {
+      "id": "dmitri-kavetski",
+      "name": "Dmitri Kavetski",
+      "title": "Professor; Program Director",
+      "university": "Adelaide University",
+      "universitySlug": "adelaide",
+      "field": "water",
+      "researchFocus": "Bayesian inference and uncertainty analysis for hydrological and environmental models, including the BATEA framework and robust numerical algorithms.",
+      "email": null,
+      "profileUrl": "https://researchers.adelaide.edu.au/profile/dmitri.kavetski",
+      "sourceUrl": "https://researchers.adelaide.edu.au/profile/dmitri.kavetski"
+    },
+    {
+      "id": "phillip-visintin",
+      "name": "Phillip Visintin",
+      "title": "Professor; Program Director",
+      "university": "Adelaide University",
+      "universitySlug": "adelaide",
+      "field": "structural",
+      "researchFocus": "Mechanics-based design models for reinforced, prestressed and fibre-reinforced concrete, UHPC and geopolymer concrete, with a circular-economy materials focus.",
+      "email": null,
+      "profileUrl": "https://researchers.adelaide.edu.au/profile/phillip.visintin",
+      "sourceUrl": "https://researchers.adelaide.edu.au/profile/phillip.visintin"
+    },
+    {
+      "id": "scott-smith",
+      "name": "Scott Smith",
+      "title": "Professor of Structural Engineering; Dean International and Engagement",
+      "university": "Adelaide University",
+      "universitySlug": "adelaide",
+      "field": "structural",
+      "researchFocus": "FRP composites for strengthening and rehabilitating concrete infrastructure, and materials and structures for off-earth construction.",
+      "email": null,
+      "profileUrl": "https://researchers.adelaide.edu.au/profile/scott.smith",
+      "sourceUrl": "https://researchers.adelaide.edu.au/profile/scott.smith"
+    },
+    {
+      "id": "reza-hassanli",
+      "name": "Reza Hassanli",
+      "title": "Senior Lecturer",
+      "university": "Adelaide University",
+      "universitySlug": "adelaide",
+      "field": "structural",
+      "researchFocus": "Seismic behaviour and rehabilitation of concrete and composite structures, precast and prestressed systems, GFRP-reinforced concrete and green concrete.",
+      "email": null,
+      "profileUrl": "https://researchers.adelaide.edu.au/profile/reza.hassanli",
+      "sourceUrl": "https://researchers.adelaide.edu.au/profile/reza.hassanli"
+    },
+    {
+      "id": "rajibul-karim",
+      "name": "Rajibul Karim",
+      "title": "Senior Lecturer",
+      "university": "Adelaide University",
+      "universitySlug": "adelaide",
+      "field": "geotechnical",
+      "researchFocus": "Expansive and soft soils, soil-atmosphere boundary interaction, ground improvement and biocementation, and pavement and tailings behaviour.",
+      "email": null,
+      "profileUrl": "https://researchers.adelaide.edu.au/profile/rajibul.karim",
+      "sourceUrl": "https://researchers.adelaide.edu.au/profile/rajibul.karim"
+    }
+  ]
+}

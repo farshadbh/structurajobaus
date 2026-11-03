@@ -1,0 +1,90 @@
+{
+  "state": "WA",
+  "verifiedAt": "2026-11-03",
+  "people": [
+    {
+      "id": "hong-hao",
+      "name": "Hong Hao",
+      "title": "John Curtin Distinguished Professor",
+      "university": "Curtin University",
+      "universitySlug": "curtin",
+      "field": "structural",
+      "researchFocus": "Founding Director of the Centre for Infrastructural Monitoring and Protection: structural dynamics, blast and impact loading, and structural health monitoring.",
+      "email": null,
+      "profileUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/",
+      "sourceUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/"
+    },
+    {
+      "id": "mohamed-shahin",
+      "name": "Mohamed Shahin",
+      "title": "Professor | Geotechnical Engineering",
+      "university": "Curtin University",
+      "universitySlug": "curtin",
+      "field": "geotechnical",
+      "researchFocus": "AI and machine-learning applications in geotechnical engineering, pile and footing design, and reliability-based geotechnical analysis.",
+      "email": null,
+      "profileUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/",
+      "sourceUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/"
+    },
+    {
+      "id": "amin-chegenizadeh",
+      "name": "Amin Chegenizadeh",
+      "title": "Associate Professor | Geotechnical Engineering",
+      "university": "Curtin University",
+      "universitySlug": "curtin",
+      "field": "geotechnical",
+      "researchFocus": "Ground improvement, stabilised and fibre-reinforced soils, and geotechnical characterisation for transport and civil infrastructure.",
+      "email": null,
+      "profileUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/",
+      "sourceUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/"
+    },
+    {
+      "id": "ranjan-sarukkalige",
+      "name": "Ranjan Sarukkalige",
+      "title": "Associate Professor | Water Engineering; Deputy Head of School",
+      "university": "Curtin University",
+      "universitySlug": "curtin",
+      "field": "water",
+      "researchFocus": "Water resources and hydrology, including rainfall-runoff modelling, urban stormwater and climate-change impacts on water availability.",
+      "email": null,
+      "profileUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/",
+      "sourceUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/"
+    },
+    {
+      "id": "faisal-anwar",
+      "name": "Faisal Anwar",
+      "title": "Professor | Water Engineering",
+      "university": "Curtin University",
+      "universitySlug": "curtin",
+      "field": "water",
+      "researchFocus": "Environmental water engineering, urban stormwater quality and treatment, and sustainable drainage and low-impact development systems.",
+      "email": null,
+      "profileUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/",
+      "sourceUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/"
+    },
+    {
+      "id": "xihong-zhang",
+      "name": "Xihong Zhang",
+      "title": "Associate Professor | Structural Engineering; Director, Research",
+      "university": "Curtin University",
+      "universitySlug": "curtin",
+      "field": "structural",
+      "researchFocus": "Structural response to extreme loads including blast, impact and wind, and the development of resilient structural systems and protective materials.",
+      "email": null,
+      "profileUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/",
+      "sourceUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/"
+    },
+    {
+      "id": "prabir-sarker",
+      "name": "Prabir Sarker",
+      "title": "Professor | Structural Engineering",
+      "university": "Curtin University",
+      "universitySlug": "curtin",
+      "field": "structural",
+      "researchFocus": "Reinforced and prestressed concrete, geopolymer concrete and sustainable construction materials, and structural member behaviour.",
+      "email": null,
+      "profileUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/",
+      "sourceUrl": "https://www.curtin.edu.au/about/learning-teaching/science-engineering/school-of-civil-mechanical-engineering/our-people/"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "state": "QLD",
+  "verifiedAt": "2026-11-03",
+  "people": [
+    {
+      "id": "mark-hickman",
+      "name": "Mark Hickman",
+      "title": "Professor and Chair of Transport Engineering",
+      "university": "University of Queensland",
+      "universitySlug": "uq",
+      "field": "transport",
+      "researchFocus": "Leads the Transport and Population Research Network, working on public transit planning and operations, travel demand modelling, congestion pricing and sustainable transport policy.",
+      "email": "m.hickman1@uq.edu.au",
+      "profileUrl": "https://about.uq.edu.au/experts/2972",
+      "sourceUrl": "https://about.uq.edu.au/experts/2972"
+    }
+  ]
+}
