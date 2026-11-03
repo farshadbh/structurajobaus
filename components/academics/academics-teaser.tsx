@@ -6,7 +6,7 @@ import { ACADEMIC_STATS, FIELDS, groupByUniversity } from '@/lib/academics'
 function FieldChips() {
   return (
     <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-      {FIELDS.map((field) => (
+      {FIELDS.filter((field) => ACADEMIC_STATS.byField[field.slug] > 0).map((field) => (
         <li key={field.slug}>
           <Link
             href={`/academic/people?field=${field.slug}`}
@@ -49,10 +49,10 @@ export function AcademicsTeaser() {
           </div>
 
           <Link
-            href="/academic/people"
+            href="/supervisors"
             className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Browse the directory
+            Find your supervisor
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         </div>
@@ -90,10 +90,10 @@ export function AcademicsSection() {
             </div>
 
             <Link
-              href="/academic/people"
+              href="/supervisors"
               className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
             >
-              Open as its own page
+              Open the full directory
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </div>

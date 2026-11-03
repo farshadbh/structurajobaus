@@ -41,7 +41,7 @@ export default async function AcademicPeoplePage({ searchParams }: { searchParam
   const fieldParam = Array.isArray(raw) ? raw[0] : raw
   const field = isAcademicField(fieldParam) ? fieldParam : undefined
 
-  const people = getAcademics(field)
+  const people = getAcademics({ country: 'AU', field })
   const groups = groupByUniversity(people)
 
   return (
@@ -68,7 +68,7 @@ export default async function AcademicPeoplePage({ searchParams }: { searchParam
                 All fields ({ACADEMIC_STATS.total})
               </Link>
             </li>
-            {FIELDS.map((entry) => (
+            {FIELDS.filter((entry) => ACADEMIC_STATS.byField[entry.slug] > 0).map((entry) => (
               <li key={entry.slug}>
                 <Link
                   href={`/academic/people?field=${entry.slug}`}

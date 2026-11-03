@@ -1,14 +1,6 @@
 import { ExternalLink, Mail } from 'lucide-react'
 import type { Academic, AcademicField, UniversityGroup } from '@/lib/academics'
 
-const FIELDS_LABEL: Record<AcademicField, string> = {
-  structural: 'structural engineering',
-  geotechnical: 'geotechnical engineering',
-  transport: 'transport engineering',
-  water: 'water engineering',
-  construction: 'construction and materials',
-}
-
 function AcademicCard({ person }: { person: Academic }) {
   return (
     <article className="flex h-full flex-col rounded-lg border bg-card p-5">
@@ -106,7 +98,7 @@ export function AcademicDirectory({
 
       {field && (
         <p className="mt-10 border-t pt-6 text-sm text-muted-foreground">
-          Showing {FIELDS_LABEL[field]} only.{' '}
+          Showing {FIELDS_LABEL[field]} only.{" "}
           <a href="/academic/people" className="text-primary hover:underline">
             Show every field
           </a>
@@ -115,4 +107,15 @@ export function AcademicDirectory({
       )}
     </div>
   )
+}
+
+const FIELDS_LABEL: Record<AcademicField, string> = {
+  structural: 'structural engineering',
+  earthquake: 'earthquake engineering',
+  geotechnical: 'geotechnical engineering',
+  transport: 'transport engineering',
+  water: 'water engineering',
+  construction: 'construction and materials',
+  computational: 'computational and optimisation',
+  risk: 'risk and resilience',
 }
