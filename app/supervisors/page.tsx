@@ -45,6 +45,13 @@ export default function SupervisorsPage() {
           {[...PLANNED_COUNTRIES, ...planned.map((country) => country.name)].join(' · ')}
         </p>
         <p className="mt-6 text-sm text-muted-foreground">
+          Looking for a university that is not listed yet?{' '}
+          <Link href="/universities" className="text-primary hover:underline">
+            Browse the 500-university coverage list
+          </Link>{' '}
+          and go straight to its engineering staff page.
+        </p>
+        <p className="mt-3 text-sm text-muted-foreground">
           Know a supervisor who is missing?{' '}
           <Link href="/post-a-job" className="text-primary hover:underline">
             Send us the name and profile link
