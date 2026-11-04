@@ -8,6 +8,15 @@ A specialist site for **structural and civil engineering careers**:
 - **PhD supervisor finder** (`/supervisors`) — civil engineering academics worldwide with research
   focus and a ready-written enquiry email; a CV dropped in the browser fills the email, and
   follow-ups are tracked locally.
+- **Professor finder** (`/professors`) — keyword search over every *active* researcher at
+  universities in Australia and New Zealand, any field, from OpenAlex: most-cited first, with
+  their 3–4 latest papers. Retired, departed and inactive academics are filtered out. Opening a
+  professor reads their university staff page for the published email, "accepting students",
+  funding and emeritus status, and drafts the enquiry email; sent emails and follow-ups are tracked.
+- **Membership** (`/pricing`) — free members see the first 2 professors per search (the rest
+  blurred, enforced on the server) and use their CV only to fill the email. Paid members see
+  everything and get CV matching with a % score — private in-browser matching, plus Claude when
+  `ANTHROPIC_API_KEY` is set. Payments by Stripe.
 - **Universities** (`/universities`) — the QS 2027 top 500 grouped by country with official sites.
 - **Accounts and alerts** — saved searches with daily, weekly or monthly emails.
 - **Post a job** (`/post-a-job`) — employer submissions filed as GitHub issues for review.
@@ -96,6 +105,11 @@ pnpm dev
 | `SITE_URL` | Actions variable | Public URL used in email links. Defaults to the Vercel deployment. |
 | `GITHUB_TOKEN` | Vercel | Fine-grained PAT with Issues: write on the repo. `/post-a-job` files each submission as an issue; without it the form shows a setup message. |
 | `GITHUB_REPO` | Vercel | `owner/repo` that receives the submission issues. |
+| `OPENALEX_MAILTO` / `OPENALEX_API_KEY` | Vercel | Optional. Contact address / key for the OpenAlex API used by the professor finder. |
+| `BRAVE_SEARCH_API_KEY` | Vercel | Finds staff pages on university sites (free tier). Without it only ORCID-listed pages are read. |
+| `ANTHROPIC_API_KEY` | Vercel | Claude matching and staff-page reading for paid members. Optional. |
+| `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` | Vercel | Paid membership. Webhook URL: `https://<domain>/api/billing/webhook`, events `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`. |
+| `PRO_EMAILS` | Vercel | Comma-separated emails treated as members without paying (owner, testers). |
 | `NEXT_PUBLIC_DEMO_JOBS` | local only | `1` renders the bundled sample listings before the first sync. Never enable in production. |
 
 Free keys: Careerjet at <https://www.careerjet.com/partners/api> (publisher account) and Jooble at

@@ -1,6 +1,29 @@
 import type { CandidateProfile } from './cv'
 import { fieldName, type Academic } from './academics'
 
+/**
+ * Anyone the email can be written to: a transcribed academic from the
+ * directory, or a professor found through the finder, whose field is free text
+ * ("Hydrology", "Machine learning") instead of one of our engineering slugs.
+ */
+export interface EmailRecipient {
+  name: string
+  surname?: string
+  title: string
+  researchFocus: string
+  email: string | null
+  /** The PhD area in words, e.g. "structural engineering" or "hydrology". */
+  area: string
+}
+
+type Person = Academic | EmailRecipient
+
+function areaOf(person: Person) {
+  return 'area' in person ? person.area : `${fieldName(person.field).toLowerCase()} engineering`
+}
+
+const capitalise = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+
 /*
  * A first email to a potential supervisor, pre-filled but still worth reading
  * before sending. With a CV loaded the facts about the student fill themselves
@@ -19,7 +42,7 @@ export interface EmailOptions {
   sentAt?: string
 }
 
-export function surnameOf(person: Academic): string {
+export function surnameOf(person: Person): string {
   if (person.surname) return person.surname
 
   const cleaned = person.name
@@ -34,11 +57,11 @@ export function surnameOf(person: Academic): string {
 }
 
 /** "Professor Mueller", "Dr Okafor" - professors get the full title, everyone else the doctorate. */
-export function salutation(person: Academic): string {
+export function salutation(person: Person): string {
   return /professor/i.test(person.title) ? `Professor ${surnameOf(person)}` : `Dr ${surnameOf(person)}`
 }
 
-function focusClause(person: Academic) {
+function focusClause(person: Person) {
   const clause = person.researchFocus.split(/[.;]/)[0].trim()
   const lower = clause.charAt(0).toLowerCase() + clause.slice(1)
   return lower.replace(/\.$/, '')
@@ -64,13 +87,13 @@ function sentDate(iso?: string) {
 }
 
 export function buildSupervisorEmail(
-  person: Academic,
+  person: Person,
   profile?: CandidateProfile,
   options: EmailOptions = {},
 ): { subject: string; body: string } {
   const attachCv = options.attachCv ?? true
   const who = profile?.name
-  const subject = `PhD enquiry: ${fieldName(person.field)} supervision${who ? ` — ${who}` : ''}`
+  const subject = `PhD enquiry: ${capitalise(areaOf(person))} supervision${who ? ` — ${who}` : ''}`
 
   const about = [
     `- Degree and university: ${degreeLine(profile)}`,
@@ -91,7 +114,7 @@ export function buildSupervisorEmail(
   const body = [
     `Dear ${salutation(person)},`,
     '',
-    `I am writing to ask whether you are taking on new PhD students in the next intake. I am applying for a PhD in ${fieldName(person.field).toLowerCase()} engineering, and your work on ${focusClause(person)} is the closest match to what I want to study.`,
+    `I am writing to ask whether you are taking on new PhD students in the next intake. I am applying for a PhD in ${areaOf(person)}, and your work on ${focusClause(person)} is the closest match to what I want to study.`,
     '',
     'About me',
     ...about,
@@ -117,18 +140,18 @@ export function buildSupervisorEmail(
  * Two weeks of silence is normal, so this never accuses anyone of ignoring it.
  */
 export function buildFollowUpEmail(
-  person: Academic,
+  person: Person,
   profile?: CandidateProfile,
   options: EmailOptions = {},
 ): { subject: string; body: string } {
   const attachCv = options.attachCv ?? true
-  const subject = `Following up: PhD enquiry — ${fieldName(person.field)} supervision`
+  const subject = `Following up: PhD enquiry — ${capitalise(areaOf(person))} supervision`
   const qualification = profile?.degree ? ` (${profile.degree})` : ''
 
   const body = [
     `Dear ${salutation(person)},`,
     '',
-    `I wrote to you on ${sentDate(options.sentAt)} about a PhD in ${fieldName(person.field).toLowerCase()} engineering under your supervision, on ${focusClause(person)}. I am following up in case it arrived at a busy time — I know the start of semester is not the easiest moment for email.`,
+    `I wrote to you on ${sentDate(options.sentAt)} about a PhD in ${areaOf(person)} under your supervision, on ${focusClause(person)}. I am following up in case it arrived at a busy time — I know the start of semester is not the easiest moment for email.`,
     '',
     profile?.name
       ? `Since then nothing has changed except my interest: I finished ${profile.degree ?? 'my degree'}${qualification ? '' : ''}${profile.university ? ` at ${profile.university}` : ''}${profile.graduationYear ? ` in ${profile.graduationYear}` : ''} and I am ready to start in the next intake.`
@@ -148,13 +171,13 @@ export function buildFollowUpEmail(
   return { subject, body }
 }
 
-function mailto(address: string, subject: string, body: string) {
+export function mailto(address: string, subject: string, body: string) {
   return `mailto:${address}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
 }
 
 /** A mailto: link with the template already written into it, or null without a published address. */
 export function mailtoHref(
-  person: Academic,
+  person: Person,
   profile?: CandidateProfile,
   options: EmailOptions = {},
 ): string | null {
@@ -165,7 +188,7 @@ export function mailtoHref(
 
 /** The follow-up as a mailto: link, dated from when the first email went out. */
 export function followUpMailtoHref(
-  person: Academic,
+  person: Person,
   profile: CandidateProfile | null | undefined,
   options: EmailOptions = {},
 ): string | null {

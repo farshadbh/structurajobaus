@@ -5,6 +5,9 @@ import { ListsManager } from '@/components/account/lists-manager'
 import { criteriaToFilters, listsKey, type SavedList } from '@/lib/accounts'
 import { getCurrentUser } from '@/lib/auth'
 import { getJobs } from '@/lib/jobs'
+import Link from 'next/link'
+import { BillingButton } from '@/components/finder/upgrade-button'
+import { PRO_PRICE_LABEL, planOf } from '@/lib/plans'
 import { STORE_READY, getJson } from '@/lib/store'
 
 // Always render per request: the page depends on the session cookie and on
@@ -59,6 +62,31 @@ export default async function AccountPage() {
         breadcrumbs={[{ label: 'My alerts', href: '/account' }]}
       />
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+        <section className="mb-8 rounded-lg border bg-card p-5">
+          <h2 className="font-semibold">Membership</h2>
+          {planOf(user) === 'pro' ? (
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-3 text-sm">
+              <p>
+                <span className="font-medium text-emerald-700">Member</span>
+                {user.proUntil ? ` until ${new Date(user.proUntil).toLocaleDateString('en-AU')}` : ''} — every
+                professor, supervision status and CV matching are unlocked.
+              </p>
+              {user.stripeCustomerId && (
+                <div className="w-44">
+                  <BillingButton action="portal" label="Manage billing" />
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Free plan. Membership ({PRO_PRICE_LABEL}) opens every professor in the finder and matches your CV
+              against them.{' '}
+              <Link href="/pricing" className="font-medium text-primary hover:underline">
+                See membership
+              </Link>
+            </p>
+          )}
+        </section>
         <ListsManager
           email={user.email}
           lists={lists}

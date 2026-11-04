@@ -67,6 +67,11 @@ export async function setJson(key: string, value: unknown): Promise<boolean> {
   return (await command<string>(['SET', key, JSON.stringify(value)])) === 'OK'
 }
 
+/** SET with an expiry, for caches that should refresh on their own. */
+export async function setJsonEx(key: string, value: unknown, seconds: number): Promise<boolean> {
+  return (await command<string>(['SET', key, JSON.stringify(value), 'EX', seconds])) === 'OK'
+}
+
 export async function remove(key: string): Promise<void> {
   await command<number>(['DEL', key])
 }

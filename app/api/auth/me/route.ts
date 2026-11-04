@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { AUTH_READY, getCurrentUser } from '@/lib/auth'
+import { planOf } from '@/lib/plans'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,12 +12,12 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   const headers = { 'Cache-Control': 'no-store' }
 
-  if (!AUTH_READY) return NextResponse.json({ email: null }, { headers })
+  if (!AUTH_READY) return NextResponse.json({ email: null, plan: 'free' }, { headers })
 
   try {
     const user = await getCurrentUser()
-    return NextResponse.json({ email: user?.email ?? null }, { headers })
+    return NextResponse.json({ email: user?.email ?? null, plan: planOf(user) }, { headers })
   } catch {
-    return NextResponse.json({ email: null }, { headers })
+    return NextResponse.json({ email: null, plan: 'free' }, { headers })
   }
 }

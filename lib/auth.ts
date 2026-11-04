@@ -117,6 +117,12 @@ export interface StoredUser {
   lastDigestAt?: string
   unsubscribedAt?: string
   unsubscribeToken: string
+  /** Membership. Absent means free. See lib/plans.ts. */
+  plan?: 'free' | 'pro'
+  /** End of the paid period; pro access lapses after it. */
+  proUntil?: string
+  stripeCustomerId?: string
+  stripeSubscriptionId?: string
 }
 
 export const DIGEST_USERS_KEY = 'digest:users'

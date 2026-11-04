@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 const NAV_ITEMS = [
   { href: '/academic', label: 'Academic Jobs' },
   { href: '/industry', label: 'Industry Jobs' },
-  { href: '/cities', label: 'Browse by City' },
+  { href: '/professors', label: 'Find a professor' },
   { href: '/jobs?visa=1', label: 'Visa Sponsorship' },
   { href: '/account', label: 'Job alerts' },
   { href: '/post-a-job', label: 'Post a job' },
@@ -56,9 +56,18 @@ export function SiteHeader() {
     ? [
         { href: '/jobs', label: 'Search all jobs' },
         { href: '/account', label: 'My account' },
-        { href: '/supervisors', label: 'Find a supervisor' },
+        { href: '/professors', label: 'Find a professor' },
+        { href: '/supervisors', label: 'Supervisor directory' },
+        { href: '/cities', label: 'Browse by city' },
+        { href: '/pricing', label: 'Membership' },
       ]
-    : [...MOBILE_LINKS, { href: '/supervisors', label: 'Find a supervisor' }]
+    : [
+        ...MOBILE_LINKS,
+        { href: '/professors', label: 'Find a professor' },
+        { href: '/supervisors', label: 'Supervisor directory' },
+        { href: '/cities', label: 'Browse by city' },
+        { href: '/pricing', label: 'Membership' },
+      ]
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">

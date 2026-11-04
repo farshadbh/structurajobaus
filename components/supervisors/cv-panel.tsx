@@ -15,8 +15,11 @@ export function CvPanel({
   onClear,
   attachCv,
   onAttachChange,
+  onText,
 }: {
   profile: CandidateProfile | null
+  /** The CV's full text, for matching. Kept in memory by the caller only. */
+  onText?: (text: string) => void
   onChange: (profile: CandidateProfile) => void
   onClear: () => void
   attachCv: boolean
@@ -34,8 +37,9 @@ export function CvPanel({
     setReading(true)
     setError('')
     try {
-      const { profile: parsed } = await readCv(file)
+      const { profile: parsed, text } = await readCv(file)
       onChange(parsed)
+      onText?.(text)
       setPasteOpen(false)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'That file could not be read.')
@@ -53,6 +57,7 @@ export function CvPanel({
       return
     }
     onChange(parsed)
+    onText?.(paste)
     setError('')
     setPasteOpen(false)
     setPaste('')

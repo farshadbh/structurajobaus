@@ -38,6 +38,19 @@ export default function SupervisorsPage() {
         </p>
       </PageHeader>
 
+      <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
+        <Link
+          href="/professors"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/40 bg-accent/10 p-4 text-sm hover:bg-accent/15"
+        >
+          <span>
+            <strong>New: find a professor in any field.</strong> Search every active researcher in Australia
+            and New Zealand by topic, with their latest papers and whether they are taking students.
+          </span>
+          <span className="font-semibold text-accent">Open the professor finder →</span>
+        </Link>
+      </div>
+
       <SupervisorExplorer pageSize={36} showDirectoryLink={false} showIntro={false} />
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
