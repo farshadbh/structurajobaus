@@ -2,7 +2,6 @@ import { CityGrid } from '@/components/home/city-grid'
 import { Hero } from '@/components/home/hero'
 import { JobSection } from '@/components/home/job-section'
 import { RoleCategories } from '@/components/home/role-categories'
-import { SupervisorSection } from '@/components/supervisors/supervisor-section'
 import { JsonLd } from '@/components/json-ld'
 import { SITE_NAME, SITE_URL } from '@/lib/format'
 import { getFeaturedJobs, getJobCounts, getLatestJobs, getVisaSponsoredJobs } from '@/lib/jobs'
@@ -32,8 +31,6 @@ export default async function HomePage() {
     <>
       <JsonLd data={websiteJsonLd} />
       <Hero stats={counts} />
-      {/* Directly under the hero, so the supervisor finder is visible without scrolling past the job cards. */}
-      <SupervisorSection />
       <JobSection
         id="featured-jobs"
         eyebrow="Featured"
