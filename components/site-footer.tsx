@@ -92,9 +92,10 @@ export function SiteFooter() {
                     >
                       {source.label}
                     </a>
-                    {index < Object.values(SOURCE_ATTRIBUTION).length - 1 ? ', ' : '.'}
+                    {index < Object.values(SOURCE_ATTRIBUTION).length - 1 ? ', ' : ''}
                   </span>
                 ))}
+                , and directly from university and employer career sites.
               </span>
             )}
           </p>

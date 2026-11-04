@@ -1,8 +1,16 @@
-# SE Jobs Australia
+# SE Jobs Worldwide
 
-A specialist job board for **structural engineering vacancies in Australia** — academic posts
-(lecturer, professor, research fellow, PhD scholarship) alongside industry roles (structural,
-bridge, civil, design, project).
+A specialist site for **structural and civil engineering careers**:
+
+- **Job board** — Australian academic posts (lecturer, professor, research fellow, PhD scholarship)
+  alongside industry roles (structural, bridge, civil, geotechnical, design, project), filterable by
+  role, specialism, city, state, salary, visa sponsorship and work pattern, with an RSS feed.
+- **PhD supervisor finder** (`/supervisors`) — civil engineering academics worldwide with research
+  focus and a ready-written enquiry email; a CV dropped in the browser fills the email, and
+  follow-ups are tracked locally.
+- **Universities** (`/universities`) — the QS 2027 top 500 grouped by country with official sites.
+- **Accounts and alerts** — saved searches with daily, weekly or monthly emails.
+- **Post a job** (`/post-a-job`) — employer submissions filed as GitHub issues for review.
 
 Live site: https://structuraljobaus.vercel.app
 
@@ -84,8 +92,10 @@ pnpm dev
 | `UPSTASH_REDIS_REST_TOKEN` | Vercel + Actions secret | Upstash REST token. |
 | `AUTH_SECRET` | Vercel | Signs the session cookie. `openssl rand -hex 32`. Changing it signs everyone out. |
 | `BREVO_API_KEY` | Actions secret | Brevo transactional email key. Absent means the digest run logs a skip and exits 0. |
-| `EMAIL_FROM` | Actions variable | Verified Brevo sender, e.g. `SE Jobs Australia <you@example.com>`. |
+| `EMAIL_FROM` | Actions variable | Verified Brevo sender, e.g. `SE Jobs Worldwide <you@example.com>`. |
 | `SITE_URL` | Actions variable | Public URL used in email links. Defaults to the Vercel deployment. |
+| `GITHUB_TOKEN` | Vercel | Fine-grained PAT with Issues: write on the repo. `/post-a-job` files each submission as an issue; without it the form shows a setup message. |
+| `GITHUB_REPO` | Vercel | `owner/repo` that receives the submission issues. |
 | `NEXT_PUBLIC_DEMO_JOBS` | local only | `1` renders the bundled sample listings before the first sync. Never enable in production. |
 
 Free keys: Careerjet at <https://www.careerjet.com/partners/api> (publisher account) and Jooble at
@@ -113,7 +123,9 @@ Once you have a custom domain, set `NEXT_PUBLIC_SITE_URL` in Vercel and redeploy
 ## Project layout
 
 ```
-app/                 routes: /, /jobs, /jobs/[slug], /academic, /industry, /cities/[city], /account, /login, /signup, /privacy, /terms
+app/                 routes: /, /jobs, /jobs/[slug], /jobs/feed.xml, /academic, /academic/people, /industry,
+                     /cities/[city], /supervisors, /universities, /post-a-job, /account, /login, /signup,
+                     /privacy, /terms
 components/          header, footer, hero, job cards, filters, listing
 lib/jobs.ts          data access: live snapshot, expiry filtering, search/filtering
 lib/taxonomy.ts      roles, cities, states, salary bands
@@ -122,7 +134,15 @@ lib/accounts.ts      saved-list validation, criteria → board filters, digest l
 lib/store.ts         Upstash Redis over REST (no driver)
 components/account/  sign-in form, lists manager
 data/jobs.json       the current listing snapshot (generated)
+lib/academics.ts     supervisor directory: disciplines, specialisations, country data
+lib/cv.ts            in-browser CV reader (PDF, DOCX, text) — nothing is uploaded
+lib/supervisor-email.ts   enquiry and follow-up email drafts
+lib/universities.ts  QS 2027 top-500 coverage list
+lib/submissions.ts   employer job submissions → GitHub issues
+data/academics/*.json     transcribed academic staff, one file per country/state
+data/qs-2027.ts, data/qs-domains.ts, data/universities.ts   university rankings and official sites
 scripts/ingest-jobs.mjs   multi-source ingestion (Careerjet, Jooble, optional Adzuna)
+scripts/sources/          keyless employer-direct sources (Workday, PageUp career sites)
 scripts/send-digests.mjs  daily/weekly/monthly job alert email
 scripts/001_create_jobs.sql   future Postgres/Supabase schema for direct employer posts
 ```

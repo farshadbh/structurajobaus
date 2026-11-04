@@ -159,10 +159,13 @@ export function SupervisorExplorer({
   pageSize = 24,
   id = 'supervisors',
   showDirectoryLink = true,
+  showIntro = true,
 }: {
   pageSize?: number
   id?: string
   showDirectoryLink?: boolean
+  /** Off when the page around the explorer already carries the heading and intro. */
+  showIntro?: boolean
 }) {
   const [country, setCountry] = useState<CountryFilter>('all')
   const [university, setUniversity] = useState('all')
@@ -292,6 +295,7 @@ export function SupervisorExplorer({
       <CountryLandmark code={selectedCountry?.code ?? 'AU'} />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {showIntro ? (
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-2xl">
             <p className="font-mono text-xs font-medium tracking-wider text-accent uppercase">
@@ -319,8 +323,15 @@ export function SupervisorExplorer({
             </Link>
           )}
         </div>
+        ) : (
+          selectedCountry && (
+            <p className="font-mono text-xs font-medium tracking-wider text-accent uppercase">
+              {selectedCountry.name}
+            </p>
+          )
+        )}
 
-        <div className="mt-8 rounded-xl border bg-card p-3 sm:p-4">
+        <div className={showIntro || selectedCountry ? 'mt-8 rounded-xl border bg-card p-3 sm:p-4' : 'rounded-xl border bg-card p-3 sm:p-4'}>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]">
             <label className="flex flex-col gap-1.5">
               <span className="font-mono text-[11px] font-medium tracking-wider text-muted-foreground uppercase">

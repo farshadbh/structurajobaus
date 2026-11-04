@@ -32,6 +32,6 @@ jobs:
           UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
           UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
-          EMAIL_FROM: ${{ vars.EMAIL_FROM || 'SE Jobs Australia <alerts@example.com>' }}
+          EMAIL_FROM: ${{ vars.EMAIL_FROM || 'SE Jobs Worldwide <alerts@example.com>' }}
           SITE_URL: ${{ vars.SITE_URL || 'https://structuraljobaus.vercel.app' }}
         run: node scripts/send-digests.mjs

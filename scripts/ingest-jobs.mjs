@@ -272,6 +272,11 @@ const CIVIL_PHRASE =
 // titles mention "engineering", which is not enough to belong here.
 const OTHER_DISCIPLINE =
   /\b(mechanical|mechatronic|robotics?|electrical|electronic|chemical|aerospace|aeronautical|combustion|process systems|software|computer science|data science|biomedical|mining|petroleum|nursing|medical|psychology|law|business|accounting|finance|marketing|natural sciences|biology|chemistry|physics)\b/i
+// Phrases where "civil" or "structural" mean something other than engineering:
+// "Research Fellow - Digital Civil Justice" is a law post, "Structural Biology"
+// a life-science one. Checked before STRONG_CIVIL so the bare word cannot win.
+const FALSE_FRIEND =
+  /\b(civil (justice|law|liberties|litigation|procedure|rights|society|dispute|claims|registry|celebrant)|structural (biology|violence|inequalit(y|ies)|racism|adjustment|reform)|construction (law|of (identity|gender|knowledge)))\b/i
 const NOISE_TITLE =
   /\b(draft|drafter|draught|bim|detailer|estimator|sales|recruit|talent|technician|labourer|laborer|welder|boilermaker|foreman|supervisor)\b/i
 const VISA_PATTERN = /\b(visa sponsorship|sponsorship|sponsor(?:s|ed|ing)?|sponsored|482|tss|work visa)\b/i
@@ -284,6 +289,7 @@ const VISA_PATTERN = /\b(visa sponsorship|sponsorship|sponsor(?:s|ed|ing)?|spons
  */
 function isRelevantTitle(title, company, text) {
   if (NOISE_TITLE.test(title)) return false
+  if (FALSE_FRIEND.test(title)) return false
   // "Civil and Mechanical Engineering" stays…
   if (STRONG_CIVIL.test(title)) return true
   // …but "School of Electrical, Mechanical and Infrastructure Engineering" does

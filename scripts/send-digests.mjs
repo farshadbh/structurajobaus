@@ -20,7 +20,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const SITE_URL = (process.env.SITE_URL || 'https://structuraljobaus.vercel.app').replace(/\/+$/, '')
-const SITE_NAME = 'SE Jobs Australia'
+const SITE_NAME = 'SE Jobs Worldwide'
 const REST_URL = (process.env.UPSTASH_REDIS_REST_URL || '').replace(/\/+$/, '')
 const REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || ''
 const BREVO_API_KEY = process.env.BREVO_API_KEY || ''

@@ -7,6 +7,12 @@ import { getCurrentUser } from '@/lib/auth'
 import { getJobs } from '@/lib/jobs'
 import { STORE_READY, getJson } from '@/lib/store'
 
+// Always render per request: the page depends on the session cookie and on
+// whether the store is configured at runtime. Without this, a build made before
+// the Upstash keys existed is prerendered as "accounts are not switched on" and
+// keeps saying so after the keys are added.
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'My job alerts',
   robots: { index: false, follow: false },

@@ -31,9 +31,14 @@ export default function SupervisorsPage() {
           {covered.length} countries. Compiled from public university pages and checked{' '}
           {ACADEMIC_VERIFIED_AT}; emails appear only where the university publishes one.
         </p>
+        <p className="mt-3 max-w-2xl text-sm text-white/70">
+          Each one comes with an enquiry email already written. Add your CV and the email fills with
+          your own details; filter by country, university or field, and the people you have written
+          to turn green.
+        </p>
       </PageHeader>
 
-      <SupervisorExplorer pageSize={36} showDirectoryLink={false} />
+      <SupervisorExplorer pageSize={36} showDirectoryLink={false} showIntro={false} />
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <h2 className="text-lg font-semibold">Still to come</h2>
