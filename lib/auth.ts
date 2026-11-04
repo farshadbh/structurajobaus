@@ -31,7 +31,10 @@ const SESSION_DAYS = 30
 const KEY_LENGTH = 64
 
 function secret() {
-  return process.env.AUTH_SECRET ?? ''
+  if (process.env.AUTH_SECRET) return process.env.AUTH_SECRET
+  // `pnpm dev` on localhost only; production still refuses to sign anyone in
+  // without a real secret.
+  return process.env.NODE_ENV === 'development' ? 'local-development-only-secret' : ''
 }
 
 export const AUTH_READY = Boolean(secret())

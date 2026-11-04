@@ -17,9 +17,79 @@
 const REST_URL = process.env.UPSTASH_REDIS_REST_URL?.replace(/\/+$/, '')
 const REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN
 
-export const STORE_READY = Boolean(REST_URL && REST_TOKEN)
+/*
+ * Local development without Upstash: `pnpm dev` keeps accounts in memory, so
+ * sign-up, membership (PRO_EMAILS) and saved lists can be tried on localhost
+ * with no setup. Never used by `next build` / production: there the two
+ * Upstash variables are required. Restarting `pnpm dev` clears the data.
+ */
+const USE_MEMORY = !(REST_URL && REST_TOKEN) && process.env.NODE_ENV === 'development'
+
+export const STORE_READY = Boolean(REST_URL && REST_TOKEN) || USE_MEMORY
+
+interface MemoryStore {
+  values: Map<string, { value: string; expires?: number }>
+  sets: Map<string, Set<string>>
+}
+
+// Kept on globalThis so hot reloads in development do not wipe it.
+const memory: MemoryStore = ((globalThis as { __sjaMemoryStore?: MemoryStore }).__sjaMemoryStore ??= {
+  values: new Map(),
+  sets: new Map(),
+})
+
+function memoryCommand(args: (string | number)[]): unknown {
+  const [name, key, ...rest] = args.map(String)
+  const live = (k: string) => {
+    const entry = memory.values.get(k)
+    if (entry?.expires && entry.expires < Date.now()) {
+      memory.values.delete(k)
+      return undefined
+    }
+    return entry
+  }
+
+  switch (name.toUpperCase()) {
+    case 'GET':
+      return live(key)?.value ?? null
+    case 'SET': {
+      const ex = rest.indexOf('EX')
+      memory.values.set(key, {
+        value: rest[0],
+        expires: ex >= 0 ? Date.now() + Number(rest[ex + 1]) * 1000 : undefined,
+      })
+      return 'OK'
+    }
+    case 'DEL':
+      return memory.values.delete(key) ? 1 : 0
+    case 'INCR': {
+      const next = Number(live(key)?.value ?? 0) + 1
+      memory.values.set(key, { value: String(next), expires: live(key)?.expires })
+      return next
+    }
+    case 'EXPIRE': {
+      const entry = live(key)
+      if (entry) entry.expires = Date.now() + Number(rest[0]) * 1000
+      return entry ? 1 : 0
+    }
+    case 'SADD': {
+      const set = memory.sets.get(key) ?? new Set<string>()
+      memory.sets.set(key, set)
+      const added = set.has(rest[0]) ? 0 : 1
+      set.add(rest[0])
+      return added
+    }
+    case 'SREM':
+      return memory.sets.get(key)?.delete(rest[0]) ? 1 : 0
+    case 'SMEMBERS':
+      return [...(memory.sets.get(key) ?? [])]
+    default:
+      return null
+  }
+}
 
 async function command<T>(args: (string | number)[]): Promise<T | null> {
+  if (USE_MEMORY) return memoryCommand(args) as T | null
   if (!REST_URL || !REST_TOKEN) return null
 
   try {
