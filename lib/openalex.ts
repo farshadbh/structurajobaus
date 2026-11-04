@@ -55,6 +55,8 @@ export interface ProfessorSummary {
   fields: string[]
   /** Papers on the searched topic since the activity window opened. */
   matchingWorks: number
+  /** Share of their recent papers that are on the topic (0-1). */
+  focus: number
   /** Latest year with at least one publication. */
   lastActiveYear: number
   recentWorks: RecentWork[]
@@ -155,6 +157,7 @@ interface RawWork {
   doi: string | null
   type?: string | null
   primary_location?: { source?: { display_name?: string } | null; landing_page_url?: string | null } | null
+  authorships?: { author?: { id?: string }; institutions?: { country_code?: string | null }[] }[]
 }
 
 /* ----------------------------------------------------------------- tuning */
@@ -169,6 +172,20 @@ const MIN_H_INDEX = Number(process.env.FINDER_MIN_H_INDEX || 10)
 const MIN_WORKS = Number(process.env.FINDER_MIN_WORKS || 20)
 /** How many candidate authors are pulled per search before filtering. */
 const CANDIDATES = 200
+/**
+ * Topic relevance: at least two on-topic papers, and either a meaningful share
+ * of their recent output (so a prolific author with one stray paper on the
+ * topic stays out) or a solid body of on-topic work in absolute terms.
+ */
+const MIN_MATCHING = 2
+const MIN_FOCUS = 0.08
+const STRONG_MATCHING = 6
+/** Below this share of recent papers with a local affiliation, the post here is secondary. */
+const MIN_LOCAL_SHARE = 0.5
+/** Papers with more authors than this say little about any one of them. */
+const MAX_AUTHORS = 30
+/** Below this many people, a phrase search is retried as loose words. */
+const MIN_PHRASE_RESULTS = 15
 
 const bareId = (url: string) => url.replace(/^https?:\/\/openalex\.org\//, '')
 
@@ -181,6 +198,9 @@ function toSummary(raw: RawAuthor, region: RawInstitution, matchingWorks: number
     0,
     ...(raw.counts_by_year ?? []).filter((row) => row.works_count > 0).map((row) => row.year),
   )
+  const recentOutput = (raw.counts_by_year ?? [])
+    .filter((row) => row.year >= RELEVANCE_FROM)
+    .reduce((sum, row) => sum + row.works_count, 0)
   const topics = (raw.topics ?? []).slice(0, 6).map((topic) => topic.display_name)
   const fields = [
     ...new Set((raw.topics ?? []).map((topic) => topic.field?.display_name).filter(Boolean) as string[]),
@@ -201,6 +221,7 @@ function toSummary(raw: RawAuthor, region: RawInstitution, matchingWorks: number
     topics,
     fields,
     matchingWorks,
+    focus: recentOutput ? Math.min(1, matchingWorks / recentOutput) : 0,
     lastActiveYear,
     recentWorks: [],
   }
@@ -222,6 +243,16 @@ function isActive(raw: RawAuthor) {
 function isEstablished(raw: RawAuthor) {
   return (raw.summary_stats?.h_index ?? 0) >= MIN_H_INDEX && raw.works_count >= MIN_WORKS
 }
+
+function isOnTopic(person: ProfessorSummary) {
+  return (
+    person.matchingWorks >= MIN_MATCHING &&
+    (person.focus >= MIN_FOCUS || person.matchingWorks >= STRONG_MATCHING)
+  )
+}
+
+/** Relevance order: on-topic volume, weighted by how central the topic is to them. */
+const relevance = (person: ProfessorSummary) => person.matchingWorks * (0.5 + person.focus)
 
 /* ----------------------------------------------------------------- search */
 
@@ -245,6 +276,10 @@ async function candidates(query: string, regions: RegionCode[]) {
       `authorships.institutions.country_code:${countries}`,
       `authorships.institutions.type:education`,
       `from_publication_date:${RELEVANCE_FROM}-01-01`,
+      // Consortium papers (particle physics, genomics) list thousands of
+      // authors; one local co-author would otherwise fill every candidate slot
+      // with people from abroad.
+      `authors_count:<${MAX_AUTHORS + 1}`,
     ].join(','),
     group_by: 'authorships.author.id',
     per_page: String(CANDIDATES),
@@ -284,19 +319,38 @@ async function candidates(query: string, regions: RegionCode[]) {
   for (const raw of authors) {
     const university = currentUniversity(raw, regions)
     if (!university || !isActive(raw) || !isEstablished(raw)) continue
-    professors.push(toSummary(raw, university, counts.get(bareId(raw.id)) ?? 0))
+    const person = toSummary(raw, university, counts.get(bareId(raw.id)) ?? 0)
+    if (isOnTopic(person)) professors.push(person)
   }
   return professors
 }
 
-/** The few latest papers of one author, newest first. */
-export async function recentWorks(authorId: string, limit = 4): Promise<RecentWork[]> {
+/**
+ * The few latest papers of one author, newest first, and the share of their
+ * recent papers that carry an affiliation in the chosen countries - which tells
+ * a real local post from a secondary or honorary one held from abroad.
+ */
+export async function recentWorks(
+  authorId: string,
+  limit = 4,
+  regions: RegionCode[] = ['AU', 'NZ'],
+): Promise<{ works: RecentWork[]; localShare: number }> {
   const data = await getJson<{ results: RawWork[] }>('/works', {
     filter: `author.id:${authorId},from_publication_date:${THIS_YEAR - 4}-01-01,type:article|review|book-chapter|preprint|book`,
     sort: 'publication_date:desc',
-    per_page: String(Math.min(25, limit + 6)),
-    select: 'id,title,display_name,publication_year,doi,type,primary_location',
+    per_page: String(Math.min(25, Math.max(limit + 6, 12))),
+    select: 'id,title,display_name,publication_year,doi,type,primary_location,authorships',
   })
+
+  let affiliated = 0
+  let local = 0
+  for (const work of data.results ?? []) {
+    const own = work.authorships?.find((entry) => entry.author?.id && bareId(entry.author.id) === authorId)
+    const countries = (own?.institutions ?? []).map((inst) => (inst.country_code ?? '').toUpperCase())
+    if (countries.length === 0) continue
+    affiliated++
+    if (countries.some((code) => regions.includes(code as RegionCode))) local++
+  }
 
   const seen = new Set<string>()
   const works: RecentWork[] = []
@@ -314,7 +368,7 @@ export async function recentWorks(authorId: string, limit = 4): Promise<RecentWo
     })
     if (works.length >= limit) break
   }
-  return works
+  return { works, localShare: affiliated ? local / affiliated : 1 }
 }
 
 async function mapLimit<T, R>(items: T[], limit: number, task: (item: T) => Promise<R>) {
@@ -330,12 +384,17 @@ async function mapLimit<T, R>(items: T[], limit: number, task: (item: T) => Prom
   return out
 }
 
-/** Recent papers for each professor shown, a few requests at a time. */
-export async function withRecentWorks(professors: ProfessorSummary[], limit = 4) {
-  return mapLimit(professors, 5, async (person) => ({
-    ...person,
-    recentWorks: await recentWorks(person.id, limit).catch(() => []),
-  }))
+/**
+ * Recent papers for each professor shown, a few requests at a time. People
+ * whose recent papers mostly list an affiliation abroad are dropped: their post
+ * here is secondary, and they are rarely the right person to supervise here.
+ */
+export async function withRecentWorks(professors: ProfessorSummary[], limit = 4, regions?: RegionCode[]) {
+  const rows = await mapLimit(professors, 5, async (person) => {
+    const recent = await recentWorks(person.id, limit, regions).catch(() => ({ works: [], localShare: 1 }))
+    return { person: { ...person, recentWorks: recent.works }, local: recent.localShare >= MIN_LOCAL_SHARE }
+  })
+  return rows.filter((row) => row.local).map((row) => row.person)
 }
 
 export async function searchProfessors(options: SearchOptions): Promise<SearchResult> {
@@ -346,23 +405,38 @@ export async function searchProfessors(options: SearchOptions): Promise<SearchRe
   const pageSize = Math.min(Math.max(options.pageSize ?? 20, 1), 50)
   const page = Math.max(options.page ?? 1, 1)
 
-  const all = await candidates(query, regions)
+  // "structural health monitoring" must not match papers that merely contain
+  // the words "structural", "health" and "monitoring" (dementia studies do), so
+  // a plain multi-word query is searched as an exact phrase first, and as
+  // loose words only when the phrase finds too few people.
+  const words = query.split(' ').length
+  const plain = !/["()]|\b(AND|OR|NOT)\b/.test(query)
+  let all =
+    plain && words >= 2 && words <= 5 ? await candidates(`"${query}"`, regions) : await candidates(query, regions)
+  if (plain && words >= 2 && words <= 5 && all.length < MIN_PHRASE_RESULTS) {
+    const loose = await candidates(query, regions)
+    if (loose.length > all.length) all = loose
+  }
 
-  // "citations" is the Scholar-label order; "relevance" puts the people who
-  // publish most on this exact topic first and breaks ties on citations.
+  // "citations" is the Scholar-label order; "relevance" puts the people for
+  // whom this topic is central first and breaks ties on citations.
   all.sort((a, b) =>
     options.sort === 'relevance'
-      ? b.matchingWorks - a.matchingWorks || b.citations - a.citations
+      ? relevance(b) - relevance(a) || b.citations - a.citations
       : b.citations - a.citations,
   )
 
-  const slice = all.slice((page - 1) * pageSize, page * pageSize)
+  // A few spare candidates cover the people dropped for a mainly-overseas post.
+  const start = (page - 1) * pageSize
+  const window = all.slice(start, start + pageSize + 6)
+  const kept = await withRecentWorks(window, 4, regions)
+  const dropped = window.length - kept.length
   return {
     query,
-    total: all.length,
+    total: Math.max(kept.length, all.length - dropped),
     page,
     pageSize,
-    professors: await withRecentWorks(slice),
+    professors: kept.slice(0, pageSize),
   }
 }
 
@@ -373,8 +447,12 @@ export async function getProfessor(authorId: string, regions: RegionCode[] = ['A
   const university = currentUniversity(raw, regions) ?? raw.last_known_institutions?.[0]
   if (!university) throw new OpenAlexError('This researcher has no current institution on record.')
   const summary = toSummary(raw, university, 0)
-  summary.recentWorks = await recentWorks(authorId, 8).catch(() => [])
-  return { summary, active: isActive(raw) && Boolean(currentUniversity(raw, regions)) }
+  const recent = await recentWorks(authorId, 8, regions).catch(() => ({ works: [], localShare: 1 }))
+  summary.recentWorks = recent.works
+  return {
+    summary,
+    active: isActive(raw) && Boolean(currentUniversity(raw, regions)) && recent.localShare >= MIN_LOCAL_SHARE,
+  }
 }
 
 /** The institution's website, used to tell a real staff page from a namesake. */
