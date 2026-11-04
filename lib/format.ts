@@ -53,8 +53,8 @@ export const EMPLOYMENT_TYPE_LABEL = {
   scholarship: 'Scholarship',
 } as const
 
-export const SITE_NAME = 'Structural Engineering Jobs Australia'
-export const SITE_SHORT_NAME = 'SE Jobs Australia'
+export const SITE_NAME = 'Structural Engineering Jobs Worldwide'
+export const SITE_SHORT_NAME = 'SE Jobs Worldwide'
 export const SITE_TAGLINE = 'Academic & industry structural engineering jobs'
 
 /**

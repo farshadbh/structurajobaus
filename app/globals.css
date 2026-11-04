@@ -101,3 +101,57 @@
     linear-gradient(to bottom, oklch(1 0 0 / 0.07) 1px, transparent 1px);
   background-size: 32px 32px;
 }
+
+.hero-sky {
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 81% 20%, #5b367c 0%, transparent 42%),
+    radial-gradient(ellipse at 69% 75%, #163b68 0%, transparent 52%),
+    linear-gradient(110deg, #08162c 15%, #10152d 65%, #241838);
+}
+
+.hero-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, #fff 0.8px, transparent 1.7px),
+    radial-gradient(circle, #a8c8ff 0.65px, transparent 1.55px),
+    radial-gradient(circle, #e5d0ff 1px, transparent 2px);
+  background-size: 107px 97px, 71px 73px, 193px 147px;
+  background-position: 7px 21px, 31px 12px, 84px 42px;
+  opacity: 0.55;
+  animation: hero-twinkle 6s ease-in-out infinite alternate;
+}
+
+.hero-meteor {
+  position: absolute;
+  top: 13%;
+  left: 74%;
+  width: clamp(75px, 12vw, 155px);
+  height: 2px;
+  border-radius: 100%;
+  background: linear-gradient(90deg, transparent, #a9cbff 78%, white);
+  box-shadow: 12px 0 14px #a8c8ff80;
+  opacity: 0;
+  animation: hero-shooting-star 12s ease-out infinite;
+}
+
+.hero-meteor-delayed {
+  top: 42%;
+  left: 59%;
+  animation-delay: 6s;
+}
+
+@keyframes hero-twinkle {
+  to { opacity: 0.83; }
+}
+
+@keyframes hero-shooting-star {
+  0%, 55% { opacity: 0; transform: translate(0, 0) rotate(25deg); }
+  59% { opacity: 0.95; }
+  70%, 100% { opacity: 0; transform: translate(230px, 107px) rotate(25deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-stars, .hero-meteor { animation: none; }
+}

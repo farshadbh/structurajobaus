@@ -37,7 +37,7 @@ export function SiteFooter() {
           <Logo inverted />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-primary-foreground/80">
             The specialist job board connecting structural engineers with universities, research
-            institutes and engineering firms across Australia.
+            institutes and engineering firms.
           </p>
           {updatedLabel && (
             <p className="mt-4 font-mono text-xs text-primary-foreground/70">
@@ -69,7 +69,7 @@ export function SiteFooter() {
 
       <div className="border-t border-primary-foreground/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-xs text-primary-foreground/75 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <p>&copy; {new Date().getFullYear()} SE Jobs Australia. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} SE Jobs Worldwide. All rights reserved.</p>
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <Link href="/privacy" className="hover:text-primary-foreground">
               Privacy

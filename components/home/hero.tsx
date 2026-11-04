@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { SearchBar } from '@/components/home/search-bar'
 
@@ -16,34 +15,24 @@ export function Hero({ stats }: HeroProps) {
 
   return (
     <section className="relative isolate overflow-hidden bg-primary text-primary-foreground">
-      <Image
-        src="/images/hero-bridge.png"
-        alt=""
-        fill
-        priority
-        fetchPriority="high"
-        sizes="(max-width: 768px) 100vw, 1440px"
-        className="-z-20 object-cover opacity-35"
-      />
-      <div
-        className="absolute inset-0 -z-10 bg-gradient-to-r from-primary via-primary/90 to-primary/50"
-        aria-hidden="true"
-      />
-      <div className="blueprint-grid absolute inset-0 -z-10" aria-hidden="true" />
+      <div className="hero-sky absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
+        <span className="hero-stars" />
+        <span className="hero-meteor" />
+        <span className="hero-meteor hero-meteor-delayed" />
+      </div>
 
       <div className="mx-auto max-w-7xl px-4 pt-16 pb-14 sm:px-6 md:pt-24 md:pb-20 lg:px-8">
         <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 font-mono text-xs tracking-wider text-white/80 uppercase">
           <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />
-          Australia&apos;s structural engineering job board
+          Global structural engineering careers
         </p>
 
         <h1 className="mt-6 max-w-4xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
           Structural Engineering Academic &amp; Industry Jobs{' '}
-          <span className="text-accent">Australia</span>
+          <span className="text-accent">Worldwide</span>
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-pretty text-white/80">
-          Find the latest structural engineering and academic opportunities across Australia —
-          refreshed every morning.
+          Explore industry and academic jobs, and find universities and PhD supervisors around the world.
         </p>
 
         <div className="mt-10 max-w-5xl">

@@ -10,7 +10,7 @@ const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
 const description =
-  'Structural engineering jobs in Australia: lecturer, professor, postdoc and PhD roles at universities, plus structural, bridge and civil engineering jobs in Sydney, Melbourne, Brisbane, Perth and Adelaide. Updated every morning.'
+  'Explore structural engineering jobs, research opportunities, universities and PhD supervisors.'
 
 const ogImage = {
   url: '/images/hero-bridge.png',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   appleWebApp: { title: SITE_SHORT_NAME },
   keywords: [
-    'structural engineering jobs Australia',
+    'structural engineering jobs worldwide',
     'structural engineer jobs',
     'academic engineering jobs',
     'lecturer structural engineering',
