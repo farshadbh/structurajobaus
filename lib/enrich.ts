@@ -40,8 +40,9 @@ export interface ProfileCheck {
 
 const CACHE_DAYS = 30
 const cacheKey = (id: string) => `prof:v1:${id}`
-const UA =
-  'Mozilla/5.0 (compatible; SEJobsProfessorFinder/1.0; +https://structuraljobaus.vercel.app/professors)'
+const UA = `Mozilla/5.0 (compatible; SEJobsProfessorFinder/1.0; +${(
+  process.env.NEXT_PUBLIC_SITE_URL || process.env.RENDER_EXTERNAL_URL || 'http://localhost:3000'
+).replace(/\/+$/, '')}/professors)`
 
 /* ------------------------------------------------------------- page fetch */
 

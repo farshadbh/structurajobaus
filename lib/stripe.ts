@@ -4,7 +4,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto'
  * Stripe over its REST API, in the same spirit as lib/store.ts: a handful of
  * form-encoded requests do not justify the SDK and a lockfile change.
  *
- * Needed in Vercel:
+ * Needed in the hosting environment:
  *   STRIPE_SECRET_KEY      sk_live_... (or sk_test_... for the trial run)
  *   STRIPE_PRICE_ID        price_... of the monthly membership
  *   STRIPE_WEBHOOK_SECRET  whsec_... from the webhook endpoint

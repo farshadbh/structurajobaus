@@ -88,6 +88,11 @@ export async function setMembers(key: string): Promise<string[]> {
   return (await command<string[]>(['SMEMBERS', key])) ?? []
 }
 
+/** A plain counter, e.g. apply clicks per listing. */
+export async function increment(key: string): Promise<number> {
+  return (await command<number>(['INCR', key])) ?? 0
+}
+
 /**
  * Fixed-window counter used to slow down password guessing. Returns the number
  * of hits in the current window, or 0 when storage is unavailable (fail open:

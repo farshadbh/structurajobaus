@@ -21,14 +21,14 @@ A specialist site for **structural and civil engineering careers**:
 - **Accounts and alerts** — saved searches with daily, weekly or monthly emails.
 - **Post a job** (`/post-a-job`) — employer submissions filed as GitHub issues for review.
 
-Live site: https://structuraljobaus.vercel.app
+Hosting: any Node or Docker host — see **Hosting** below (Render blueprint included).
 
 ## Stack
 
 - Next.js 16 (App Router, React 19) with Tailwind CSS 4
 - TypeScript, pnpm
 - Listings stored as a committed JSON snapshot (`data/jobs.json`) and refreshed daily
-- Deployed on Vercel
+- Runs as a standalone Node server (`output: 'standalone'`), packaged by the `Dockerfile`
 
 ## How the daily update works
 
@@ -40,7 +40,7 @@ Live site: https://structuraljobaus.vercel.app
    sponsorship), filters out irrelevant and expired ads, and rewrites `data/jobs.json`. Every
    source is optional and skipped when its key is absent, so the job succeeds before the first
    key exists.
-3. The workflow commits the snapshot. Vercel rebuilds on push, so the site reflects the new ads
+3. The workflow commits the snapshot. The host rebuilds on push (Render `autoDeploy`), so the site reflects the new ads
    without any manual step.
 4. Expired listings are dropped at build time (`closingDate` in the past), so dead ads never
    accumulate.
@@ -92,24 +92,24 @@ pnpm dev
 
 | Name | Where | Purpose |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Vercel + GitHub Actions | Canonical host for canonical tags, sitemap, robots, OG. Falls back to the Vercel deployment URL when unset. |
+| `NEXT_PUBLIC_SITE_URL` | Host + GitHub Actions | Canonical host (`https://yourdomain.com`) for canonical tags, sitemap, robots, OG. Falls back to Render's own address when unset. |
 | `CAREERJET_API_KEY` | GitHub Actions secret + local `.env` | Careerjet publisher key. Free, no card. 12 calls per run. |
 | `JOOBLE_API_KEY` | GitHub Actions secret + local `.env` | Jooble AU key. Free, but 500 requests for the lifetime of the key, so only 4 calls per run. |
 | `ADZUNA_APP_ID` | optional | Adzuna app id (trial is 25 lifetime calls; paid is £8/month). |
 | `ADZUNA_APP_KEY` | optional | Adzuna app key. |
-| `UPSTASH_REDIS_REST_URL` | Vercel + Actions secret | Upstash Redis REST endpoint. Accounts are off until this and the token are set. |
-| `UPSTASH_REDIS_REST_TOKEN` | Vercel + Actions secret | Upstash REST token. |
-| `AUTH_SECRET` | Vercel | Signs the session cookie. `openssl rand -hex 32`. Changing it signs everyone out. |
+| `UPSTASH_REDIS_REST_URL` | Host + Actions secret | Upstash Redis REST endpoint. Accounts are off until this and the token are set. |
+| `UPSTASH_REDIS_REST_TOKEN` | Host + Actions secret | Upstash REST token. |
+| `AUTH_SECRET` | Host | Signs the session cookie. `openssl rand -hex 32`. Changing it signs everyone out. |
 | `BREVO_API_KEY` | Actions secret | Brevo transactional email key. Absent means the digest run logs a skip and exits 0. |
 | `EMAIL_FROM` | Actions variable | Verified Brevo sender, e.g. `SE Jobs Worldwide <you@example.com>`. |
-| `SITE_URL` | Actions variable | Public URL used in email links. Defaults to the Vercel deployment. |
-| `GITHUB_TOKEN` | Vercel | Fine-grained PAT with Issues: write on the repo. `/post-a-job` files each submission as an issue; without it the form shows a setup message. |
-| `GITHUB_REPO` | Vercel | `owner/repo` that receives the submission issues. |
-| `OPENALEX_MAILTO` / `OPENALEX_API_KEY` | Vercel | Optional. Contact address / key for the OpenAlex API used by the professor finder. |
-| `BRAVE_SEARCH_API_KEY` | Vercel | Finds staff pages on university sites (free tier). Without it only ORCID-listed pages are read. |
-| `ANTHROPIC_API_KEY` | Vercel | Claude matching and staff-page reading for paid members. Optional. |
-| `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` | Vercel | Paid membership. Webhook URL: `https://<domain>/api/billing/webhook`, events `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`. |
-| `PRO_EMAILS` | Vercel | Comma-separated emails treated as members without paying (owner, testers). |
+| `SITE_URL` | Actions variable | Public URL used in email links. Required for working links in alert emails. |
+| `GITHUB_TOKEN` | Host | Fine-grained PAT with Issues: write on the repo. `/post-a-job` files each submission as an issue; without it the form shows a setup message. |
+| `GITHUB_REPO` | Host | `owner/repo` that receives the submission issues. |
+| `OPENALEX_MAILTO` / `OPENALEX_API_KEY` | Host | Optional. Contact address / key for the OpenAlex API used by the professor finder. |
+| `BRAVE_SEARCH_API_KEY` | Host | Finds staff pages on university sites (free tier). Without it only ORCID-listed pages are read. |
+| `ANTHROPIC_API_KEY` | Host | Claude matching and staff-page reading for paid members. Optional. |
+| `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` | Host | Paid membership. Webhook URL: `https://<domain>/api/billing/webhook`, events `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`. |
+| `PRO_EMAILS` | Host | Comma-separated emails treated as members without paying (owner, testers). |
 | `NEXT_PUBLIC_DEMO_JOBS` | local only | `1` renders the bundled sample listings before the first sync. Never enable in production. |
 
 Free keys: Careerjet at <https://www.careerjet.com/partners/api> (publisher account) and Jooble at
@@ -132,7 +132,26 @@ also requires:
 - **written agreement for commercial use.** The free tier is for evaluation; a product that
   generates revenue or leads needs a licence after a 14-day trial.
 
-Once you have a custom domain, set `NEXT_PUBLIC_SITE_URL` in Vercel and redeploy.
+## Hosting
+
+The site is a plain Next.js server with no Vercel-specific code.
+
+**Render (blueprint in `render.yaml`):**
+
+1. render.com → New → Blueprint → connect GitHub and pick this repository.
+2. Fill in the environment values it asks for (table above). `AUTH_SECRET` is generated for you.
+3. Render builds the `Dockerfile` and serves the site at `https://se-jobs-worldwide.onrender.com`
+   — use that address as the test site.
+4. When the test site is approved: Settings → Custom Domains → add `yourdomain.com` and
+   `www.yourdomain.com`, create the DNS records Render shows at your domain registrar, then set
+   `NEXT_PUBLIC_SITE_URL=https://yourdomain.com` (and the Actions variable `SITE_URL`) and redeploy.
+
+**Anywhere else with Docker:**
+
+```bash
+docker build --build-arg NEXT_PUBLIC_SITE_URL=https://yourdomain.com -t se-jobs .
+docker run -p 3000:3000 --env-file .env.local se-jobs
+```
 
 ## Project layout
 

@@ -1,4 +1,4 @@
-import { track } from '@vercel/analytics/server'
+import { increment } from '@/lib/store'
 import { getJobBySlug } from '@/lib/jobs'
 
 /**
@@ -22,13 +22,15 @@ export async function POST(request: Request) {
   const job = await getJobBySlug(slug)
   if (!job) return new Response(null, { status: 404 })
 
+  // Counted in the same Redis as the accounts (no hosting-specific analytics):
+  // per listing, and per month for the board as a whole.
   try {
-    await track('apply_click', {
-      slug: job.slug,
-      organisation: job.organisation,
-      sector: job.sector,
-      source: job.source ?? 'direct',
-    })
+    const month = new Date().toISOString().slice(0, 7)
+    await Promise.all([
+      increment(`stats:apply:${job.slug}`),
+      increment(`stats:apply:month:${month}`),
+      increment(`stats:apply:source:${job.source ?? 'direct'}`),
+    ])
   } catch {
     // Analytics must never surface as a failure to the visitor.
   }

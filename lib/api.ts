@@ -1,7 +1,7 @@
 /* Shared plumbing for the account endpoints. */
 
 export const NOT_CONFIGURED =
-  'Accounts are not configured on this deployment yet. Add UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN and AUTH_SECRET to the Vercel project, then redeploy.'
+  'Accounts are not configured on this deployment yet. Add UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN and AUTH_SECRET to the hosting environment, then redeploy.'
 
 /**
  * Every write checks that the browser sent it from our own origin. The session

@@ -58,18 +58,14 @@ export const SITE_SHORT_NAME = 'SE Jobs Worldwide'
 export const SITE_TAGLINE = 'Academic & industry structural engineering jobs'
 
 /**
- * Canonical host. Set NEXT_PUBLIC_SITE_URL explicitly once a custom domain is
- * live; until then fall back to the Vercel deployment URL so canonical tags and
- * the sitemap can never point at a host that does not resolve.
+ * Canonical host: set NEXT_PUBLIC_SITE_URL to the live domain (e.g.
+ * https://example.com). Until then the host's own address is used - Render
+ * sets RENDER_EXTERNAL_URL - so canonical tags and the sitemap never point at
+ * a host that does not resolve.
  */
 export const SITE_URL = (() => {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim()
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim() || process.env.RENDER_EXTERNAL_URL?.trim()
   if (explicit) return explicit.replace(/\/+$/, '')
-
-  const vercelHost =
-    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() || process.env.VERCEL_URL?.trim()
-  if (vercelHost) return `https://${vercelHost.replace(/\/+$/, '')}`
-
   return 'http://localhost:3000'
 })()
 

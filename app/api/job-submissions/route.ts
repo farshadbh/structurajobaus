@@ -1,6 +1,6 @@
 import { submissionToMarkdown, validateSubmission } from '@/lib/submissions'
 
-const REPO = process.env.GITHUB_REPO ?? 'orodzarrin/structurajobaus'
+const REPO = process.env.GITHUB_REPO ?? 'farshadbh/structurajobaus'
 
 /**
  * Employer submissions land as GitHub issues labelled `job-submission`, which

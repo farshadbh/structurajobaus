@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // A self-contained server in .next/standalone: the Docker image and any
+  // Node host run it with `node server.js`, no Vercel needed.
+  output: 'standalone',
   poweredByHeader: false,
   images: {
     formats: ['image/avif', 'image/webp'],

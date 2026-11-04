@@ -467,7 +467,7 @@ async function fetchCareerjetPage(keywords, page) {
     // Careerjet requires the originating client; a scheduled job has no user,
     // so identify it as our own unattended ingest.
     user_ip: '127.0.0.1',
-    user_agent: 'structuraljobaus-ingest/1.0 (+https://structuraljobaus.vercel.app)',
+    user_agent: `structuraljobaus-ingest/1.0 (+${process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://github.com/farshadbh/structurajobaus'})`,
   })
 
   const auth = Buffer.from(`${CAREERJET_API_KEY}:`).toString('base64')

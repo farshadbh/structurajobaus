@@ -1,0 +1,42 @@
+# Render Blueprint: Dashboard -> New -> Blueprint -> pick this repository.
+# Render builds the Dockerfile, gives the site a free https://<name>.onrender.com
+# address for testing, and redeploys on every push to the branch below
+# (including the daily job-listing refresh commit).
+services:
+  - type: web
+    name: se-jobs-worldwide
+    runtime: docker
+    plan: starter # the free plan sleeps after 15 idle minutes; starter stays on
+    region: singapore # closest Render region to Australia and New Zealand
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /
+    envVars:
+      # Fill these in on Render (Environment tab); sync: false means the value
+      # is entered by hand and never stored in the repository.
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: BRAVE_SEARCH_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENALEX_MAILTO
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PRICE_ID
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PRO_EMAILS
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GITHUB_REPO
+        value: farshadbh/structurajobaus
