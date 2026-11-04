@@ -105,7 +105,7 @@ pnpm dev
 | `SITE_URL` | Actions variable | Public URL used in email links. Required for working links in alert emails. |
 | `GITHUB_TOKEN` | Host | Fine-grained PAT with Issues: write on the repo. `/post-a-job` files each submission as an issue; without it the form shows a setup message. |
 | `GITHUB_REPO` | Host | `owner/repo` that receives the submission issues. |
-| `OPENALEX_MAILTO` / `OPENALEX_API_KEY` | Host | Optional. Contact address / key for the OpenAlex API used by the professor finder. |
+| `OPENALEX_API_KEY` | Host | **Required** for the professor finder. Free key from OpenAlex; without it searches fail once the shared per-IP daily budget runs out. |
 | `BRAVE_SEARCH_API_KEY` | Host | Finds staff pages on university sites (free tier). Without it only ORCID-listed pages are read. |
 | `ANTHROPIC_API_KEY` | Host | Claude matching and staff-page reading for paid members. Optional. |
 | `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` | Host | Paid membership. Webhook URL: `https://<domain>/api/billing/webhook`, events `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`. |

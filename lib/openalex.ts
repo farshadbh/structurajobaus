@@ -107,6 +107,13 @@ async function getJson<T>(path: string, params: Record<string, string>): Promise
     throw new OpenAlexError(`OpenAlex could not be reached (${(error as Error).message}).`)
   }
 
+  if (response.status === 429) {
+    throw new OpenAlexError(
+      process.env.OPENALEX_API_KEY
+        ? 'The professor search has reached its daily limit. Please try again tomorrow.'
+        : 'The professor search is not configured yet (OPENALEX_API_KEY is missing).',
+    )
+  }
   if (!response.ok) {
     throw new OpenAlexError(`OpenAlex answered ${response.status} for ${path}.`)
   }
