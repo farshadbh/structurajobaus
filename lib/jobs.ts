@@ -1,6 +1,6 @@
 import dataset from '@/data/jobs.json'
 import { SAMPLE_JOBS } from './data/sample-jobs'
-import { ALL_ROLES, CITIES, STATES, type Sector, type StateCode } from './taxonomy'
+import { ALL_ROLES, CITIES, CIVIL_SPECIALISMS, STATES, type Sector, type StateCode } from './taxonomy'
 import type { Job, JobFilters } from './types'
 
 /*
@@ -68,6 +68,18 @@ const JOBS: Job[] = IS_DEMO_DATA ? [...SAMPLE_JOBS].sort(byNewest) : LIVE_JOBS
 function matchesFilters(job: Job, filters: JobFilters) {
   if (filters.sector && job.sector !== filters.sector) return false
   if (filters.role && job.roleSlug !== filters.role) return false
+
+  // The feed never labels the sub-discipline, so the listing's own words decide it.
+  if (filters.specialism) {
+    const specialism = CIVIL_SPECIALISMS.find((entry) => entry.slug === filters.specialism)
+    if (specialism) {
+      const haystack = [job.title, job.summary, job.department ?? '', ...job.tags]
+        .join(' ')
+        .toLowerCase()
+      if (!specialism.keywords.some((keyword) => haystack.includes(keyword))) return false
+    }
+  }
+
   if (filters.city && job.city !== filters.city) return false
   if (filters.state && job.state !== filters.state) return false
   if (filters.visa && !job.visaSponsorship) return false
@@ -188,6 +200,9 @@ export function parseFilters(params: RawSearchParams): JobFilters {
     remote: get('remote') === '1',
     hybrid: get('hybrid') === '1',
     fullTime: get('fulltime') === '1',
+    specialism: CIVIL_SPECIALISMS.some((entry) => entry.slug === get('specialism'))
+      ? get('specialism')
+      : undefined,
   }
 }
 

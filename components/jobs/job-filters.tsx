@@ -5,7 +5,14 @@ import Form from 'next/form'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
-import { ACADEMIC_ROLES, CITIES, INDUSTRY_ROLES, SALARY_OPTIONS, STATES } from '@/lib/taxonomy'
+import {
+  ACADEMIC_ROLES,
+  CITIES,
+  CIVIL_SPECIALISMS,
+  INDUSTRY_ROLES,
+  SALARY_OPTIONS,
+  STATES,
+} from '@/lib/taxonomy'
 import type { JobFilters as Filters } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -142,6 +149,25 @@ export function JobFilters({ action, filters, lockSector, lockCity, activeCount 
             </div>
           </Fieldset>
         )}
+
+        <Fieldset legend="Civil specialism">
+          <label htmlFor="filter-specialism" className="sr-only">
+            Civil specialism
+          </label>
+          <select
+            id="filter-specialism"
+            name="specialism"
+            defaultValue={filters.specialism ?? ''}
+            className={selectClass}
+          >
+            <option value="">All specialisms</option>
+            {CIVIL_SPECIALISMS.map((specialism) => (
+              <option key={specialism.slug} value={specialism.slug}>
+                {specialism.name}
+              </option>
+            ))}
+          </select>
+        </Fieldset>
 
         <Fieldset legend="Role">
           <label htmlFor="filter-role" className="sr-only">

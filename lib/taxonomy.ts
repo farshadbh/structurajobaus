@@ -111,3 +111,64 @@ export function getRole(slug: string) {
 export function getCity(slug: string) {
   return CITIES.find((city) => city.slug === slug)
 }
+
+/**
+ * The civil/structural sub-disciplines a listing is filed under.
+ *
+ * Feeds rarely label the discipline, so a listing is matched on its own words:
+ * title, summary, department and tags. "Bridge" sits only under structural,
+ * otherwise a bridge engineer would appear in transport as well and the counts
+ * would double.
+ */
+export interface Specialism {
+  slug: string
+  name: string
+  keywords: string[]
+}
+
+export const CIVIL_SPECIALISMS: Specialism[] = [
+  {
+    slug: 'structural',
+    name: 'Structural & bridges',
+    keywords: ['structural', 'bridge', 'steel', 'concrete', 'timber', 'seismic', 'earthquake'],
+  },
+  {
+    slug: 'geotechnical',
+    name: 'Geotechnical & tunnelling',
+    keywords: ['geotechnical', 'geotech', 'foundation', 'soil', 'piling', 'tunnel'],
+  },
+  {
+    slug: 'water',
+    name: 'Water & drainage',
+    keywords: ['water', 'hydraulic', 'hydrology', 'drainage', 'wastewater', 'stormwater', 'flood'],
+  },
+  {
+    slug: 'transport',
+    name: 'Transport & roads',
+    keywords: ['transport', 'traffic', 'road', 'highway', 'rail', 'pavement'],
+  },
+  {
+    slug: 'construction',
+    name: 'Construction & project management',
+    keywords: ['construction', 'site engineer', 'project manager', 'contracts', 'planning'],
+  },
+  {
+    slug: 'environmental',
+    name: 'Environmental & sustainability',
+    keywords: ['environmental', 'sustainability', 'climate', 'carbon'],
+  },
+  {
+    slug: 'materials',
+    name: 'Materials & durability',
+    keywords: ['materials', 'durability', 'corrosion', 'asphalt'],
+  },
+  {
+    slug: 'surveying',
+    name: 'Surveying & geospatial',
+    keywords: ['survey', 'geospatial', 'gis', 'lidar'],
+  },
+]
+
+export function getSpecialism(slug: string) {
+  return CIVIL_SPECIALISMS.find((specialism) => specialism.slug === slug)
+}

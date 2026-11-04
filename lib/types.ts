@@ -63,4 +63,6 @@ export interface JobFilters {
   remote?: boolean
   hybrid?: boolean
   fullTime?: boolean
+  /** Civil sub-discipline, e.g. structural, geotechnical, water, transport. */
+  specialism?: string
 }
