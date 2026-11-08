@@ -29,5 +29,5 @@ export function tooMany(error: string) {
 }
 
 export function unauthorized() {
-  return Response.json({ error: 'Sign in to manage your job alerts.' }, { status: 401 })
+  return Response.json({ error: 'Sign in first.' }, { status: 401 })
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { CONTACT_HREF } from '@/lib/format'
 import Link from 'next/link'
 import { AcademicDirectory } from '@/components/academics/academic-directory'
 import { PageHeader } from '@/components/page-header'
@@ -51,7 +52,7 @@ export default async function AcademicPeoplePage({ searchParams }: { searchParam
         title="Civil engineering academics in Australia"
         description="Lecturers, senior lecturers, associate professors and professors, with what each one researches and how to contact them."
         breadcrumbs={[
-          { label: 'Academic jobs', href: '/academic' },
+          { label: 'Supervisors', href: '/supervisors' },
           { label: 'Academics', href: '/academic/people' },
         ]}
       >
@@ -112,9 +113,9 @@ export default async function AcademicPeoplePage({ searchParams }: { searchParam
           </p>
           <p className="mt-2">
             Someone missing or listed wrongly?{' '}
-            <Link href="/post-a-job" className="underline hover:no-underline">
+            <a href={CONTACT_HREF} className="underline hover:no-underline">
               Send us a correction
-            </Link>{' '}
+            </a>{' '}
             and it goes into the next update.
           </p>
         </aside>

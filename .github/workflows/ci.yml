@@ -8,17 +8,28 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # The repository holds two sites: PhD Compass at the root and the
+        # SE Jobs Worldwide job board in job-board/. Each is checked on its own.
+        site: ['.', 'job-board']
+    defaults:
+      run:
+        working-directory: ${{ matrix.site }}
     steps:
       - uses: actions/checkout@v4
 
       # No pinned version here: pnpm/action-setup reads `packageManager` from
       # package.json. Specifying both fails with ERR_PNPM_BAD_PM_VERSION.
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ${{ matrix.site }}/package.json
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
+          cache-dependency-path: ${{ matrix.site }}/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
 

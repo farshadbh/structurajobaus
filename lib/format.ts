@@ -53,9 +53,9 @@ export const EMPLOYMENT_TYPE_LABEL = {
   scholarship: 'Scholarship',
 } as const
 
-export const SITE_NAME = 'Structural Engineering Jobs Worldwide'
-export const SITE_SHORT_NAME = 'SE Jobs Worldwide'
-export const SITE_TAGLINE = 'Academic & industry structural engineering jobs'
+export const SITE_NAME = 'PhD Compass'
+export const SITE_SHORT_NAME = 'PhD Compass'
+export const SITE_TAGLINE = 'Find your PhD supervisor, university and scholarship'
 
 /**
  * Canonical host: set NEXT_PUBLIC_SITE_URL to the live domain (e.g.
@@ -68,6 +68,14 @@ export const SITE_URL = (() => {
   if (explicit) return explicit.replace(/\/+$/, '')
   return 'http://localhost:3000'
 })()
+
+/**
+ * Where corrections and privacy requests go: set NEXT_PUBLIC_CONTACT_EMAIL to
+ * a published address; until then they go to the repository's issue tracker.
+ */
+export const CONTACT_HREF = process.env.NEXT_PUBLIC_CONTACT_EMAIL
+  ? `mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL}`
+  : 'https://github.com/farshadbh/structurajobaus/issues'
 
 /**
  * Aggregators require a visible attribution link wherever their listings appear.

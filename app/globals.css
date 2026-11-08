@@ -2,6 +2,9 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
+/* The job board in job-board/ is a separate site with its own stylesheet. */
+@source not '../job-board';
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

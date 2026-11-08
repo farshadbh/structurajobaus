@@ -6,13 +6,13 @@ export default function NotFound() {
       <p className="font-mono text-sm text-accent">404</p>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight">This page has been decommissioned</h1>
       <p className="mt-3 text-muted-foreground">
-        The job or page you&apos;re looking for may have closed or moved.
+        The page you&apos;re looking for may have moved.
       </p>
       <Link
-        href="/jobs"
+        href="/professors"
         className="mt-8 inline-flex h-10 items-center rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
       >
-        Browse all jobs
+        Find a professor
       </Link>
     </div>
   )

@@ -175,7 +175,7 @@ const seeds: Seed[] = [
   },
   {
     title: 'PhD Scholarship – Offshore & Marine Structures',
-    roleSlug: 'phd-scholarship',
+    roleSlug: 'research-fellow',
     sector: 'academic',
     organisation: 'University of Western Australia',
     department: 'Oceans Graduate School',
@@ -197,7 +197,7 @@ const seeds: Seed[] = [
   },
   {
     title: 'PhD Scholarship – Low-Carbon Concrete',
-    roleSlug: 'phd-scholarship',
+    roleSlug: 'research-fellow',
     sector: 'academic',
     organisation: 'University of Adelaide',
     department: 'School of Architecture & Civil Engineering',

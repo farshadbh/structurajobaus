@@ -88,7 +88,14 @@ function memoryCommand(args: (string | number)[]): unknown {
   }
 }
 
-async function command<T>(args: (string | number)[]): Promise<T | null> {
+/*
+ * Every key is prefixed so PhD Compass can share one Upstash database with the
+ * job board (job-board/) without the two sites' accounts ever colliding.
+ */
+const KEY_PREFIX = process.env.STORE_KEY_PREFIX ?? 'compass:'
+
+async function command<T>(rawArgs: (string | number)[]): Promise<T | null> {
+  const args = rawArgs.length > 1 ? [rawArgs[0], `${KEY_PREFIX}${rawArgs[1]}`, ...rawArgs.slice(2)] : rawArgs
   if (USE_MEMORY) return memoryCommand(args) as T | null
   if (!REST_URL || !REST_TOKEN) return null
 

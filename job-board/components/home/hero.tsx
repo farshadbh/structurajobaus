@@ -32,7 +32,7 @@ export function Hero({ stats }: HeroProps) {
           <span className="text-accent">Worldwide</span>
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-pretty text-white/80">
-          Explore industry and academic jobs, and find universities and PhD supervisors around the world.
+          Industry and academic structural engineering jobs, including roles that offer visa sponsorship.
         </p>
 
         <div className="mt-10 max-w-5xl">
@@ -42,22 +42,22 @@ export function Hero({ stats }: HeroProps) {
         <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-white/80">
           <span>Popular:</span>
           <Link
-            href="/academic?role=phd-scholarship"
+            href="/academic"
             className="rounded-full border border-white/20 px-3 py-1 transition-colors hover:border-accent hover:text-white"
           >
-            PhD Scholarships
+            Academic jobs
           </Link>
           <Link
-            href="/universities"
+            href="/industry"
             className="rounded-full border border-white/20 px-3 py-1 transition-colors hover:border-accent hover:text-white"
           >
-            Universities worldwide
+            Industry jobs
           </Link>
           <Link
-            href="/supervisors"
+            href="/jobs?visa=1"
             className="rounded-full border border-accent/60 bg-accent/10 px-3 py-1 font-medium text-white transition-colors hover:border-accent"
           >
-            Find a supervisor
+            Visa sponsorship
           </Link>
         </div>
 

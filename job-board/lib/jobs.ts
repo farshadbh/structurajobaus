@@ -57,7 +57,10 @@ function withRealEmployer(job: Job): Job {
   return PLACEHOLDER_EMPLOYER.test(organisation) ? { ...job, organisation: '' } : job
 }
 
-const LIVE_JOBS: Job[] = FILE.jobs.filter(isOpen).map(withRealEmployer).sort(byNewest)
+// PhD scholarships are published by the sister site, PhD Compass, not here.
+const isJobRole = (job: Job) => job.roleSlug !== 'phd-scholarship'
+
+const LIVE_JOBS: Job[] = FILE.jobs.filter(isOpen).filter(isJobRole).map(withRealEmployer).sort(byNewest)
 
 export const IS_DEMO_DATA = LIVE_JOBS.length === 0 && DEMO_ENABLED
 export const DATA_UPDATED_AT = FILE.generatedAt

@@ -8,12 +8,11 @@ import { Logo } from '@/components/logo'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { href: '/academic', label: 'Academic Jobs' },
-  { href: '/industry', label: 'Industry Jobs' },
   { href: '/professors', label: 'Find a professor' },
-  { href: '/jobs?visa=1', label: 'Visa Sponsorship' },
-  { href: '/account', label: 'Job alerts' },
-  { href: '/post-a-job', label: 'Post a job' },
+  { href: '/supervisors', label: 'Supervisor directory' },
+  { href: '/universities', label: 'Universities' },
+  { href: '/scholarships', label: 'Scholarships' },
+  { href: '/pricing', label: 'Membership' },
 ]
 
 /**
@@ -26,7 +25,6 @@ const NAV_ITEMS = [
  * account slot holds its width, so nothing jumps.
  */
 const MOBILE_LINKS = [
-  { href: '/jobs', label: 'Search all jobs' },
   { href: '/signup', label: 'Create account' },
   { href: '/login', label: 'Sign in' },
 ]
@@ -52,22 +50,7 @@ export function SiteHeader() {
   }, [pathname])
 
   const accountName = email ? email.split('@')[0] : null
-  const mobileLinks = email
-    ? [
-        { href: '/jobs', label: 'Search all jobs' },
-        { href: '/account', label: 'My account' },
-        { href: '/professors', label: 'Find a professor' },
-        { href: '/supervisors', label: 'Supervisor directory' },
-        { href: '/cities', label: 'Browse by city' },
-        { href: '/pricing', label: 'Membership' },
-      ]
-    : [
-        ...MOBILE_LINKS,
-        { href: '/professors', label: 'Find a professor' },
-        { href: '/supervisors', label: 'Supervisor directory' },
-        { href: '/cities', label: 'Browse by city' },
-        { href: '/pricing', label: 'Membership' },
-      ]
+  const mobileLinks = email ? [{ href: '/account', label: 'My account' }] : MOBILE_LINKS
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
@@ -75,13 +58,13 @@ export function SiteHeader() {
         <Logo />
 
         {/*
-         * Six links plus two account buttons only fit on one line from 1280px up,
+         * Five links plus two account buttons only fit on one line from 1280px up,
          * so the nav appears at xl and the hamburger covers everything narrower.
          * Everything is nowrap: a wrapped label is what made the bar look ragged.
          */}
         <nav aria-label="Main" className="hidden items-center gap-0.5 xl:flex">
           {NAV_ITEMS.map((item) => {
-            const active = pathname.startsWith(item.href.split('?')[0]) && item.href !== '/jobs?visa=1'
+            const active = pathname.startsWith(item.href)
             return (
               <Link
                 key={item.href}

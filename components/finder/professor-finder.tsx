@@ -610,13 +610,27 @@ export function ProfessorFinder() {
       .then((response) => response.json())
       .then((data: { claude?: boolean }) => setClaudeAvailable(Boolean(data.claude)))
       .catch(() => null)
+
+    // A search started elsewhere (the home page, a shared link) runs at once.
+    const params = new URLSearchParams(window.location.search)
+    const fromUrl = params.get('q')?.trim()
+    const regionParam = params.get('region')
+    const fromRegion = regionParam === 'AU' || regionParam === 'NZ' ? regionParam : 'all'
+    if (fromUrl) {
+      setQuery(fromUrl)
+      setRegion(fromRegion)
+      void runSearch(1, { q: fromUrl, region: fromRegion })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const isPro = plan === 'pro'
   const area = (query.trim() || open?.fields[0] || 'research').toLowerCase()
 
-  async function runSearch(nextPage = 1) {
-    if (query.trim().length < 2) {
+  async function runSearch(nextPage = 1, override?: { q: string; region: 'all' | RegionCode }) {
+    const q = (override?.q ?? query).trim()
+    const where = override?.region ?? region
+    if (q.length < 2) {
       setError('Type a research topic, e.g. "seismic retrofit", "hydrology" or "machine learning".')
       return
     }
@@ -624,8 +638,8 @@ export function ProfessorFinder() {
     setError('')
     setMatches(null)
     try {
-      const params = new URLSearchParams({ q: query.trim(), sort, page: String(nextPage) })
-      if (region !== 'all') params.set('region', region)
+      const params = new URLSearchParams({ q, sort, page: String(nextPage) })
+      if (where !== 'all') params.set('region', where)
       const response = await fetch(`/api/professors/search?${params}`)
       const data = (await response.json()) as SearchResponse
       if (!response.ok) {

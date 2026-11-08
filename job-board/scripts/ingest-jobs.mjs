@@ -36,6 +36,9 @@ import { fetchPageUpJobs } from './sources/pageup.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DATA_FILE = path.join(ROOT, 'data', 'jobs.json')
+// PhD scholarships are published by the sister site, PhD Compass, at the
+// repository root - not on this job board.
+const SCHOLARSHIP_FILE = path.join(ROOT, '..', 'data', 'scholarships.json')
 
 const ADZUNA_APP_ID = process.env.ADZUNA_APP_ID?.trim()
 const ADZUNA_APP_KEY = process.env.ADZUNA_APP_KEY?.trim()
@@ -797,7 +800,10 @@ async function main() {
   // test before publication.
   const directFromEmployer = (job) => job.source === 'workday' || job.source === 'pageup'
   const checked = await dropDeadLinks(fresh.filter((job) => !directFromEmployer(job)))
-  const jobs = [...checked, ...fresh.filter(directFromEmployer)].sort(byNewest)
+  const everything = [...checked, ...fresh.filter(directFromEmployer)].sort(byNewest)
+  const isScholarship = (job) => job.roleSlug === 'phd-scholarship'
+  const scholarships = everything.filter(isScholarship)
+  const jobs = everything.filter((job) => !isScholarship(job))
 
   if (jobs.length === 0) {
     console.warn('[ingest] No matching structural engineering vacancies returned — keeping the previous snapshot.')
@@ -821,6 +827,18 @@ async function main() {
     )}\n`,
     'utf8',
   )
+
+  await mkdir(path.dirname(SCHOLARSHIP_FILE), { recursive: true })
+  await writeFile(
+    SCHOLARSHIP_FILE,
+    `${JSON.stringify(
+      { generatedAt: new Date().toISOString(), source: used.join('+'), scholarships },
+      null,
+      2,
+    )}\n`,
+    'utf8',
+  )
+  console.log(`[ingest] Wrote ${scholarships.length} PhD scholarships for PhD Compass.`)
 
   const academic = jobs.filter((job) => job.sector === 'academic').length
   const fromBoards = jobs.filter((job) => directFromEmployer(job)).length

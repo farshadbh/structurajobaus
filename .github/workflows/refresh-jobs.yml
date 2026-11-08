@@ -32,12 +32,14 @@ jobs:
           JOOBLE_API_KEY: ${{ secrets.JOOBLE_API_KEY }}
           ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
           ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
-        run: node scripts/ingest-jobs.mjs
+        # The job board lives in job-board/; the same run hands PhD scholarship ads
+        # to PhD Compass at the repository root (data/scholarships.json).
+        run: node job-board/scripts/ingest-jobs.mjs
 
       - name: Commit refreshed snapshot
         run: |
-          if git diff --quiet -- data/jobs.json; then
-            echo "No changes to data/jobs.json"
+          if git diff --quiet -- job-board/data/jobs.json && [ -z "$(git status --porcelain -- data/scholarships.json)" ]; then
+            echo "No changes to the listings or scholarships"
             exit 0
           fi
           # Vercel Hobby refuses to deploy commits whose author is not a project
@@ -46,6 +48,6 @@ jobs:
           # repo owner keeps every daily snapshot deployable.
           git config user.name "orodzarrin"
           git config user.email "orod.zarrin@gmail.com"
-          git add data/jobs.json
-          git commit -m "chore(data): refresh job listings"
+          git add job-board/data/jobs.json data/scholarships.json
+          git commit -m "chore(data): refresh job listings and PhD scholarships"
           git push

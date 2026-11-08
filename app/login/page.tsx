@@ -7,7 +7,7 @@ import { STORE_READY } from '@/lib/store'
 
 export const metadata: Metadata = {
   title: 'Sign in',
-  description: 'Sign in to save job lists and get new structural engineering roles emailed to you.',
+  description: 'Sign in to PhD Compass.',
   alternates: { canonical: '/login' },
   robots: { index: false, follow: true },
 }
@@ -20,7 +20,7 @@ export default async function LoginPage() {
       <PageHeader
         eyebrow="Your account"
         title="Sign in"
-        description="Saved lists and email alerts for new structural engineering roles."
+        description="Your membership and professor search."
         breadcrumbs={[{ label: 'Sign in', href: '/login' }]}
       />
       <div className="mx-auto max-w-md px-4 py-10 sm:px-6 lg:px-8">

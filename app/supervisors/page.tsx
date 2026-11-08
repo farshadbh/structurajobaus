@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { CONTACT_HREF } from '@/lib/format'
 import Link from 'next/link'
 import { SupervisorExplorer } from '@/components/supervisors/supervisor-explorer'
 import { PageHeader } from '@/components/page-header'
@@ -22,7 +23,6 @@ export default function SupervisorsPage() {
         title="Find your supervisor"
         description="Who researches what, where, and how to write to them — across Australia, North America, the UK, Europe and Asia."
         breadcrumbs={[
-          { label: 'Academic jobs', href: '/academic' },
           { label: 'Supervisors', href: '/supervisors' },
         ]}
       >
@@ -71,9 +71,9 @@ export default function SupervisorsPage() {
         </p>
         <p className="mt-3 text-sm text-muted-foreground">
           Know a supervisor who is missing?{' '}
-          <Link href="/post-a-job" className="text-primary hover:underline">
+          <a href={CONTACT_HREF} className="text-primary hover:underline">
             Send us the name and profile link
-          </Link>{' '}
+          </a>{' '}
           and it goes into the next update.
         </p>
       </section>

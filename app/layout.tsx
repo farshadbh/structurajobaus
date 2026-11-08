@@ -9,7 +9,7 @@ const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
 const description =
-  'Explore structural engineering jobs, research opportunities, universities and PhD supervisors.'
+  'Find an active professor to supervise your PhD in Australia and New Zealand, check whether they take students, and email them from your CV.'
 
 const ogImage = {
   url: '/images/hero-bridge.png',
@@ -28,15 +28,13 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   appleWebApp: { title: SITE_SHORT_NAME },
   keywords: [
-    'structural engineering jobs worldwide',
-    'structural engineer jobs',
-    'academic engineering jobs',
-    'lecturer structural engineering',
-    'PhD scholarship civil engineering',
-    'bridge engineer jobs',
-    'civil engineer jobs Sydney',
-    'engineering jobs Melbourne',
-    'visa sponsorship engineering jobs Australia',
+    'PhD supervisor',
+    'find a PhD supervisor Australia',
+    'PhD supervisor New Zealand',
+    'PhD scholarship Australia',
+    'professors accepting PhD students',
+    'email a potential supervisor',
+    'research supervisor search',
   ],
   alternates: { canonical: '/' },
   openGraph: {

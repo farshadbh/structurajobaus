@@ -1,0 +1,157 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --color-success: var(--success);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* Engineering palette: steel navy, safety orange, concrete greys. */
+:root {
+  color-scheme: light;
+  --background: oklch(0.985 0.003 247);
+  --foreground: oklch(0.22 0.03 256);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.03 256);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.03 256);
+  --primary: oklch(0.34 0.08 254);
+  --primary-foreground: oklch(0.985 0.003 247);
+  --secondary: oklch(0.95 0.01 250);
+  --secondary-foreground: oklch(0.28 0.05 255);
+  --muted: oklch(0.955 0.007 250);
+  --muted-foreground: oklch(0.5 0.025 256);
+  --accent: oklch(0.72 0.17 54);
+  --accent-foreground: oklch(0.2 0.03 256);
+  --success: oklch(0.55 0.12 160);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.9 0.012 250);
+  --input: oklch(0.88 0.012 250);
+  --ring: oklch(0.55 0.1 254);
+  --chart-1: oklch(0.34 0.08 254);
+  --chart-2: oklch(0.72 0.17 54);
+  --chart-3: oklch(0.55 0.12 160);
+  --chart-4: oklch(0.6 0.05 254);
+  --chart-5: oklch(0.8 0.02 250);
+  --radius: 0.5rem;
+  --sidebar: oklch(0.985 0.003 247);
+  --sidebar-foreground: oklch(0.22 0.03 256);
+  --sidebar-primary: oklch(0.34 0.08 254);
+  --sidebar-primary-foreground: oklch(0.985 0.003 247);
+  --sidebar-accent: oklch(0.95 0.01 250);
+  --sidebar-accent-foreground: oklch(0.28 0.05 255);
+  --sidebar-border: oklch(0.9 0.012 250);
+  --sidebar-ring: oklch(0.55 0.1 254);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@utility blueprint-grid {
+  background-image:
+    linear-gradient(to right, oklch(1 0 0 / 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.07) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.hero-sky {
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 81% 20%, #5b367c 0%, transparent 42%),
+    radial-gradient(ellipse at 69% 75%, #163b68 0%, transparent 52%),
+    linear-gradient(110deg, #08162c 15%, #10152d 65%, #241838);
+}
+
+.hero-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, #fff 0.8px, transparent 1.7px),
+    radial-gradient(circle, #a8c8ff 0.65px, transparent 1.55px),
+    radial-gradient(circle, #e5d0ff 1px, transparent 2px);
+  background-size: 107px 97px, 71px 73px, 193px 147px;
+  background-position: 7px 21px, 31px 12px, 84px 42px;
+  opacity: 0.55;
+  animation: hero-twinkle 6s ease-in-out infinite alternate;
+}
+
+.hero-meteor {
+  position: absolute;
+  top: 13%;
+  left: 74%;
+  width: clamp(75px, 12vw, 155px);
+  height: 2px;
+  border-radius: 100%;
+  background: linear-gradient(90deg, transparent, #a9cbff 78%, white);
+  box-shadow: 12px 0 14px #a8c8ff80;
+  opacity: 0;
+  animation: hero-shooting-star 12s ease-out infinite;
+}
+
+.hero-meteor-delayed {
+  top: 42%;
+  left: 59%;
+  animation-delay: 6s;
+}
+
+@keyframes hero-twinkle {
+  to { opacity: 0.83; }
+}
+
+@keyframes hero-shooting-star {
+  0%, 55% { opacity: 0; transform: translate(0, 0) rotate(25deg); }
+  59% { opacity: 0.95; }
+  70%, 100% { opacity: 0; transform: translate(230px, 107px) rotate(25deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-stars, .hero-meteor { animation: none; }
+}

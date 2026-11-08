@@ -34,4 +34,4 @@ jobs:
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           EMAIL_FROM: ${{ vars.EMAIL_FROM || 'SE Jobs Worldwide <alerts@example.com>' }}
           SITE_URL: ${{ vars.SITE_URL }}
-        run: node scripts/send-digests.mjs
+        run: node job-board/scripts/send-digests.mjs

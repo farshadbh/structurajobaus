@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { CONTACT_HREF } from '@/lib/format'
 import Link from 'next/link'
 import { PageHeader } from '@/components/page-header'
 import {
@@ -26,7 +27,6 @@ export default function UniversitiesPage() {
         title="Universities worldwide"
         description="The QS 2027 top 200 and the wider directory, grouped by country, each with the official site that leads to the staff pages that matter."
         breadcrumbs={[
-          { label: 'Academic jobs', href: '/academic' },
           { label: 'Supervisors', href: '/supervisors' },
           { label: 'Universities', href: '/universities' },
         ]}
@@ -132,9 +132,9 @@ export default function UniversitiesPage() {
           green number beside a university is the count of people transcribed from that
           institution&rsquo;s own pages; a dash means none yet. If you spot a wrong country or a dead
           link,{' '}
-          <Link href="/post-a-job" className="text-primary hover:underline">
+          <a href={CONTACT_HREF} className="text-primary hover:underline">
             send it in
-          </Link>{' '}
+          </a>{' '}
           and it goes into the next update.
         </p>
       </section>

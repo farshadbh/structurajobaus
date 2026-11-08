@@ -1,10 +1,11 @@
 # Render Blueprint: Dashboard -> New -> Blueprint -> pick this repository.
-# Render builds the Dockerfile, gives the site a free https://<name>.onrender.com
-# address for testing, and redeploys on every push to the branch below
-# (including the daily job-listing refresh commit).
+# Two sites, two services: PhD Compass (repository root) and the SE Jobs
+# Worldwide job board (job-board/). Each gets a free https://<name>.onrender.com
+# address for testing and redeploys on every push to the branch below
+# (including the daily listing/scholarship refresh commit).
 services:
   - type: web
-    name: se-jobs-worldwide
+    name: phd-compass
     runtime: docker
     plan: starter # the free plan sleeps after 15 idle minutes; starter stays on
     region: singapore # closest Render region to Australia and New Zealand
@@ -35,6 +36,29 @@ services:
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
       - key: PRO_EMAILS
+        sync: false
+      - key: NEXT_PUBLIC_CONTACT_EMAIL
+        sync: false
+
+  - type: web
+    name: se-jobs-worldwide
+    runtime: docker
+    rootDir: job-board
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    region: singapore
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /
+    envVars:
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
         sync: false
       - key: GITHUB_TOKEN
         sync: false

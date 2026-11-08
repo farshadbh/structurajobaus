@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 }
 
 const ROWS: { label: string; free: boolean | string; pro: boolean | string }[] = [
-  { label: 'Job board, alerts and the supervisor directory', free: true, pro: true },
+  { label: 'Supervisor directory, universities and scholarships', free: true, pro: true },
   { label: 'Professor search by keyword, all fields', free: `First ${FREE_VISIBLE} results`, pro: 'Every result' },
   { label: 'Latest papers of each professor', free: true, pro: true },
   { label: 'Ready-written email and follow-up tracking', free: true, pro: true },
@@ -40,7 +40,7 @@ export default async function PricingPage() {
       <PageHeader
         eyebrow="Membership"
         title="Find the right supervisor faster"
-        description="The free plan covers the job board and a taste of the professor finder. Membership opens every professor, their supervision status, and matching against your CV."
+        description="The free plan gives a taste of the professor finder. Membership opens every professor, their supervision status, and matching against your CV."
         breadcrumbs={[{ label: 'Membership', href: '/pricing' }]}
       />
 
