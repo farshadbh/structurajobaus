@@ -1,8 +1,8 @@
 # SE Jobs Australia
 
-A specialist job board for **structural engineering vacancies in Australia** — academic posts
-(lecturer, professor, research fellow) alongside industry roles (structural,
-bridge, civil, design, project, geotechnical).
+A specialist job board for **structural engineering vacancies in Australia** — industry roles
+(structural, bridge, civil, design, project, geotechnical) with consultancies, contractors and
+asset owners.
 
 Live site: https://structuraljobaus.vercel.app
 
@@ -37,7 +37,7 @@ pnpm ingest
 ## Accounts, saved lists and email alerts
 
 Visitors can create a free account (`/signup`) and build **lists** — saved searches with keywords,
-academic/industry, city, state, minimum salary and visa sponsorship. Each account chooses a daily,
+city, state, minimum salary and visa sponsorship. Each account chooses a daily,
 weekly or monthly email; `scripts/send-digests.mjs` sends one email per period, and only when
 something new matches.
 
@@ -76,8 +76,8 @@ pnpm dev
 | Name | Where | Purpose |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Vercel + GitHub Actions | Canonical host for canonical tags, sitemap, robots, OG. Falls back to the Vercel deployment URL when unset. |
-| `CAREERJET_API_KEY` | GitHub Actions secret + local `.env` | Careerjet publisher key. Free, no card. 12 calls per run. |
-| `JOOBLE_API_KEY` | GitHub Actions secret + local `.env` | Jooble AU key. Free, but 500 requests for the lifetime of the key, so only 4 calls per run. |
+| `CAREERJET_API_KEY` | GitHub Actions secret + local `.env` | Careerjet publisher key. Free, no card. 10 calls per run. |
+| `JOOBLE_API_KEY` | GitHub Actions secret + local `.env` | Jooble AU key. Free, but 500 requests for the lifetime of the key, so only 6 calls per run. |
 | `ADZUNA_APP_ID` | optional | Adzuna app id (trial is 25 lifetime calls; paid is £8/month). |
 | `ADZUNA_APP_KEY` | optional | Adzuna app key. |
 | `UPSTASH_REDIS_REST_URL` | Vercel + Actions secret | Upstash Redis REST endpoint. Accounts are off until this and the token are set. |
@@ -113,7 +113,7 @@ Once you have a custom domain, set `NEXT_PUBLIC_SITE_URL` in Vercel and redeploy
 ## Project layout
 
 ```
-app/                 routes: /, /jobs, /jobs/[slug], /academic, /industry, /cities/[city], /account, /login, /signup, /privacy, /terms
+app/                 routes: /, /jobs, /jobs/[slug], /industry, /cities/[city], /account, /login, /signup, /privacy, /terms
 components/          header, footer, hero, job cards, filters, listing
 lib/jobs.ts          data access: live snapshot, expiry filtering, search/filtering
 lib/taxonomy.ts      roles, cities, states, salary bands

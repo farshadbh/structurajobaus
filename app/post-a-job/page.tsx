@@ -15,7 +15,7 @@ export default function PostAJobPage() {
       <PageHeader
         eyebrow="For employers"
         title="Post a structural engineering job"
-        description="Reach structural engineers, academics and researchers across Australia. Submissions are reviewed before publication."
+        description="Reach structural, civil and geotechnical engineers across Australia. Submissions are reviewed before publication."
         breadcrumbs={[{ label: 'Post a job', href: '/post-a-job' }]}
       />
 

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { JobsListing } from '@/components/jobs/jobs-listing'
 import { PageHeader } from '@/components/page-header'
-import { parseFilters } from '@/lib/jobs'
+import { isKnownSector, parseFilters } from '@/lib/jobs'
 import { CITIES, getCity } from '@/lib/taxonomy'
 
 type Params = Promise<{ city: string }>
@@ -29,7 +29,7 @@ export async function generateMetadata({
 
   return {
     title: `Structural Engineering Jobs in ${city.name}, ${city.state}`,
-    description: `Academic and industry structural engineering jobs in ${city.name}. ${city.description}`,
+    description: `Industry structural engineering jobs in ${city.name}. ${city.description}`,
     alternates: { canonical: `/cities/${city.slug}` },
     robots: narrowed ? { index: false, follow: true } : { index: true, follow: true },
   }
@@ -39,7 +39,10 @@ export default async function CityPage({ params, searchParams }: { params: Param
   const city = getCity((await params).city)
   if (!city) notFound()
 
-  const filters = parseFilters(await searchParams)
+  const rawParams = await searchParams
+  const filters = parseFilters(rawParams)
+  const sectorParam = Array.isArray(rawParams.sector) ? rawParams.sector[0] : rawParams.sector
+  if (!isKnownSector(sectorParam)) notFound()
 
   return (
     <>

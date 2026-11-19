@@ -71,10 +71,10 @@ export async function JobsListing({ action, filters, lockSector, lockCity }: Job
                 : 'This board reloads vacancies from Australian job feeds every morning at 6am Sydney time. Check back shortly, or browse by role and city.'}
             </p>
             <Link
-              href={HAS_LIVE_DATA ? action : '/academic'}
+              href={HAS_LIVE_DATA ? action : '/industry'}
               className="mt-5 inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
-              {HAS_LIVE_DATA ? 'Clear filters' : 'Browse academic jobs'}
+              {HAS_LIVE_DATA ? 'Clear filters' : 'Browse industry jobs'}
             </Link>
           </div>
         )}

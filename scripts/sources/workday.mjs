@@ -29,17 +29,6 @@ const SEARCH_TERMS = [
   'design engineer',
   'project engineer',
 ]
-
-/**
- * University boards write their vacancies as "Lecturer in Civil Engineering"
- * or "Research Fellow", so the industry terms alone return almost nothing 
- * from them. These are added only to university sites.
- */
-const ACADEMIC_TERMS = [
-  'lecturer civil engineering',
-  'research fellow civil engineering',
-  'structural engineering academic',
-]
 const PAGES_PER_TERM = 2
 const RESULTS_PER_PAGE = 20
 const MAX_DETAIL_FETCHES = 60
@@ -76,50 +65,6 @@ export const WORKDAY_SITES = [
     host: 'fultonhogan.wd3.myworkdayjobs.com',
     tenant: 'fultonhogan',
     site: 'Fultonhogan',
-  },
-  {
-    company: 'University of Queensland',
-    host: 'uq.wd3.myworkdayjobs.com',
-    tenant: 'uq',
-    site: 'uqcareers',
-    terms: [...SEARCH_TERMS, ...ACADEMIC_TERMS],
-  },
-  // Universities and contractors whose career sites live on Workday's newer
-  // wd105 cluster rather than wd3; the host must match the tenant's cluster.
-  {
-    company: 'University of Melbourne',
-    host: 'unimelb.wd105.myworkdayjobs.com',
-    tenant: 'unimelb',
-    site: 'UoM_External_Career',
-    terms: [...SEARCH_TERMS, ...ACADEMIC_TERMS],
-  },
-  {
-    company: 'University of Sydney',
-    host: 'usyd.wd105.myworkdayjobs.com',
-    tenant: 'usyd',
-    site: 'USYD_EXTERNAL_CAREER_SITE',
-    terms: [...SEARCH_TERMS, ...ACADEMIC_TERMS],
-  },
-  {
-    company: 'RMIT University',
-    host: 'rmit.wd3.myworkdayjobs.com',
-    tenant: 'rmit',
-    site: 'RMIT_Careers',
-    terms: [...SEARCH_TERMS, ...ACADEMIC_TERMS],
-  },
-  {
-    company: 'Macquarie University',
-    host: 'mq.wd3.myworkdayjobs.com',
-    tenant: 'mq',
-    site: 'CareersatMQ',
-    terms: [...SEARCH_TERMS, ...ACADEMIC_TERMS],
-  },
-  {
-    company: 'Flinders University',
-    host: 'flinders.wd3.myworkdayjobs.com',
-    tenant: 'flinders',
-    site: 'flinders_employment',
-    terms: [...SEARCH_TERMS, ...ACADEMIC_TERMS],
   },
   {
     company: 'ACCIONA',
@@ -194,8 +139,7 @@ function isoDay(value) {
  */
 async function fetchSite(cfg, { terms, detailLimit = MAX_DETAIL_FETCHES } = {}) {
   const seen = new Map()
-  // A site can carry its own term list: university boards need academic terms,
-  // contractor boards do not, and each extra term costs requests.
+  // Every site is searched with the same industry terms.
   const searchTerms = terms ?? cfg.terms ?? SEARCH_TERMS
 
   for (const term of searchTerms) {

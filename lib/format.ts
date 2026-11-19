@@ -55,7 +55,7 @@ export const EMPLOYMENT_TYPE_LABEL = {
 
 export const SITE_NAME = 'SE Jobs Australia'
 export const SITE_SHORT_NAME = 'SE Jobs Australia'
-export const SITE_TAGLINE = 'Academic & industry structural engineering jobs in Australia'
+export const SITE_TAGLINE = 'Industry civil and structural engineering jobs in Australia'
 
 /**
  * Canonical host. Set NEXT_PUBLIC_SITE_URL explicitly once a custom domain is

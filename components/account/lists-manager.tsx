@@ -215,7 +215,7 @@ export function ListsManager({ email, lists, counts, digest }: ListsManagerProps
         {lists.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">
             No lists yet. Create one below — for example “Senior structural, Melbourne” or
-            “Academic roles, any city”.
+            “Geotechnical, Brisbane”.
           </p>
         ) : (
           <ul className="mt-4 flex flex-col gap-3">
@@ -292,14 +292,11 @@ export function ListsManager({ email, lists, counts, digest }: ListsManagerProps
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <label htmlFor="sector" className="mb-1.5 block text-sm font-medium">
-                Sector
-              </label>
-              <select id="sector" name="sector" defaultValue="" className={fieldClass}>
-                <option value="">Academic + industry</option>
-                <option value="academic">Academic only</option>
-                <option value="industry">Industry only</option>
-              </select>
+              <span className="mb-1.5 block text-sm font-medium">Sector</span>
+              <p className="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm text-muted-foreground">
+                Industry
+              </p>
+              <input type="hidden" name="sector" value="industry" />
             </div>
             <div>
               <label htmlFor="city" className="mb-1.5 block text-sm font-medium">

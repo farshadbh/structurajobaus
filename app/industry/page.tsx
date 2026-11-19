@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { SectorPage } from '@/components/jobs/sector-page'
-import { isKnownRole, parseFilters } from '@/lib/jobs'
+import { isKnownRole, isKnownSector, parseFilters } from '@/lib/jobs'
 import { getRole } from '@/lib/taxonomy'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
@@ -30,8 +30,10 @@ export async function generateMetadata({
 }
 
 export default async function IndustryPage({ searchParams }: { searchParams: SearchParams }) {
-  const filters = parseFilters(await searchParams)
-  if (!isKnownRole(filters.role)) notFound()
+  const rawParams = await searchParams
+  const filters = parseFilters(rawParams)
+  const sectorParam = Array.isArray(rawParams.sector) ? rawParams.sector[0] : rawParams.sector
+  if (!isKnownSector(sectorParam) || !isKnownRole(filters.role)) notFound()
 
   return <SectorPage sector="industry" filters={filters} />
 }

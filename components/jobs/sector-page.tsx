@@ -1,18 +1,11 @@
 import Link from 'next/link'
 import { JobsListing } from '@/components/jobs/jobs-listing'
 import { PageHeader } from '@/components/page-header'
-import { ACADEMIC_ROLES, INDUSTRY_ROLES, type Sector } from '@/lib/taxonomy'
+import { INDUSTRY_ROLES, type Sector } from '@/lib/taxonomy'
 import type { JobFilters } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 const SECTOR_COPY = {
-  academic: {
-    eyebrow: 'Academic jobs',
-    title: 'Academic structural engineering jobs',
-    description:
-      'Lecturer, professor, research fellow and postdoctoral opportunities at Australian universities.',
-    roles: ACADEMIC_ROLES,
-  },
   industry: {
     eyebrow: 'Industry jobs',
     title: 'Industry structural engineering jobs',

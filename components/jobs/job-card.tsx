@@ -8,16 +8,10 @@ import {
   WORK_ARRANGEMENT_LABEL,
 } from '@/lib/format'
 import type { Job } from '@/lib/types'
-import { cn } from '@/lib/utils'
 
 export function SectorBadge({ sector }: { sector: Job['sector'] }) {
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded px-2 py-0.5 font-mono text-[11px] font-medium tracking-wide uppercase',
-        sector === 'academic' ? 'bg-primary/10 text-primary' : 'bg-accent/15 text-[oklch(0.45_0.13_50)]',
-      )}
-    >
+    <span className="inline-flex items-center rounded bg-accent/15 px-2 py-0.5 font-mono text-[11px] font-medium tracking-wide text-[oklch(0.45_0.13_50)] uppercase">
       {sector}
     </span>
   )

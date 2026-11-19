@@ -146,7 +146,6 @@ export async function getRelatedJobs(job: Job, limit = 3): Promise<Job[]> {
 export async function getJobCounts() {
   const counts = {
     total: JOBS.length,
-    academic: 0,
     industry: 0,
     visa: 0,
     byCity: {} as Record<string, number>,
@@ -170,6 +169,10 @@ export async function getAllJobSlugs(): Promise<
 }
 
 /** Used to reject junk filter values instead of serving a soft-404. */
+export function isKnownSector(slug?: string) {
+  return !slug || slug === 'industry'
+}
+
 export function isKnownRole(slug?: string) {
   return !slug || ALL_ROLES.some((role) => role.slug === slug)
 }
@@ -191,7 +194,7 @@ export function parseFilters(params: RawSearchParams): JobFilters {
 
   return {
     q: get('q')?.slice(0, 100),
-    sector: sector === 'academic' || sector === 'industry' ? sector : undefined,
+    sector: sector === 'industry' ? sector : undefined,
     role: get('role'),
     city: get('city'),
     state: STATES.some((s) => s.code === state) ? (state as StateCode) : undefined,

@@ -2,8 +2,9 @@ import type { EmploymentType, Sector, StateCode, WorkArrangement } from './taxon
 
 /**
  * Where a listing came from. `direct` (employer submissions), `careerjet`,
- * `jooble`, `workday` and `pageup` (employer career sites) are the free feeds;
- * `adzuna` is optional and paid. Only `demo` is fabricated.
+ * `jooble` and `workday` (employer career sites) are the free feeds;
+ * `adzuna` is optional and paid. `pageup` is legacy — university boards that
+ * are no longer fetched. Only `demo` is fabricated.
  */
 export type JobSource =
   | 'adzuna'

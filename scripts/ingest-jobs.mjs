@@ -19,20 +19,19 @@
  * .github/workflows/refresh-jobs.yml.
  *
  * Quota notes, because they shape the query counts below:
- *   - Careerjet publisher keys have no published call cap; we use 6 keywords
- *     x 2 pages = 12 calls per run.
+ *   - Careerjet publisher keys have no published call cap; we use 5 keywords
+ *     x 2 pages = 10 calls per run.
  *   - Jooble's free plan is 500 requests for the *lifetime* of the key, so it
- *     gets 3 industry keywords x 2 pages plus 6 academic keywords x 1 page =
- *     12 calls per run (~41 days of daily runs).
+ *     gets 3 industry keywords x 2 pages = 6 calls per run (~83 days of
+ *     daily runs).
  *   - Adzuna's approved account is still on the trial plan: 25 calls for the
  *     lifetime of the key (full access is £8/month). It therefore gets 4
- *     keywords x 1 page = 4 calls per run, covering industry *and* academic.
+ *     industry keywords x 1 page = 4 calls per run.
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fetchWorkdayJobs } from './sources/workday.mjs'
-import { fetchPageUpJobs } from './sources/pageup.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DATA_FILE = path.join(ROOT, 'data', 'jobs.json')
@@ -55,42 +54,18 @@ const QUERIES = [
   'senior structural engineer',
   'bridge engineer',
   'civil structural engineer',
-  'structural engineer university',
 ]
 // "senior structural engineer" duplicates "structural engineer", so that call is
 // spent on geotechnical vacancies instead: the board covers civil/structural
 // work, and geotechnical sits in the same discipline.
 const JOOBLE_INDUSTRY_QUERIES = [...QUERIES.slice(0, 2), 'geotechnical engineer']
-// Jooble's free tier is metered per call for the *lifetime* of the key, so the
-// academic queries get one page each instead of two.
-//
-// These have to name the *employer type* as well as the discipline. Jooble
-// matches loosely, so "structural engineering lecturer" mostly returns industry
-// ads (99 matches, 2 real university vacancies); asking for a university
-// lecturer, a professor and a research fellow instead
-// surfaces the role types the /academic page advertises.
-//
-// One query per academic role family, so the section carries the whole ladder
-// from postdoc and lecturer to professor and head of
-// school instead of only the two or three roles one query happens to return.
-const ACADEMIC_QUERIES = [
-  'postdoctoral research fellow civil engineering',
-  'research associate civil engineering university',
-  'university lecturer civil engineering',
-  'senior lecturer structural engineering',
-  'professor civil engineering university',
-  // One extra query for geotechnical academia: lecturer, research fellow,
-  // postdoc and professor posts in that sub-discipline rarely mention
-  // "structural", so the queries above miss them.
-  'geotechnical engineering university',
-]
 // Adzuna is metered per call on the free plan, so it gets a deliberately small
-// set that covers both sectors instead of the full industry list.
+// industry-only set instead of the full industry list.
 const ADZUNA_QUERIES = [
   'structural engineer',
   'bridge engineer',
-  'structural engineering lecturer',
-  'structural engineering university',
+  'geotechnical engineer',
+  'civil engineer',
 ]
 const PAGES_PER_QUERY = 2
 const RESULTS_PER_PAGE = 50
@@ -227,21 +202,8 @@ const STATE_NAMES = {
   'northern territory': 'NT',
 }
 
-const ACADEMIC_EMPLOYERS =
-  /(universit|unsw|monash|rmit|curtin|qut|deakin|swinburne|griffith|macquarie|latrobe|flinders|australian national|western sydney|csu|acu|usc|james cook|murdoch|cdu|\buts\b|une\b|unisa|charles sturt|federation|victoria university|ecu\b|tafe|institute of technology|polytechnic|research institute|csiro)/i
-
-const ACADEMIC_TITLES =
-  /\b(lecturer|professor|postdoc|post-doc|research fellow|research associate|research assistant|teaching fellow|tutor|phd|scholarship|academic|dean|head of school)\b/i
-
-/* Ordered most-specific-first so "senior lecturer" never matches "lecturer". */
+/* Ordered most-specific-first so "senior structural" never matches plain "structural". */
 const ROLE_RULES = [
-  [/head of school|dean|director of school|school chair/i, 'professor'],
-  [/senior lecturer/i, 'senior-lecturer'],
-  [/associate professor|associate prof\b/i, 'associate-professor'],
-  [/\bprofessor\b/i, 'professor'],
-  [/postdoc|post-doc|post doctoral/i, 'postdoctoral-fellow'],
-  [/research fellow|research associate|research assistant|research officer/i, 'research-fellow'],
-  [/\blecturer\b|associate lecturer|teaching fellow|\btutor\b|academic/i, 'lecturer'],
   // Geotechnical titles become their own filter: "Geotechnical Engineer" must
   // not be filed under plain civil engineering.
   [/geotech/i, 'geotechnical-engineer'],
@@ -261,12 +223,7 @@ const CIVIL_DISCIPLINE =
 // outrank a sibling discipline in the same title.
 const STRONG_CIVIL =
   /\b(structural|structures?|civil|bridge|geotechnical|seismic|earthquake)\b/i
-// Ad bodies are matched on the discipline *phrase*, not the bare words: a
-// violence-prevention PhD talks about "structural violence" and a careless
-// keyword test would file it under structural engineering.
-const CIVIL_PHRASE =
-  /\b(civil|structural|bridge|geotechnical|construction|infrastructure|earthquake|environmental|materials|steel|concrete)[ -]engineering\b/i
-// Sibling disciplines a university advertises next to civil engineering. Their
+// Sibling disciplines advertised next to civil engineering. Their
 // titles mention "engineering", which is not enough to belong here.
 const OTHER_DISCIPLINE =
   /\b(mechanical|mechatronic|robotics?|electrical|electronic|chemical|aerospace|aeronautical|combustion|process systems|software|computer science|data science|biomedical|mining|petroleum|nursing|medical|psychology|law|business|accounting|finance|marketing|natural sciences|biology|chemistry|physics)\b/i
@@ -275,21 +232,19 @@ const NOISE_TITLE =
 const VISA_PATTERN = /\b(visa sponsorship|sponsorship|sponsor(?:s|ed|ing)?|sponsored|482|tss|work visa)\b/i
 
 /**
- * A job belongs on the board when its title names civil/structural work, or —
- * for an academic employer, whose titles are "Lecturer in Engineering" or
- * "Head of School" — when the discipline appears in the ad body instead.
+ * A job belongs on the board when its title names civil/structural work.
  * Sibling disciplines (mechanical, robotics, chemical…) must stay out.
+ * The ad body is not consulted: a title that does not name the discipline
+ * does not belong here.
  */
 function isRelevantTitle(title, company, text) {
   if (NOISE_TITLE.test(title)) return false
   // "Civil and Mechanical Engineering" stays…
   if (STRONG_CIVIL.test(title)) return true
-  // …but "School of Electrical, Mechanical and Infrastructure Engineering" does
-  // not: the sibling discipline outranks a shared school name.
+  // …but "Electrical, Mechanical and Infrastructure Engineering" does not:
+  // the sibling discipline outranks a shared discipline name.
   if (OTHER_DISCIPLINE.test(title)) return false
-  if (CIVIL_DISCIPLINE.test(title)) return true
-  if (!ACADEMIC_EMPLOYERS.test(company)) return false
-  return CIVIL_PHRASE.test(String(text ?? '').slice(0, 600))
+  return CIVIL_DISCIPLINE.test(title)
 }
 
 function classifyRole(title) {
@@ -299,8 +254,12 @@ function classifyRole(title) {
   return 'structural-engineer'
 }
 
+/**
+ * The board is industry-only: every listing it keeps is an industry role,
+ * whatever the employer. There is no second sector any more.
+ */
 function classifySector(title, company) {
-  return ACADEMIC_EMPLOYERS.test(company) || ACADEMIC_TITLES.test(title) ? 'academic' : 'industry'
+  return 'industry'
 }
 
 /** Providers give a free-text location, so infer city + state from that text. */
@@ -590,7 +549,7 @@ function fromAdzuna(raw) {
 
 // Employer-direct sources win every tie: their ad carries the real employer and
 // an apply link that stays live for as long as the vacancy does.
-const PRIORITY = { workday: 0, pageup: 1, careerjet: 2, jooble: 3, adzuna: 4 }
+const PRIORITY = { workday: 0, careerjet: 1, jooble: 2, adzuna: 3 }
 
 /**
  * Text shown by an aggregator when the vacancy behind a listing has gone. A job
@@ -669,10 +628,7 @@ async function collect(queries, fetchPage, mapJob, label, calls, pages = PAGES_P
       }
     }
   }
-  const academic = found.filter((job) => job.sector === 'academic').length
-  console.log(
-    `[ingest] ${label}: ${found.length} matching listings (${academic} academic) from ${calls.count} calls`,
-  )
+  console.log(`[ingest] ${label}: ${found.length} matching listings from ${calls.count} calls`)
   return found
 }
 
@@ -680,18 +636,16 @@ async function main() {
   const calls = { count: 0 }
   const used = []
   const merged = new Map()
-  // Read before any source so PageUp listings can keep the date they were first
-  // seen; PageUp publishes no posted date of its own.
+  // Read before any source so the low-yield guard below can compare against
+  // the previous snapshot.
   const existing = await readExisting()
-  const seenBefore = new Map((existing.jobs ?? []).map((job) => [job.id, job]))
 
   const add = (jobs, source) => {
     used.push(source)
     for (const job of jobs) {
       const key = dedupeKey(job)
       const existing = merged.get(key)
-      const winsTie = job.sector === 'academic' && existing?.sector !== 'academic'
-      if (!existing || PRIORITY[source] < PRIORITY[existing.source] || winsTie) {
+      if (!existing || PRIORITY[source] < PRIORITY[existing.source]) {
         merged.set(key, job)
       }
     }
@@ -709,24 +663,16 @@ async function main() {
 
   if (JOOBLE_API_KEY) {
     try {
-      const joobleJobs = [
-        ...(await collect(
+      add(
+        await collect(
           JOOBLE_INDUSTRY_QUERIES,
           (keywords) => fetchJooble(keywords),
           fromJooble,
           'Jooble',
           calls,
-        )),
-        ...(await collect(
-          ACADEMIC_QUERIES,
-          (keywords) => fetchJooble(keywords),
-          fromJooble,
-          'Jooble academic',
-          calls,
-          1,
-        )),
-      ]
-      add(joobleJobs, 'jooble')
+        ),
+        'jooble',
+      )
     } catch (error) {
       console.warn(`[ingest] Jooble failed: ${error instanceof Error ? error.message : error}`)
     }
@@ -753,22 +699,6 @@ async function main() {
   const employerJobs = (await fetchWorkdayJobs()).map(buildJob).filter(Boolean)
   if (employerJobs.length > 0) add(employerJobs, 'workday')
 
-  // Universities that run on PageUp publish no JSON feed, so their listing
-  // pages are read instead. They carry no posted date, hence the first-seen
-  // fallback: an ad keeps the date it first appeared on the board and still
-  // expires on the same 30-day window as every other listing.
-  const firstSeen = sydneyToday()
-  const pageUpJobs = (await fetchPageUpJobs())
-    .map((raw) =>
-      buildJob({
-        ...raw,
-        postedAt:
-          raw.postedAt ?? seenBefore.get(`pageup-${raw.externalId}`)?.postedAt ?? firstSeen,
-      }),
-    )
-    .filter(Boolean)
-  if (pageUpJobs.length > 0) add(pageUpJobs, 'pageup')
-
   if (used.length === 0) {
     console.warn('[ingest] No source produced listings — keeping the previous snapshot.')
     console.warn('[ingest] Missing credentials are skipped; failures are reported above.')
@@ -787,7 +717,7 @@ async function main() {
   // Employer-direct links point at the employer's own board, which already
   // removes a vacancy when it closes, so only aggregator links need a liveness
   // test before publication.
-  const directFromEmployer = (job) => job.source === 'workday' || job.source === 'pageup'
+  const directFromEmployer = (job) => job.source === 'workday'
   const checked = await dropDeadLinks(fresh.filter((job) => !directFromEmployer(job)))
   const jobs = [...checked, ...fresh.filter(directFromEmployer)].sort(byNewest)
 
@@ -814,10 +744,9 @@ async function main() {
     'utf8',
   )
 
-  const academic = jobs.filter((job) => job.sector === 'academic').length
   const fromBoards = jobs.filter((job) => directFromEmployer(job)).length
   console.log(
-    `[ingest] Wrote ${jobs.length} listings (${academic} academic, ${jobs.length - academic} industry, ${fromBoards} direct from employer boards) from ${used.join(', ')} using ${calls.count} API calls.`,
+    `[ingest] Wrote ${jobs.length} industry listings (${fromBoards} direct from employer boards) from ${used.join(', ')} using ${calls.count} API calls.`,
   )
 }
 

@@ -1,7 +1,7 @@
 -- Supabase / Postgres schema for the jobs portal.
 -- Run this when connecting Supabase, then replace the function bodies in lib/jobs.ts.
 
-create type job_sector as enum ('academic', 'industry');
+create type job_sector as enum ('industry');
 create type work_arrangement as enum ('onsite', 'hybrid', 'remote');
 create type employment_type as enum ('full-time', 'part-time', 'contract', 'scholarship');
 

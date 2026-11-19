@@ -10,7 +10,7 @@ const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
 const description =
-  'Explore academic and industry structural engineering jobs across Australia.'
+  'Explore industry civil and structural engineering jobs across Australia.'
 
 const ogImage = {
   url: '/images/hero-bridge.png',
@@ -31,8 +31,7 @@ export const metadata: Metadata = {
   keywords: [
     'structural engineering jobs Australia',
     'structural engineer jobs',
-    'academic engineering jobs',
-    'lecturer structural engineering',
+    'geotechnical engineer jobs',
     'bridge engineer jobs',
     'civil engineer jobs Sydney',
     'engineering jobs Melbourne',

@@ -7,9 +7,8 @@ import { SITE_NAME, SITE_URL } from '@/lib/format'
 import { getFeaturedJobs, getJobCounts, getLatestJobs, getVisaSponsoredJobs } from '@/lib/jobs'
 
 export default async function HomePage() {
-  const [featured, academic, industry, visa, counts] = await Promise.all([
+  const [featured, industry, visa, counts] = await Promise.all([
     getFeaturedJobs(6),
-    getLatestJobs('academic', 4),
     getLatestJobs('industry', 4),
     getVisaSponsoredJobs(4),
     getJobCounts(),
@@ -35,22 +34,13 @@ export default async function HomePage() {
         id="featured-jobs"
         eyebrow="Featured"
         title="Featured structural engineering jobs"
-        description="The newest roles from Australian universities and engineering firms."
+        description="The newest roles from Australian engineering firms and contractors."
         jobs={featured}
         href="/jobs"
         linkLabel="View all jobs"
         columns={3}
       />
       <RoleCategories counts={counts.byRole} />
-      <JobSection
-        id="latest-academic"
-        eyebrow="Academic"
-        title="Latest academic jobs"
-        description="Lecturer, professor, research fellow and postdoctoral opportunities."
-        jobs={academic}
-        href="/academic"
-        linkLabel="All academic jobs"
-      />
       <JobSection
         id="latest-industry"
         eyebrow="Industry"
@@ -65,7 +55,7 @@ export default async function HomePage() {
         id="visa-jobs"
         eyebrow="Visa sponsorship"
         title="Jobs offering visa sponsorship"
-        description="Employers open to sponsoring skilled international engineers and academics."
+        description="Employers open to sponsoring skilled international engineers."
         jobs={visa}
         href="/jobs?visa=1"
         linkLabel="All visa sponsored jobs"

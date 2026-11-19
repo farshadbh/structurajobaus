@@ -8,7 +8,6 @@ import { Logo } from '@/components/logo'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { href: '/academic', label: 'Academic Jobs' },
   { href: '/industry', label: 'Industry Jobs' },
   { href: '/cities', label: 'Browse by City' },
   { href: '/jobs?visa=1', label: 'Visa Sponsorship' },
@@ -65,7 +64,7 @@ export function SiteHeader() {
         <Logo />
 
         {/*
-         * Six links plus two account buttons only fit on one line from 1280px up,
+         * Five links plus two account buttons only fit on one line from 1280px up,
          * so the nav appears at xl and the hamburger covers everything narrower.
          * Everything is nowrap: a wrapped label is what made the bar look ragged.
          */}

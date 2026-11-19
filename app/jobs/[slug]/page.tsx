@@ -102,7 +102,7 @@ export default async function JobPage({ params }: { params: Params }) {
   if (!job) notFound()
   const related = await getRelatedJobs(job)
   const role = getRole(job.roleSlug)
-  const sectorLabel = job.sector === 'academic' ? 'Academic jobs' : 'Industry jobs'
+  const sectorLabel = 'Industry jobs'
   const jsonLd = IS_DEMO_DATA ? null : jobPostingJsonLd(job)
   const attribution = job.source ? SOURCE_ATTRIBUTION[job.source] : undefined
 
@@ -131,7 +131,7 @@ export default async function JobPage({ params }: { params: Params }) {
         title={job.title}
         description={job.summary}
         breadcrumbs={[
-          { label: sectorLabel, href: `/${job.sector}` },
+          { label: sectorLabel, href: '/industry' },
           { label: job.title, href: `/jobs/${job.slug}` },
         ]}
       >
@@ -242,7 +242,7 @@ export default async function JobPage({ params }: { params: Params }) {
         <section aria-labelledby="related-jobs" className="border-t bg-muted/50 py-14">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h2 id="related-jobs" className="text-xl font-semibold">
-              Similar {job.sector} jobs
+              Similar industry jobs
             </h2>
             <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((item) => (

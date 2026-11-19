@@ -1,4 +1,4 @@
-export type Sector = 'academic' | 'industry'
+export type Sector = 'industry'
 export type StateCode = 'NSW' | 'VIC' | 'QLD' | 'WA' | 'SA' | 'TAS' | 'ACT' | 'NT'
 export type WorkArrangement = 'onsite' | 'hybrid' | 'remote'
 export type EmploymentType = 'full-time' | 'part-time' | 'contract' | 'scholarship'
@@ -8,15 +8,6 @@ export interface Role {
   name: string
   sector: Sector
 }
-
-export const ACADEMIC_ROLES: Role[] = [
-  { slug: 'lecturer', name: 'Lecturer', sector: 'academic' },
-  { slug: 'senior-lecturer', name: 'Senior Lecturer', sector: 'academic' },
-  { slug: 'associate-professor', name: 'Associate Professor', sector: 'academic' },
-  { slug: 'professor', name: 'Professor', sector: 'academic' },
-  { slug: 'research-fellow', name: 'Research Fellow', sector: 'academic' },
-  { slug: 'postdoctoral-fellow', name: 'Postdoctoral Fellow', sector: 'academic' },
-]
 
 export const INDUSTRY_ROLES: Role[] = [
   { slug: 'structural-engineer', name: 'Structural Engineer', sector: 'industry' },
@@ -29,7 +20,7 @@ export const INDUSTRY_ROLES: Role[] = [
   { slug: 'project-engineer', name: 'Project Engineer', sector: 'industry' },
 ]
 
-export const ALL_ROLES = [...ACADEMIC_ROLES, ...INDUSTRY_ROLES]
+export const ALL_ROLES = [...INDUSTRY_ROLES]
 
 export interface City {
   slug: string

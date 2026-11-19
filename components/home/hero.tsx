@@ -2,13 +2,12 @@ import Link from 'next/link'
 import { SearchBar } from '@/components/home/search-bar'
 
 interface HeroProps {
-  stats: { total: number; academic: number; industry: number; visa: number }
+  stats: { total: number; industry: number; visa: number }
 }
 
 export function Hero({ stats }: HeroProps) {
   const statItems = [
     { label: 'Live roles', value: stats.total },
-    { label: 'Academic', value: stats.academic },
     { label: 'Industry', value: stats.industry },
     { label: 'Visa sponsored', value: stats.visa },
   ]
@@ -28,11 +27,11 @@ export function Hero({ stats }: HeroProps) {
         </p>
 
         <h1 className="mt-6 max-w-4xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-          Structural Engineering Academic &amp; Industry Jobs{' '}
+          Structural Engineering Industry Jobs{' '}
           <span className="text-accent">in Australia</span>
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-pretty text-white/80">
-          Explore academic and industry civil and structural engineering jobs across Australia — from university lecturers to structural, civil and geotechnical engineers.
+          Explore industry civil and structural engineering jobs across Australia — structural, civil, geotechnical, bridge, design and project engineering roles with consultancies, contractors and asset owners.
         </p>
 
         <div className="mt-10 max-w-5xl">
@@ -54,26 +53,26 @@ export function Hero({ stats }: HeroProps) {
             Geotechnical Engineers
           </Link>
           <Link
-            href="/academic?role=lecturer"
+            href="/industry?role=bridge-engineer"
             className="rounded-full border border-white/20 px-3 py-1 transition-colors hover:border-accent hover:text-white"
           >
-            Lecturers
+            Bridge Engineers
           </Link>
           <Link
-            href="/academic?role=professor"
+            href="/industry?role=civil-engineer"
             className="rounded-full border border-white/20 px-3 py-1 transition-colors hover:border-accent hover:text-white"
           >
-            Professors
+            Civil Engineers
           </Link>
           <Link
-            href="/academic?role=postdoctoral-fellow"
+            href="/industry?role=senior-structural-engineer"
             className="rounded-full border border-accent/60 bg-accent/10 px-3 py-1 font-medium text-white transition-colors hover:border-accent"
           >
-            Postdocs
+            Senior Structural Engineers
           </Link>
         </div>
 
-        <dl className="mt-14 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-white/15 bg-white/15 sm:grid-cols-4">
+        <dl className="mt-14 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-white/15 bg-white/15 sm:grid-cols-3">
           {statItems.map((item) => (
             <div key={item.label} className="bg-primary/80 px-5 py-4 backdrop-blur">
               <dt className="font-mono text-[11px] tracking-wider text-white/75 uppercase">

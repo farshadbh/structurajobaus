@@ -22,7 +22,7 @@ export function Logo({ className, inverted = false }: { className?: string; inve
             inverted ? 'text-white/60' : 'text-muted-foreground',
           )}
         >
-          Academic & Industry
+          Civil &amp; Structural
         </span>
       </span>
     </Link>

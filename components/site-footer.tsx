@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Logo } from '@/components/logo'
 import { SOURCE_ATTRIBUTION } from '@/lib/format'
 import { DATA_UPDATED_AT, IS_DEMO_DATA } from '@/lib/jobs'
-import { ACADEMIC_ROLES, CITIES, INDUSTRY_ROLES } from '@/lib/taxonomy'
+import { CITIES, INDUSTRY_ROLES } from '@/lib/taxonomy'
 
 const updatedLabel = DATA_UPDATED_AT
   ? new Intl.DateTimeFormat('en-AU', {
@@ -16,10 +16,6 @@ const updatedLabel = DATA_UPDATED_AT
 
 export function SiteFooter() {
   const columns = [
-    {
-      title: 'Academic Jobs',
-      links: ACADEMIC_ROLES.map((role) => ({ href: `/academic?role=${role.slug}`, label: role.name })),
-    },
     {
       title: 'Industry Jobs',
       links: INDUSTRY_ROLES.map((role) => ({ href: `/industry?role=${role.slug}`, label: role.name })),
@@ -36,8 +32,8 @@ export function SiteFooter() {
         <div className="lg:col-span-2">
           <Logo inverted />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-primary-foreground/80">
-            The specialist job board connecting structural engineers with universities, research
-            institutes and engineering firms.
+            The specialist job board connecting structural engineers with engineering
+            firms, consultancies and contractors.
           </p>
           {updatedLabel && (
             <p className="mt-4 font-mono text-xs text-primary-foreground/70">
