@@ -16,7 +16,7 @@ export async function generateMetadata({
 
   const title = roleName
     ? `${roleName} Jobs in Structural Engineering Australia`
-    : 'Academic Position Jobs in Structural Engineering Australia'
+    : 'Academic Structural Engineering Jobs Australia'
 
   const otherFilters =
     filters.q || filters.city || filters.state || filters.salaryMin || filters.visa || filters.remote || filters.hybrid || filters.fullTime

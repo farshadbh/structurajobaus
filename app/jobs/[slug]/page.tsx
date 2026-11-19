@@ -102,7 +102,7 @@ export default async function JobPage({ params }: { params: Params }) {
   if (!job) notFound()
   const related = await getRelatedJobs(job)
   const role = getRole(job.roleSlug)
-  const sectorLabel = 'Academic Position'
+  const sectorLabel = job.sector === 'academic' ? 'Academic jobs' : 'Industry jobs'
   const jsonLd = IS_DEMO_DATA ? null : jobPostingJsonLd(job)
   const attribution = job.source ? SOURCE_ATTRIBUTION[job.source] : undefined
 

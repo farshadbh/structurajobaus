@@ -15,7 +15,7 @@ export function SectorBadge({ sector }: { sector: Job['sector'] }) {
     <span
       className={cn(
         'inline-flex items-center rounded px-2 py-0.5 font-mono text-[11px] font-medium tracking-wide uppercase',
-        'bg-primary/10 text-primary',
+        sector === 'academic' ? 'bg-primary/10 text-primary' : 'bg-accent/15 text-[oklch(0.45_0.13_50)]',
       )}
     >
       {sector}

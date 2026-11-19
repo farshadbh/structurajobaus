@@ -296,9 +296,10 @@ export function ListsManager({ email, lists, counts, digest }: ListsManagerProps
                 Sector
               </label>
               <select id="sector" name="sector" defaultValue="" className={fieldClass}>
-                <option value="">All academic position roles</option>
+                <option value="">Academic + industry</option>
                 <option value="academic">Academic only</option>
-                </select>
+                <option value="industry">Industry only</option>
+              </select>
             </div>
             <div>
               <label htmlFor="city" className="mb-1.5 block text-sm font-medium">

@@ -10,7 +10,7 @@ const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
 const description =
-  'Browse university positions in structural engineering — postdoctoral fellow, research fellow, lecturer, senior lecturer, associate professor and professor — at Australian universities.'
+  'Explore academic and industry structural engineering jobs across Australia.'
 
 const ogImage = {
   url: '/images/hero-bridge.png',
@@ -29,13 +29,14 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   appleWebApp: { title: SITE_SHORT_NAME },
   keywords: [
-    'academic position structural engineering',
+    'structural engineering jobs Australia',
+    'structural engineer jobs',
+    'academic engineering jobs',
     'lecturer structural engineering',
-    'professor civil engineering',
-    'postdoctoral fellow structural engineering',
-    'research fellow civil engineering',
-    'academic engineering jobs Australia',
-    'university lecturer jobs Australia',
+    'bridge engineer jobs',
+    'civil engineer jobs Sydney',
+    'engineering jobs Melbourne',
+    'visa sponsorship engineering jobs Australia',
   ],
   alternates: { canonical: '/' },
   openGraph: {

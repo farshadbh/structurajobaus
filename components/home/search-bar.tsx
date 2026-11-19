@@ -10,7 +10,7 @@ export function SearchBar() {
       action="/jobs"
       method="get"
       role="search"
-      aria-label="Search Academic Position jobs"
+      aria-label="Search structural engineering jobs"
       className="grid gap-2 rounded-xl bg-card p-2 shadow-2xl shadow-black/20 md:grid-cols-[1.6fr_1fr_1fr_auto] md:gap-0 md:divide-x"
     >
       <div className="relative">
@@ -33,8 +33,9 @@ export function SearchBar() {
         </label>
         <Briefcase className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
         <select id="search-sector" name="sector" defaultValue="" className={fieldClass}>
-          <option value="">Academic</option>
+          <option value="">Academic & Industry</option>
           <option value="academic">Academic</option>
+          <option value="industry">Industry</option>
         </select>
       </div>
 

@@ -14,9 +14,9 @@ export async function generateMetadata({
   const filters = parseFilters(await searchParams)
 
   return {
-    title: 'Search Academic Position Jobs in Australia',
+    title: 'Search Structural Engineering Jobs in Australia',
     description:
-      'Search every university position in structural engineering in Australia. Filter by city, state, salary, visa sponsorship, remote, hybrid and full-time roles.',
+      'Search every academic and industry structural engineering job in Australia. Filter by city, state, salary, visa sponsorship, remote, hybrid and full-time roles.',
     alternates: { canonical: '/jobs' },
     // Filtered permutations are duplicates of /jobs: crawlable, never indexed.
     robots: hasActiveFilters(filters)
@@ -34,8 +34,8 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
     <>
       <PageHeader
         eyebrow="All jobs"
-        title="Search academic positions"
-        description="University positions across Australia. Refine by city, state, salary, visa sponsorship and work arrangement."
+        title="Search structural engineering jobs"
+        description="Academic and industry roles across Australia. Refine by city, state, salary, visa sponsorship and work arrangement."
         breadcrumbs={[{ label: 'All jobs', href: '/jobs' }]}
       />
       <JobsListing action="/jobs" filters={filters} />

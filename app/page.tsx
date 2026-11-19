@@ -7,9 +7,10 @@ import { SITE_NAME, SITE_URL } from '@/lib/format'
 import { getFeaturedJobs, getJobCounts, getLatestJobs, getVisaSponsoredJobs } from '@/lib/jobs'
 
 export default async function HomePage() {
-  const [featured, academic, visa, counts] = await Promise.all([
+  const [featured, academic, industry, visa, counts] = await Promise.all([
     getFeaturedJobs(6),
     getLatestJobs('academic', 4),
+    getLatestJobs('industry', 4),
     getVisaSponsoredJobs(4),
     getJobCounts(),
   ])
@@ -33,8 +34,8 @@ export default async function HomePage() {
       <JobSection
         id="featured-jobs"
         eyebrow="Featured"
-        title="Featured academic positions"
-        description="The newest university roles from Australian universities."
+        title="Featured structural engineering jobs"
+        description="The newest roles from Australian universities and engineering firms."
         jobs={featured}
         href="/jobs"
         linkLabel="View all jobs"
@@ -43,18 +44,28 @@ export default async function HomePage() {
       <RoleCategories counts={counts.byRole} />
       <JobSection
         id="latest-academic"
-        eyebrow="Academic Position"
-        title="Latest academic positions"
+        eyebrow="Academic"
+        title="Latest academic jobs"
         description="Lecturer, professor, research fellow and postdoctoral opportunities."
         jobs={academic}
         href="/academic"
-        linkLabel="All academic positions"
+        linkLabel="All academic jobs"
+      />
+      <JobSection
+        id="latest-industry"
+        eyebrow="Industry"
+        title="Latest industry jobs"
+        description="Structural, bridge, civil, design and project engineering roles."
+        jobs={industry}
+        href="/industry"
+        linkLabel="All industry jobs"
+        className="border-y bg-muted/50"
       />
       <JobSection
         id="visa-jobs"
         eyebrow="Visa sponsorship"
         title="Jobs offering visa sponsorship"
-        description="Universities open to sponsoring skilled international academics."
+        description="Employers open to sponsoring skilled international engineers and academics."
         jobs={visa}
         href="/jobs?visa=1"
         linkLabel="All visa sponsored jobs"

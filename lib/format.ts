@@ -53,9 +53,9 @@ export const EMPLOYMENT_TYPE_LABEL = {
   scholarship: 'Scholarship',
 } as const
 
-export const SITE_NAME = 'Academic Position'
-export const SITE_SHORT_NAME = 'Academic Position'
-export const SITE_TAGLINE = 'University positions in structural engineering — postdoc to professor'
+export const SITE_NAME = 'SE Jobs Australia'
+export const SITE_SHORT_NAME = 'SE Jobs Australia'
+export const SITE_TAGLINE = 'Academic & industry structural engineering jobs in Australia'
 
 /**
  * Canonical host. Set NEXT_PUBLIC_SITE_URL explicitly once a custom domain is

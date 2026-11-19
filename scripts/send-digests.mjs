@@ -19,7 +19,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
-const SITE_URL = (process.env.SITE_URL || 'https://academic-position.vercel.app').replace(/\/+$/, '')
+const SITE_URL = (process.env.SITE_URL || 'https://structuraljobaus.vercel.app').replace(/\/+$/, '')
 const SITE_NAME = 'SE Jobs Australia'
 const REST_URL = (process.env.UPSTASH_REDIS_REST_URL || '').replace(/\/+$/, '')
 const REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || ''

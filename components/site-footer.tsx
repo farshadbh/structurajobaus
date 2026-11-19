@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Logo } from '@/components/logo'
 import { SOURCE_ATTRIBUTION } from '@/lib/format'
 import { DATA_UPDATED_AT, IS_DEMO_DATA } from '@/lib/jobs'
-import { ACADEMIC_ROLES, CITIES } from '@/lib/taxonomy'
+import { ACADEMIC_ROLES, CITIES, INDUSTRY_ROLES } from '@/lib/taxonomy'
 
 const updatedLabel = DATA_UPDATED_AT
   ? new Intl.DateTimeFormat('en-AU', {
@@ -17,8 +17,12 @@ const updatedLabel = DATA_UPDATED_AT
 export function SiteFooter() {
   const columns = [
     {
-      title: 'Academic Position',
+      title: 'Academic Jobs',
       links: ACADEMIC_ROLES.map((role) => ({ href: `/academic?role=${role.slug}`, label: role.name })),
+    },
+    {
+      title: 'Industry Jobs',
+      links: INDUSTRY_ROLES.map((role) => ({ href: `/industry?role=${role.slug}`, label: role.name })),
     },
     {
       title: 'Jobs by City',
@@ -32,8 +36,8 @@ export function SiteFooter() {
         <div className="lg:col-span-2">
           <Logo inverted />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-primary-foreground/80">
-            The specialist job board for university positions in structural engineering —
-            postdoc to professor.
+            The specialist job board connecting structural engineers with universities, research
+            institutes and engineering firms.
           </p>
           {updatedLabel && (
             <p className="mt-4 font-mono text-xs text-primary-foreground/70">
@@ -65,7 +69,7 @@ export function SiteFooter() {
 
       <div className="border-t border-primary-foreground/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-xs text-primary-foreground/75 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <p>&copy; {new Date().getFullYear()} Academic Position. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} SE Jobs Australia. All rights reserved.</p>
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <Link href="/privacy" className="hover:text-primary-foreground">
               Privacy

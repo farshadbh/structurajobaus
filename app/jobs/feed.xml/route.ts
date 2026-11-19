@@ -34,7 +34,7 @@ export async function GET() {
   <channel>
     <title>${escapeXml(SITE_NAME)}</title>
     <link>${SITE_URL}/jobs</link>
-    <description>University positions in structural engineering, refreshed every morning.</description>
+    <description>Structural engineering jobs across Australian universities and engineering firms, refreshed every morning.</description>
     <language>en-au</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${items}

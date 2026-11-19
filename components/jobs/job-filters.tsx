@@ -9,6 +9,7 @@ import {
   ACADEMIC_ROLES,
   CITIES,
   CIVIL_SPECIALISMS,
+  INDUSTRY_ROLES,
   SALARY_OPTIONS,
   STATES,
 } from '@/lib/taxonomy'
@@ -66,7 +67,10 @@ export function JobFilters({ action, filters, lockSector, lockCity, activeCount 
     startTransition(() => router.push(query ? `${action}?${query}` : action, { scroll: false }))
   }
 
-  const roleGroups = [{ label: 'Academic', roles: ACADEMIC_ROLES, sector: 'academic' }]
+  const roleGroups = [
+    { label: 'Academic', roles: ACADEMIC_ROLES, sector: 'academic' },
+    { label: 'Industry', roles: INDUSTRY_ROLES, sector: 'industry' },
+  ].filter((group) => !filters.sector || group.sector === filters.sector)
 
   return (
     <div>
@@ -121,6 +125,30 @@ export function JobFilters({ action, filters, lockSector, lockCity, activeCount 
           />
         </Fieldset>
 
+        {!lockSector && (
+          <Fieldset legend="Academic / Industry">
+            <div className="grid grid-cols-3 gap-1 rounded-md bg-muted p-1">
+              {[
+                { value: '', label: 'All' },
+                { value: 'academic', label: 'Academic' },
+                { value: 'industry', label: 'Industry' },
+              ].map((option) => (
+                <label key={option.label} className="relative">
+                  <input
+                    type="radio"
+                    name="sector"
+                    value={option.value}
+                    defaultChecked={(filters.sector ?? '') === option.value}
+                    className="peer sr-only"
+                  />
+                  <span className="flex h-8 cursor-pointer items-center justify-center rounded text-xs font-medium text-muted-foreground peer-checked:bg-card peer-checked:text-foreground peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
+                    {option.label}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </Fieldset>
+        )}
 
         <Fieldset legend="Civil specialism">
           <label htmlFor="filter-specialism" className="sr-only">

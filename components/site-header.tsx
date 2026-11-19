@@ -8,7 +8,8 @@ import { Logo } from '@/components/logo'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { href: '/academic', label: 'Academic Position' },
+  { href: '/academic', label: 'Academic Jobs' },
+  { href: '/industry', label: 'Industry Jobs' },
   { href: '/cities', label: 'Browse by City' },
   { href: '/jobs?visa=1', label: 'Visa Sponsorship' },
   { href: '/account', label: 'Job alerts' },

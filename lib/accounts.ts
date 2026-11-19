@@ -73,8 +73,8 @@ export function validateList(
   const keywords = text(data.keywords, 120)
 
   const sectorRaw = text(data.sector, 20)
-  const sector = sectorRaw === 'academic' ? (sectorRaw as Sector) : undefined
-  if (sectorRaw && !sector) errors.push('Choose academic, or leave it blank.')
+  const sector = sectorRaw === 'academic' || sectorRaw === 'industry' ? (sectorRaw as Sector) : undefined
+  if (sectorRaw && !sector) errors.push('Choose academic, industry, or leave it blank for both.')
 
   const stateRaw = text(data.state, 3).toUpperCase()
   const state = STATES.some((entry) => entry.code === stateRaw) ? (stateRaw as StateCode) : undefined
@@ -108,7 +108,7 @@ export function validateList(
 
   // A list with no filters would email everything, every day.
   if (Object.keys(criteria).length === 0) {
-    errors.push('Add at least one filter — keywords, academic, location, salary or visa.')
+    errors.push('Add at least one filter — keywords, academic/industry, location, salary or visa.')
   }
 
   return errors.length > 0 ? { ok: false, errors } : { ok: true, value: { name, criteria } }
@@ -142,7 +142,7 @@ export function criteriaToFilters(criteria: ListCriteria): JobFilters {
 export function describeCriteria(criteria: ListCriteria): string {
   const parts: string[] = []
 
-  if (criteria.sector) parts.push('Academic')
+  if (criteria.sector) parts.push(criteria.sector === 'academic' ? 'Academic' : 'Industry')
   if (criteria.keywords) parts.push(`“${criteria.keywords}”`)
   if (criteria.city) parts.push(CITIES.find((city) => city.slug === criteria.city)?.name ?? criteria.city)
   if (criteria.state) parts.push(criteria.state)
