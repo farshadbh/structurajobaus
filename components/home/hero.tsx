@@ -2,14 +2,13 @@ import Link from 'next/link'
 import { SearchBar } from '@/components/home/search-bar'
 
 interface HeroProps {
-  stats: { total: number; academic: number; industry: number; visa: number }
+  stats: { total: number; academic: number; visa: number }
 }
 
 export function Hero({ stats }: HeroProps) {
   const statItems = [
     { label: 'Live roles', value: stats.total },
     { label: 'Academic', value: stats.academic },
-    { label: 'Industry', value: stats.industry },
     { label: 'Visa sponsored', value: stats.visa },
   ]
 
@@ -24,15 +23,15 @@ export function Hero({ stats }: HeroProps) {
       <div className="mx-auto max-w-7xl px-4 pt-16 pb-14 sm:px-6 md:pt-24 md:pb-20 lg:px-8">
         <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 font-mono text-xs tracking-wider text-white/80 uppercase">
           <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />
-          Global structural engineering careers
+          University positions in structural engineering
         </p>
 
         <h1 className="mt-6 max-w-4xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-          Structural Engineering Academic &amp; Industry Jobs{' '}
-          <span className="text-accent">Worldwide</span>
+          Academic Position{' '}
+          <span className="text-accent">in Structural Engineering</span>
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-pretty text-white/80">
-          Explore industry and academic jobs, and find universities and PhD supervisors around the world.
+          Explore university positions — postdoctoral fellow, research fellow, lecturer, senior lecturer, associate professor and professor — at Australian universities.
         </p>
 
         <div className="mt-10 max-w-5xl">
@@ -42,26 +41,26 @@ export function Hero({ stats }: HeroProps) {
         <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-white/80">
           <span>Popular:</span>
           <Link
-            href="/academic?role=phd-scholarship"
+            href="/academic?role=lecturer"
             className="rounded-full border border-white/20 px-3 py-1 transition-colors hover:border-accent hover:text-white"
           >
-            PhD Scholarships
+            Lecturers
           </Link>
           <Link
-            href="/universities"
+            href="/academic?role=professor"
             className="rounded-full border border-white/20 px-3 py-1 transition-colors hover:border-accent hover:text-white"
           >
-            Universities worldwide
+            Professors
           </Link>
           <Link
-            href="/supervisors"
+            href="/academic?role=postdoctoral-fellow"
             className="rounded-full border border-accent/60 bg-accent/10 px-3 py-1 font-medium text-white transition-colors hover:border-accent"
           >
-            Find a supervisor
+            Postdocs
           </Link>
         </div>
 
-        <dl className="mt-14 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-white/15 bg-white/15 sm:grid-cols-4">
+        <dl className="mt-14 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-white/15 bg-white/15 sm:grid-cols-3">
           {statItems.map((item) => (
             <div key={item.label} className="bg-primary/80 px-5 py-4 backdrop-blur">
               <dt className="font-mono text-[11px] tracking-wider text-white/75 uppercase">

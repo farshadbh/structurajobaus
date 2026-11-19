@@ -1,6 +1,6 @@
 import dataset from '@/data/jobs.json'
 import { SAMPLE_JOBS } from './data/sample-jobs'
-import { ALL_ROLES, CITIES, CIVIL_SPECIALISMS, STATES, type Sector, type StateCode } from './taxonomy'
+import { ACADEMIC_ROLES, ALL_ROLES, CITIES, CIVIL_SPECIALISMS, STATES, type Sector, type StateCode } from './taxonomy'
 import type { Job, JobFilters } from './types'
 
 /*
@@ -63,7 +63,9 @@ export const IS_DEMO_DATA = LIVE_JOBS.length === 0 && DEMO_ENABLED
 export const DATA_UPDATED_AT = FILE.generatedAt
 export const HAS_LIVE_DATA = LIVE_JOBS.length > 0
 
-const JOBS: Job[] = IS_DEMO_DATA ? [...SAMPLE_JOBS].sort(byNewest) : LIVE_JOBS
+const JOBS: Job[] = IS_DEMO_DATA
+  ? SAMPLE_JOBS.filter((job) => ACADEMIC_ROLES.some((role) => role.slug === job.roleSlug)).sort(byNewest)
+  : LIVE_JOBS
 
 function matchesFilters(job: Job, filters: JobFilters) {
   if (filters.sector && job.sector !== filters.sector) return false
@@ -147,7 +149,6 @@ export async function getJobCounts() {
   const counts = {
     total: JOBS.length,
     academic: 0,
-    industry: 0,
     visa: 0,
     byCity: {} as Record<string, number>,
     byRole: {} as Record<string, number>,
@@ -191,7 +192,7 @@ export function parseFilters(params: RawSearchParams): JobFilters {
 
   return {
     q: get('q')?.slice(0, 100),
-    sector: sector === 'academic' || sector === 'industry' ? sector : undefined,
+    sector: sector === 'academic' ? sector : undefined,
     role: get('role'),
     city: get('city'),
     state: STATES.some((s) => s.code === state) ? (state as StateCode) : undefined,

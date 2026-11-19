@@ -6,7 +6,7 @@ import { getJobCounts } from '@/lib/jobs'
 export const metadata: Metadata = {
   title: 'Structural Engineering Jobs by City',
   description:
-    'Browse structural engineering academic and industry jobs in Sydney, Newcastle, Melbourne, Brisbane, Perth and Adelaide.',
+    'Browse university positions in structural engineering in Sydney, Newcastle, Melbourne, Brisbane, Perth and Adelaide.',
   alternates: { canonical: '/cities' },
 }
 
@@ -17,7 +17,7 @@ export default async function CitiesPage() {
       <PageHeader
         eyebrow="Browse by city"
         title="Structural engineering jobs by city"
-        description="Explore academic and industry opportunities in Australia's major engineering hubs."
+        description="Explore university positions in Australia's major engineering hubs."
         breadcrumbs={[{ label: 'Cities', href: '/cities' }]}
       />
       <CityGrid counts={counts.byCity} />

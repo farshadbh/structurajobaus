@@ -1,4 +1,4 @@
-export type Sector = 'academic' | 'industry'
+export type Sector = 'academic'
 export type StateCode = 'NSW' | 'VIC' | 'QLD' | 'WA' | 'SA' | 'TAS' | 'ACT' | 'NT'
 export type WorkArrangement = 'onsite' | 'hybrid' | 'remote'
 export type EmploymentType = 'full-time' | 'part-time' | 'contract' | 'scholarship'
@@ -16,21 +16,9 @@ export const ACADEMIC_ROLES: Role[] = [
   { slug: 'professor', name: 'Professor', sector: 'academic' },
   { slug: 'research-fellow', name: 'Research Fellow', sector: 'academic' },
   { slug: 'postdoctoral-fellow', name: 'Postdoctoral Fellow', sector: 'academic' },
-  { slug: 'phd-scholarship', name: 'PhD Scholarships', sector: 'academic' },
 ]
 
-export const INDUSTRY_ROLES: Role[] = [
-  { slug: 'structural-engineer', name: 'Structural Engineer', sector: 'industry' },
-  { slug: 'senior-structural-engineer', name: 'Senior Structural Engineer', sector: 'industry' },
-  { slug: 'principal-structural-engineer', name: 'Principal Structural Engineer', sector: 'industry' },
-  { slug: 'civil-engineer', name: 'Civil Engineer', sector: 'industry' },
-  { slug: 'geotechnical-engineer', name: 'Geotechnical Engineer', sector: 'industry' },
-  { slug: 'bridge-engineer', name: 'Bridge Engineer', sector: 'industry' },
-  { slug: 'design-engineer', name: 'Design Engineer', sector: 'industry' },
-  { slug: 'project-engineer', name: 'Project Engineer', sector: 'industry' },
-]
-
-export const ALL_ROLES = [...ACADEMIC_ROLES, ...INDUSTRY_ROLES]
+export const ALL_ROLES = [...ACADEMIC_ROLES]
 
 export interface City {
   slug: string

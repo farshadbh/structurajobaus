@@ -11,9 +11,7 @@
  * every site is listed explicitly, failures are per-site and never fatal, and a
  * renamed site simply drops out of the run instead of breaking the snapshot.
  *
- * Only Australian postings are returned: these boards are global (Aurecon lists
- * Hong Kong and Ho Chi Minh City, SMEC lists Dhaka), and the board is for
- * Australia.
+ * Only Australian postings are returned.
  */
 
 const BROWSER_UA =
@@ -32,7 +30,7 @@ const SEARCH_TERMS = [
 
 /**
  * University boards write their vacancies as "Lecturer in Civil Engineering"
- * or "Research Fellow", so the industry terms alone return almost nothing 
+ * or "Research Fellow", so the general engineering terms alone return almost nothing 
  * from them. These are added only to university sites.
  */
 const ACADEMIC_TERMS = [
@@ -59,24 +57,6 @@ const isAustralian = (text) => AUSTRALIA.test(String(text ?? ''))
  * is the employer name shown on the card; the ads themselves often omit it.
  */
 export const WORKDAY_SITES = [
-  {
-    company: 'Aurecon',
-    host: 'aurecongroup.wd3.myworkdayjobs.com',
-    tenant: 'aurecongroup',
-    site: 'aurecon',
-  },
-  {
-    company: 'SMEC',
-    host: 'surbanajurong.wd3.myworkdayjobs.com',
-    tenant: 'surbanajurong',
-    site: 'careersatsmec',
-  },
-  {
-    company: 'Fulton Hogan',
-    host: 'fultonhogan.wd3.myworkdayjobs.com',
-    tenant: 'fultonhogan',
-    site: 'Fultonhogan',
-  },
   {
     company: 'University of Queensland',
     host: 'uq.wd3.myworkdayjobs.com',
@@ -120,24 +100,6 @@ export const WORKDAY_SITES = [
     tenant: 'flinders',
     site: 'flinders_employment',
     terms: [...SEARCH_TERMS, ...ACADEMIC_TERMS],
-  },
-  {
-    company: 'ACCIONA',
-    host: 'acciona.wd3.myworkdayjobs.com',
-    tenant: 'acciona',
-    site: 'ACCIONA_Employment_Channel',
-  },
-  {
-    company: 'Lendlease',
-    host: 'lendlease.wd3.myworkdayjobs.com',
-    tenant: 'lendlease',
-    site: 'LendleaseCareers',
-  },
-  {
-    company: 'Service Stream',
-    host: 'servicestream.wd3.myworkdayjobs.com',
-    tenant: 'servicestream',
-    site: 'servicestream_careers',
   },
 ]
 
@@ -194,8 +156,8 @@ function isoDay(value) {
  */
 async function fetchSite(cfg, { terms, detailLimit = MAX_DETAIL_FETCHES } = {}) {
   const seen = new Map()
-  // A site can carry its own term list: university boards need academic terms,
-  // contractor boards do not, and each extra term costs requests.
+  // A site can carry its own term list: university boards add the academic terms,
+  // and each extra term costs requests.
   const searchTerms = terms ?? cfg.terms ?? SEARCH_TERMS
 
   for (const term of searchTerms) {

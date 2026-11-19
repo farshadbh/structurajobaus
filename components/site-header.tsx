@@ -8,8 +8,7 @@ import { Logo } from '@/components/logo'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { href: '/academic', label: 'Academic Jobs' },
-  { href: '/industry', label: 'Industry Jobs' },
+  { href: '/academic', label: 'Academic Position' },
   { href: '/cities', label: 'Browse by City' },
   { href: '/jobs?visa=1', label: 'Visa Sponsorship' },
   { href: '/account', label: 'Job alerts' },
@@ -56,9 +55,8 @@ export function SiteHeader() {
     ? [
         { href: '/jobs', label: 'Search all jobs' },
         { href: '/account', label: 'My account' },
-        { href: '/supervisors', label: 'Find a supervisor' },
       ]
-    : [...MOBILE_LINKS, { href: '/supervisors', label: 'Find a supervisor' }]
+    : [...MOBILE_LINKS]
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">

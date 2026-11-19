@@ -139,7 +139,6 @@ export function JobSubmissionForm() {
             <option value="full-time">Full time</option>
             <option value="part-time">Part time</option>
             <option value="contract">Fixed term / Contract</option>
-            <option value="scholarship">Scholarship</option>
           </select>
         </Field>
       </div>

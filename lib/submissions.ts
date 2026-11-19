@@ -19,7 +19,7 @@ export type ValidationResult =
   | { ok: true; value: JobSubmission }
   | { ok: false; errors: string[] }
 
-const EMPLOYMENT_TYPES: EmploymentType[] = ['full-time', 'part-time', 'contract', 'scholarship']
+const EMPLOYMENT_TYPES: EmploymentType[] = ['full-time', 'part-time', 'contract']
 
 /** Rejects javascript:, data: and relative URLs — only real https links are accepted. */
 function isHttpsUrl(value: string) {

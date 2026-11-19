@@ -28,8 +28,8 @@ export async function generateMetadata({
   )
 
   return {
-    title: `Structural Engineering Jobs in ${city.name}, ${city.state}`,
-    description: `Academic and industry structural engineering jobs in ${city.name}. ${city.description}`,
+    title: `Academic Position Jobs in ${city.name}, ${city.state}`,
+    description: `University positions in structural engineering in ${city.name}. ${city.description}`,
     alternates: { canonical: `/cities/${city.slug}` },
     robots: narrowed ? { index: false, follow: true } : { index: true, follow: true },
   }
@@ -45,7 +45,7 @@ export default async function CityPage({ params, searchParams }: { params: Param
     <>
       <PageHeader
         eyebrow={`${city.name}, ${city.state}`}
-        title={`Structural engineering jobs in ${city.name}`}
+        title={`Academic positions in ${city.name}`}
         description={city.description}
         breadcrumbs={[
           { label: 'Cities', href: '/cities' },

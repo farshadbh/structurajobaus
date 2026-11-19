@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/page-header'
 export const metadata: Metadata = {
   title: 'Post a Structural Engineering Job',
   description:
-    'Advertise a structural engineering vacancy to Australian candidates. Submit the role for review and it goes live with the next daily update.',
+    'Advertise a university position in structural engineering to Australian candidates. Submit the role for review and it goes live with the next daily update.',
   alternates: { canonical: '/post-a-job' },
 }
 
@@ -15,7 +15,7 @@ export default function PostAJobPage() {
       <PageHeader
         eyebrow="For employers"
         title="Post a structural engineering job"
-        description="Reach structural engineers, academics and researchers across Australia. Submissions are reviewed before publication."
+        description="Reach academics and researchers across Australia. Submissions are reviewed before publication."
         breadcrumbs={[{ label: 'Post a job', href: '/post-a-job' }]}
       />
 
@@ -42,7 +42,7 @@ export default function PostAJobPage() {
           <div className="rounded-lg border bg-card p-5">
             <h2 className="font-semibold">Listing rules</h2>
             <ul className="mt-3 flex list-disc flex-col gap-2 pl-4 text-sm text-muted-foreground">
-              <li>Structural, civil or bridge engineering roles based in Australia.</li>
+              <li>University positions in structural or civil engineering based in Australia.</li>
               <li>A working application link or email address.</li>
               <li>No recruiter spam or roles without a named employer.</li>
             </ul>

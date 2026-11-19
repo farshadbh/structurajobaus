@@ -1,6 +1,6 @@
-import { ChevronRight, GraduationCap, HardHat } from 'lucide-react'
+import { ChevronRight, GraduationCap } from 'lucide-react'
 import Link from 'next/link'
-import { ACADEMIC_ROLES, INDUSTRY_ROLES, type Role } from '@/lib/taxonomy'
+import { ACADEMIC_ROLES, type Role } from '@/lib/taxonomy'
 
 interface RoleCategoriesProps {
   counts: Record<string, number>
@@ -62,23 +62,15 @@ export function RoleCategories({ counts }: RoleCategoriesProps) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <p className="font-mono text-xs font-medium tracking-wider text-accent uppercase">Browse by role</p>
         <h2 id="browse-roles" className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-          Academic and industry career paths
+          University career paths
         </h2>
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <div className="mt-8 grid gap-6 lg:grid-cols-1">
           <RoleColumn
-            title="Academic Jobs"
-            description="Teaching, research and scholarship positions at Australian universities."
+            title={"Academic Positions"}
+            description={"University positions from postdoc to professor."}
             icon={GraduationCap}
             roles={ACADEMIC_ROLES}
             basePath="/academic"
-            counts={counts}
-          />
-          <RoleColumn
-            title="Industry Jobs"
-            description="Design, consulting and delivery roles with engineering firms and contractors."
-            icon={HardHat}
-            roles={INDUSTRY_ROLES}
-            basePath="/industry"
             counts={counts}
           />
         </div>

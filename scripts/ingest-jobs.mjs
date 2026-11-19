@@ -22,11 +22,10 @@
  *   - Careerjet publisher keys have no published call cap; we use 6 keywords
  *     x 2 pages = 12 calls per run.
  *   - Jooble's free plan is 500 requests for the *lifetime* of the key, so it
- *     gets 3 industry keywords x 2 pages plus 6 academic keywords x 1 page =
- *     12 calls per run (~41 days of daily runs).
+ *     gets the academic keywords only, one page each.
  *   - Adzuna's approved account is still on the trial plan: 25 calls for the
  *     lifetime of the key (full access is £8/month). It therefore gets 4
- *     keywords x 1 page = 4 calls per run, covering industry *and* academic.
+ *     keywords x 1 page = 4 calls per run, covering academic roles only.
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import path from 'node:path'
@@ -50,52 +49,49 @@ const JOOBLE_BASE_URL = (process.env.JOOBLE_BASE_URL?.trim() || 'https://au.joob
 )
 
 const QUERIES = [
-  'structural engineer',
-  'structural engineering',
-  'senior structural engineer',
-  'bridge engineer',
-  'civil structural engineer',
-  'structural engineer university',
+  'university lecturer civil engineering',
+  'senior lecturer structural engineering',
+  'professor civil engineering university',
+  'postdoctoral research fellow civil engineering',
+  'research associate civil engineering university',
+  'head of school civil engineering',
 ]
 // "senior structural engineer" duplicates "structural engineer", so that call is
 // spent on geotechnical vacancies instead: the board covers civil/structural
 // work, and geotechnical sits in the same discipline.
-const JOOBLE_INDUSTRY_QUERIES = [...QUERIES.slice(0, 2), 'geotechnical engineer']
 // Jooble's free tier is metered per call for the *lifetime* of the key, so the
 // academic queries get one page each instead of two.
 //
 // These have to name the *employer type* as well as the discipline. Jooble
-// matches loosely, so "structural engineering lecturer" mostly returns industry
-// ads (99 matches, 2 real university vacancies); asking for a university
-// lecturer, a professor, a research fellow and a PhD scholarship instead
+// matches loosely, so the queries name the university role — lecturer,
+// professor, research fellow — instead of a bare discipline term; that
 // surfaces the role types the /academic page advertises.
 //
 // One query per academic role family, so the section carries the whole ladder
 // from PhD scholarship through postdoc and lecturer to professor and head of
 // school instead of only the two or three roles one query happens to return.
 const ACADEMIC_QUERIES = [
-  'phd scholarship structural engineering',
   'postdoctoral research fellow civil engineering',
   'research associate civil engineering university',
   'university lecturer civil engineering',
   'senior lecturer structural engineering',
   'professor civil engineering university',
-  // One extra query for geotechnical academia: lecturer, research fellow,
-  // postdoc and professor posts in that sub-discipline rarely mention
-  // "structural", so the queries above miss them.
   'geotechnical engineering university',
 ]
 // Adzuna is metered per call on the free plan, so it gets a deliberately small
-// set that covers both sectors instead of the full industry list.
+// set of academic role queries only.
 const ADZUNA_QUERIES = [
-  'structural engineer',
-  'bridge engineer',
   'structural engineering lecturer',
   'structural engineering university',
+  'civil engineering professor',
+  'research fellow civil engineering',
 ]
 const PAGES_PER_QUERY = 2
 const RESULTS_PER_PAGE = 50
 const LISTING_DAYS = 30
+
+/** This site only ever publishes these roles; everything else is dropped. */
+const ALLOWED_ROLES = ['lecturer', 'senior-lecturer', 'associate-professor', 'professor', 'research-fellow', 'postdoctoral-fellow']
 
 /* ------------------------------------------------------------------ helpers */
 
@@ -236,7 +232,6 @@ const ACADEMIC_TITLES =
 
 /* Ordered most-specific-first so "senior lecturer" never matches "lecturer". */
 const ROLE_RULES = [
-  [/phd|scholarship/i, 'phd-scholarship'],
   [/head of school|dean|director of school|school chair/i, 'professor'],
   [/senior lecturer/i, 'senior-lecturer'],
   [/associate professor|associate prof\b/i, 'associate-professor'],
@@ -244,15 +239,6 @@ const ROLE_RULES = [
   [/postdoc|post-doc|post doctoral/i, 'postdoctoral-fellow'],
   [/research fellow|research associate|research assistant|research officer/i, 'research-fellow'],
   [/\blecturer\b|associate lecturer|teaching fellow|\btutor\b|academic/i, 'lecturer'],
-  // Geotechnical titles become their own filter: "Geotechnical Engineer" must
-  // not be filed under plain civil engineering.
-  [/geotech/i, 'geotechnical-engineer'],
-  [/principal structural|principal engineer/i, 'principal-structural-engineer'],
-  [/senior structural|lead structural/i, 'senior-structural-engineer'],
-  [/\bbridge/i, 'bridge-engineer'],
-  [/project engineer/i, 'project-engineer'],
-  [/design engineer|design manager/i, 'design-engineer'],
-  [/\bcivil\b/i, 'civil-engineer'],
 ]
 
 // The board is for civil/structural work only: "geotechnical", "construction"
@@ -298,11 +284,13 @@ function classifyRole(title) {
   for (const [pattern, slug] of ROLE_RULES) {
     if (pattern.test(title)) return slug
   }
-  return 'structural-engineer'
+  return null
 }
 
-function classifySector(title, company) {
-  return ACADEMIC_EMPLOYERS.test(company) || ACADEMIC_TITLES.test(title) ? 'academic' : 'industry'
+function classifySector() {
+  // This board publishes academic roles only; there is no industry sector,
+  // so every listing that reaches here is academic.
+  return 'academic'
 }
 
 /** Providers give a free-text location, so infer city + state from that text. */
@@ -400,6 +388,7 @@ function buildJob({
 
   const text = stripHtml(description)
   if (!isRelevantTitle(cleanTitle, cleanCompany, text)) return null
+  if (!ALLOWED_ROLES.includes(classifyRole(cleanTitle))) return null
 
   const { citySlug, state, location } = classifyLocation(locationText)
 
@@ -461,7 +450,7 @@ async function fetchCareerjetPage(keywords, page) {
     // Careerjet requires the originating client; a scheduled job has no user,
     // so identify it as our own unattended ingest.
     user_ip: '127.0.0.1',
-    user_agent: 'structuraljobaus-ingest/1.0 (+https://structuraljobaus.vercel.app)',
+    user_agent: 'academic-position-ingest/1.0 (+https://academic-position.vercel.app)',
   })
 
   const auth = Buffer.from(`${CAREERJET_API_KEY}:`).toString('base64')
@@ -692,8 +681,7 @@ async function main() {
     for (const job of jobs) {
       const key = dedupeKey(job)
       const existing = merged.get(key)
-      const winsTie = job.sector === 'academic' && existing?.sector !== 'academic'
-      if (!existing || PRIORITY[source] < PRIORITY[existing.source] || winsTie) {
+      if (!existing || PRIORITY[source] < PRIORITY[existing.source]) {
         merged.set(key, job)
       }
     }
@@ -713,7 +701,7 @@ async function main() {
     try {
       const joobleJobs = [
         ...(await collect(
-          JOOBLE_INDUSTRY_QUERIES,
+          ACADEMIC_QUERIES,
           (keywords) => fetchJooble(keywords),
           fromJooble,
           'Jooble',
@@ -784,6 +772,7 @@ async function main() {
   const today = sydneyToday()
   const fresh = [...merged.values()]
     .filter((job) => job.closingDate >= today)
+    .filter((job) => ALLOWED_ROLES.includes(job.roleSlug))
     .sort(byNewest)
 
   // Employer-direct links point at the employer's own board, which already
@@ -819,7 +808,7 @@ async function main() {
   const academic = jobs.filter((job) => job.sector === 'academic').length
   const fromBoards = jobs.filter((job) => directFromEmployer(job)).length
   console.log(
-    `[ingest] Wrote ${jobs.length} listings (${academic} academic, ${jobs.length - academic} industry, ${fromBoards} direct from employer boards) from ${used.join(', ')} using ${calls.count} API calls.`,
+    `[ingest] Wrote ${jobs.length} listings (${fromBoards} direct from employer boards) from ${used.join(', ')} using ${calls.count} API calls.`,
   )
 }
 
