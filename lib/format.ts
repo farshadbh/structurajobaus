@@ -40,6 +40,19 @@ export function formatDate(iso: string) {
   return dateFormatter.format(new Date(`${iso}T00:00:00Z`))
 }
 
+/** Relative "checked … ago" label for the live freshness line. */
+export function formatRelativeTime(iso: string, now = new Date()) {
+  const then = new Date(iso).getTime()
+  if (Number.isNaN(then)) return null
+  const diffMs = now.getTime() - then
+  if (diffMs < 45_000) return 'just now'
+  const minutes = Math.floor(diffMs / 60_000)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
+}
+
 export const WORK_ARRANGEMENT_LABEL = {
   onsite: 'On-site',
   hybrid: 'Hybrid',

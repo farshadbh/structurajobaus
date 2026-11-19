@@ -1,9 +1,10 @@
-import { Building2, CalendarDays, MapPin, Plane, Wallet } from 'lucide-react'
+import { Building2, MapPin, Plane, Wallet } from 'lucide-react'
 import Link from 'next/link'
+import { BookmarkButton } from '@/components/live/bookmark-button'
+import { JobDateLine } from '@/components/live/job-date-line'
 import {
   EMPLOYMENT_TYPE_LABEL,
   SOURCE_ATTRIBUTION,
-  formatDate,
   formatSalary,
   WORK_ARRANGEMENT_LABEL,
 } from '@/lib/format'
@@ -27,11 +28,14 @@ export function JobCard({ job }: { job: Job }) {
     <article className="group relative flex h-full flex-col rounded-lg border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
         <SectorBadge sector={job.sector} />
-        {job.featured && (
-          <span className="rounded bg-accent px-2 py-0.5 text-[11px] font-semibold text-accent-foreground">
-            Featured
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {job.featured && (
+            <span className="rounded bg-accent px-2 py-0.5 text-[11px] font-semibold text-accent-foreground">
+              Featured
+            </span>
+          )}
+          <BookmarkButton jobId={job.id} title={job.title} />
+        </div>
       </div>
 
       <h3 className="mt-3 text-base leading-snug font-semibold text-pretty">
@@ -80,10 +84,7 @@ export function JobCard({ job }: { job: Job }) {
       </ul>
 
       <div className="mt-auto pt-4">
-        <p className="flex items-center gap-1.5 border-t pt-3 font-mono text-xs text-muted-foreground">
-          <CalendarDays className="size-3.5" aria-hidden="true" />
-          Posted <time dateTime={job.postedAt}>{formatDate(job.postedAt)}</time>
-        </p>
+        <JobDateLine job={job} />
         {attribution && (
           <a
             href={attribution.url}

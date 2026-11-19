@@ -1,9 +1,13 @@
 'use client'
 
-import { Menu, UserRound, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { ProfileMenu } from '@/components/live/profile-menu'
+import { SavedRolesPill } from '@/components/live/saved-roles-pill'
+import { SettingsMenu } from '@/components/live/settings-menu'
+import { ThemeToggle } from '@/components/live/theme-toggle'
 import { Logo } from '@/components/logo'
 import { cn } from '@/lib/utils'
 
@@ -16,8 +20,9 @@ const NAV_ITEMS = [
 ]
 
 /**
- * Sign-up and sign-in sit outside the main nav so they own the top-right corner,
- * where people look for an account button.
+ * Sign-up and sign-in sit in the Profile menu in the top-right corner, where
+ * people look for an account button: its panel holds "Continue with Google"
+ * and "Email sign-in", both leading to the existing sign-in page.
  *
  * The header is the same for every page, so it asks the server who is signed in
  * from the browser (/api/auth/me) instead of reading the session cookie in the
@@ -26,6 +31,7 @@ const NAV_ITEMS = [
  */
 const MOBILE_LINKS = [
   { href: '/jobs', label: 'Search all jobs' },
+  { href: '/saved', label: 'Saved jobs' },
   { href: '/signup', label: 'Create account' },
   { href: '/login', label: 'Sign in' },
 ]
@@ -54,6 +60,7 @@ export function SiteHeader() {
   const mobileLinks = email
     ? [
         { href: '/jobs', label: 'Search all jobs' },
+        { href: '/saved', label: 'Saved jobs' },
         { href: '/account', label: 'My account' },
       ]
     : [...MOBILE_LINKS]
@@ -87,37 +94,16 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <div className="flex shrink-0 items-center gap-2">
-          {email ? (
-            <Link
-              href="/account"
-              title={`Signed in as ${email}`}
-              className="hidden h-9 max-w-[13rem] items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-semibold whitespace-nowrap text-accent-foreground transition-colors hover:bg-accent/90 sm:inline-flex"
-            >
-              <UserRound className="size-4 shrink-0" aria-hidden="true" />
-              <span className="truncate">{accountName}</span>
-            </Link>
-          ) : email === undefined ? (
-            <span
-              className="hidden h-9 w-24 animate-pulse rounded-md bg-muted sm:block"
-              aria-hidden="true"
-            />
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="hidden h-9 items-center rounded-md px-2.5 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/signup"
-                className="hidden h-9 items-center rounded-md bg-accent px-3.5 text-sm font-semibold whitespace-nowrap text-accent-foreground transition-colors hover:bg-accent/90 sm:inline-flex"
-              >
-                Create account
-              </Link>
-            </>
-          )}
+        {/*
+         * Right cluster: saved-roles count, day/night toggle, settings and
+         * profile — the live-careers header controls. The nav is hidden below
+         * xl, so on narrow screens these stay visible next to the hamburger.
+         */}
+        <div className="flex shrink-0 items-center gap-1.5">
+          <SavedRolesPill />
+          <ThemeToggle />
+          <SettingsMenu />
+          <ProfileMenu email={email} />
 
           <button
             type="button"

@@ -1,11 +1,15 @@
 import Link from 'next/link'
+import { LiveBadge } from '@/components/live/live-badge'
+import { LiveStatus } from '@/components/live/live-status'
 import { SearchBar } from '@/components/home/search-bar'
 
 interface HeroProps {
   stats: { total: number; industry: number; visa: number }
+  /** Data snapshot time (data/jobs.json generatedAt) for the freshness line. */
+  updatedAt: string | null
 }
 
-export function Hero({ stats }: HeroProps) {
+export function Hero({ stats, updatedAt }: HeroProps) {
   const statItems = [
     { label: 'Live roles', value: stats.total },
     { label: 'Industry', value: stats.industry },
@@ -22,8 +26,7 @@ export function Hero({ stats }: HeroProps) {
 
       <div className="mx-auto max-w-7xl px-4 pt-16 pb-14 sm:px-6 md:pt-24 md:pb-20 lg:px-8">
         <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 font-mono text-xs tracking-wider text-white/80 uppercase">
-          <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />
-          Structural engineering careers in Australia
+          <LiveBadge />
         </p>
 
         <h1 className="mt-6 max-w-4xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
@@ -82,6 +85,8 @@ export function Hero({ stats }: HeroProps) {
             </div>
           ))}
         </dl>
+
+        <LiveStatus updatedAt={updatedAt} />
       </div>
     </section>
   )

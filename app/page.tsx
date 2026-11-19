@@ -4,7 +4,7 @@ import { JobSection } from '@/components/home/job-section'
 import { RoleCategories } from '@/components/home/role-categories'
 import { JsonLd } from '@/components/json-ld'
 import { SITE_NAME, SITE_URL } from '@/lib/format'
-import { getFeaturedJobs, getJobCounts, getLatestJobs, getVisaSponsoredJobs } from '@/lib/jobs'
+import { getFeaturedJobs, getJobCounts, getLatestJobs, getVisaSponsoredJobs, DATA_UPDATED_AT } from '@/lib/jobs'
 
 export default async function HomePage() {
   const [featured, industry, visa, counts] = await Promise.all([
@@ -29,7 +29,7 @@ export default async function HomePage() {
   return (
     <>
       <JsonLd data={websiteJsonLd} />
-      <Hero stats={counts} />
+      <Hero stats={counts} updatedAt={DATA_UPDATED_AT} />
       <JobSection
         id="featured-jobs"
         eyebrow="Featured"

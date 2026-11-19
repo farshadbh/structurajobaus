@@ -41,6 +41,9 @@ export interface Job {
   visaSponsorship: boolean
   featured: boolean
   postedAt: string
+  /** No separate update date is reported by the feed yet; "Updated" falls
+   * back to the posted date — see JobDateLine. */
+  updatedAt?: string
   closingDate: string
   summary: string
   description: string
